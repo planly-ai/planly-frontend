@@ -1,5 +1,5 @@
-<p>Die Nase voll von Aufgaben-Chaos? Zest gibt Ihnen die Kontrolle. 📱📅✅</p>
-<p>Zest bietet eine Reihe von Funktionen, um Ihren Aufgabenmanagement-Prozess zu optimieren:</p>
+<p>Die Nase voll von Aufgaben-Chaos? Planly.ai gibt Ihnen die Kontrolle. 📱📅✅</p>
+<p>Planly.ai bietet eine Reihe von Funktionen, um Ihren Aufgabenmanagement-Prozess zu optimieren:</p>
 <ul>
     <li>✨ <strong>Kategorien erstellen:</strong> Organisieren Sie Ihre Aufgaben, indem Sie Kategorien erstellen, die für Sie Sinn ergeben.</li>
     <li>✅ <strong>Aufgaben in Kategorien erstellen:</strong> Fügen Sie Aufgaben innerhalb von Kategorien für einen strukturierten Ansatz hinzu.</li>

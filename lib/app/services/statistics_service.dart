@@ -1,7 +1,7 @@
 import 'package:isar_community/isar.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/ui/statistics/models/statistics_data.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/ui/statistics/models/statistics_data.dart';
+import 'package:planly_ai/main.dart';
 
 class StatisticsService {
   static Future<StatisticsData> calculateStatistics() async {

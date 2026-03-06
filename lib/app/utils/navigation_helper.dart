@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:zest/app/constants/app_constants.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
 
 class NavigationHelper {
   static const _defaultDuration = AppConstants.animationDuration;

@@ -2,28 +2,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:zest/app/controller/isar_controller.dart';
-import 'package:zest/app/services/auto_backup_service.dart';
-import 'package:zest/app/ui/home.dart';
-import 'package:zest/app/ui/onboarding.dart';
-import 'package:zest/app/ui/tasks/widgets/tasks_action.dart';
-import 'package:zest/app/ui/todos/view/calendar_todos.dart';
-import 'package:zest/app/utils/snackbar_overlay.dart';
-import 'package:zest/theme/theme.dart';
+import 'package:planly_ai/app/controller/isar_controller.dart';
+import 'package:planly_ai/app/services/auto_backup_service.dart';
+import 'package:planly_ai/app/ui/home.dart';
+import 'package:planly_ai/app/ui/onboarding.dart';
+import 'package:planly_ai/app/ui/tasks/widgets/tasks_action.dart';
+import 'package:planly_ai/app/ui/todos/view/calendar_todos.dart';
+import 'package:planly_ai/app/utils/snackbar_overlay.dart';
+import 'package:planly_ai/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
-import 'package:zest/app/controller/theme_controller.dart';
-import 'package:zest/app/utils/device_info.dart';
+import 'package:planly_ai/app/controller/theme_controller.dart';
+import 'package:planly_ai/app/utils/device_info.dart';
 import 'app/data/db.dart';
 import 'app/ui/todos/view/all_todos.dart';
 import 'app/utils/notification.dart';
 import 'translation/translation.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:zest/app/ui/todos/widgets/todos_action.dart';
+import 'package:planly_ai/app/ui/todos/widgets/todos_action.dart';
 import 'platform/platform_features.dart'
     if (dart.library.io) 'platform/platform_features_mobile.dart'
     hide DynamicColorBuilder;
@@ -535,7 +535,7 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: appLanguages.map((e) => e['locale'] as Locale).toList(),
       debugShowCheckedModeBanner: false,
       home: settings.onboard ? HomePage(key: _homeKey) : const OnBoarding(),
-      title: 'Zest',
+      title: 'Planly.ai',
       builder: (context, child) {
         return Stack(children: [child!, const SnackBarOverlayWidget()]);
       },

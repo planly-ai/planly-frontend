@@ -5,16 +5,16 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/controller/todo_controller.dart';
-import 'package:zest/app/ui/todos/view/todo_todos.dart';
-import 'package:zest/app/ui/widgets/confirmation_dialog.dart';
-import 'package:zest/app/ui/widgets/text_form.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/app/utils/navigation_helper.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
-import 'package:zest/app/utils/text_utils.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/ui/todos/view/todo_todos.dart';
+import 'package:planly_ai/app/ui/widgets/confirmation_dialog.dart';
+import 'package:planly_ai/app/ui/widgets/text_form.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/utils/navigation_helper.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/utils/text_utils.dart';
+import 'package:planly_ai/main.dart';
 
 class TodosAction extends StatefulWidget {
   const TodosAction({

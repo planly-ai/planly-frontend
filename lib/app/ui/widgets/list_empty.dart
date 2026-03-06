@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
+import 'package:planly_ai/main.dart';
 
 class ListEmpty extends StatefulWidget {
   const ListEmpty({

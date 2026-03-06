@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/data/repositories/todo_repository.dart';
-import 'package:zest/app/services/notification_service.dart';
-import 'package:zest/app/utils/show_snack_bar.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/data/repositories/todo_repository.dart';
+import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/utils/show_snack_bar.dart';
+import 'package:planly_ai/main.dart';
 
 class TodoService {
   final TodoRepository _todoRepo;

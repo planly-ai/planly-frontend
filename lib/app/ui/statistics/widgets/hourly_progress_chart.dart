@@ -2,8 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/main.dart';
 
 class HourlyProgressChart extends StatelessWidget {
   final Map<int, int> hourlyData;

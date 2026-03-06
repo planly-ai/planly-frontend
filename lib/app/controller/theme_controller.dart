@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/main.dart';
 
 class ThemeController extends GetxController {
   ThemeMode get theme => _getThemeMode();

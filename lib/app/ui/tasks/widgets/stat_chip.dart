@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class StatChip extends StatelessWidget {
   final IconData icon;

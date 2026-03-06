@@ -9,14 +9,14 @@ import 'package:isar_community/isar.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:restart_app/restart_app.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/app/utils/show_snack_bar.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/utils/show_snack_bar.dart';
+import 'package:planly_ai/main.dart';
 
 class IsarController {
   static const _platform = MethodChannel('directory_picker');
-  static const String _backupPrefix = 'backup_zest_db_';
+  static const String _backupPrefix = 'backup_planly_ai_db_';
   static const String _backupExtension = '.isar';
   static const String _compressedExtension = '.gz';
   static const String _tempFileName = 'temp.isar';

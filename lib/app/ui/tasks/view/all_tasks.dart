@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:zest/app/controller/fab_controller.dart';
-import 'package:zest/app/controller/todo_controller.dart';
-import 'package:zest/app/ui/tasks/widgets/statistics.dart';
-import 'package:zest/app/ui/tasks/widgets/task_list.dart';
-import 'package:zest/app/ui/widgets/confirmation_dialog.dart';
-import 'package:zest/app/ui/widgets/my_delegate.dart';
-import 'package:zest/app/ui/widgets/text_form.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/app/utils/progress_calculator.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
-import 'package:zest/app/utils/scroll_fab_handler.dart';
+import 'package:planly_ai/app/controller/fab_controller.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/ui/tasks/widgets/statistics.dart';
+import 'package:planly_ai/app/ui/tasks/widgets/task_list.dart';
+import 'package:planly_ai/app/ui/widgets/confirmation_dialog.dart';
+import 'package:planly_ai/app/ui/widgets/my_delegate.dart';
+import 'package:planly_ai/app/ui/widgets/text_form.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/utils/progress_calculator.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/utils/scroll_fab_handler.dart';
 
 class AllTasks extends StatefulWidget {
   const AllTasks({super.key});

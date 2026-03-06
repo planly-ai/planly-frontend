@@ -8,7 +8,7 @@
         android:name="android.permission.ACCESS_NETWORK_STATE"
         tools:node="remove"/>
     <application
-        android:label="Zest"
+        android:label="Planly.ai"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:extractNativeLibs="true">

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:reorderables/reorderables.dart';
-import 'package:zest/app/controller/todo_controller.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/ui/tasks/widgets/task_card.dart';
-import 'package:zest/app/ui/todos/view/task_todos.dart';
-import 'package:zest/app/ui/widgets/list_empty.dart';
-import 'package:zest/app/utils/navigation_helper.dart';
-import 'package:zest/app/utils/progress_calculator.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/ui/tasks/widgets/task_card.dart';
+import 'package:planly_ai/app/ui/todos/view/task_todos.dart';
+import 'package:planly_ai/app/ui/widgets/list_empty.dart';
+import 'package:planly_ai/app/utils/navigation_helper.dart';
+import 'package:planly_ai/app/utils/progress_calculator.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
+import 'package:planly_ai/main.dart';
 
 class TasksList extends StatefulWidget {
   const TasksList({

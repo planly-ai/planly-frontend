@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_heatmap_calendar/flutter_heatmap_calendar.dart';
 import 'package:get/get.dart';
-import 'package:zest/app/constants/app_constants.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
 
 class CompletionHeatmap extends StatelessWidget {
   final Map<DateTime, int> heatmapData;

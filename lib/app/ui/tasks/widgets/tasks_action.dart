@@ -4,16 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
-import 'package:zest/app/controller/todo_controller.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/ui/tasks/widgets/icon_container.dart';
-import 'package:zest/app/ui/widgets/confirmation_dialog.dart';
-import 'package:zest/app/ui/widgets/text_form.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/app/utils/color_extensions.dart';
-import 'package:zest/app/utils/navigation_helper.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
-import 'package:zest/app/utils/text_utils.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/ui/tasks/widgets/icon_container.dart';
+import 'package:planly_ai/app/ui/widgets/confirmation_dialog.dart';
+import 'package:planly_ai/app/ui/widgets/text_form.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/utils/color_extensions.dart';
+import 'package:planly_ai/app/utils/navigation_helper.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/utils/text_utils.dart';
 
 class TasksAction extends StatefulWidget {
   const TasksAction({

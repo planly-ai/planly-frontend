@@ -5,19 +5,19 @@ import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:zest/app/controller/isar_controller.dart';
-import 'package:zest/app/controller/todo_controller.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/services/auto_backup_service.dart';
-import 'package:zest/app/ui/settings/widgets/settings_section.dart';
-import 'package:zest/app/ui/settings/widgets/settings_tile.dart';
-import 'package:zest/app/ui/widgets/confirmation_dialog.dart';
-import 'package:zest/app/ui/settings/widgets/selection_dialog.dart';
-import 'package:zest/app/utils/navigation_helper.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
-import 'package:zest/app/utils/show_snack_bar.dart';
-import 'package:zest/main.dart';
-import 'package:zest/app/controller/theme_controller.dart';
+import 'package:planly_ai/app/controller/isar_controller.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/services/auto_backup_service.dart';
+import 'package:planly_ai/app/ui/settings/widgets/settings_section.dart';
+import 'package:planly_ai/app/ui/settings/widgets/settings_tile.dart';
+import 'package:planly_ai/app/ui/widgets/confirmation_dialog.dart';
+import 'package:planly_ai/app/ui/settings/widgets/selection_dialog.dart';
+import 'package:planly_ai/app/utils/navigation_helper.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/utils/show_snack_bar.dart';
+import 'package:planly_ai/main.dart';
+import 'package:planly_ai/app/controller/theme_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -370,7 +370,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     image: AssetImage('assets/icons/icon.png'),
                   ),
                 ),
-                applicationName: 'Zest',
+                applicationName: 'Planly.ai',
                 applicationVersion: appVersion,
               ),
             );
@@ -379,7 +379,7 @@ class _SettingsPageState extends State<SettingsPage> {
         SettingsTile(
           leading: const Icon(LineAwesomeIcons.github),
           title: '${'project'.tr} GitHub',
-          onTap: () => _urlLauncher('https://github.com/darkmoonight/Zest'),
+          onTap: () => _urlLauncher('https://github.com/darkmoonight/Planly.ai'),
         ),
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.code_circle),

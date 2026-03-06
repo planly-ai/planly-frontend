@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/rendering.dart';
-import 'package:zest/app/controller/fab_controller.dart';
+import 'package:planly_ai/app/controller/fab_controller.dart';
 import 'package:flutter/material.dart';
 
 class ScrollFabHandler {

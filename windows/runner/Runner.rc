@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "DARK NIGHT" "\0"
-            VALUE "FileDescription", "Zest" "\0"
+            VALUE "FileDescription", "Planly.ai" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "Zest" "\0"
+            VALUE "InternalName", "Planly.ai" "\0"
             VALUE "LegalCopyright", "Copyright © 2025" "\0"
-            VALUE "OriginalFilename", "zest.exe" "\0"
-            VALUE "ProductName", "Zest" "\0"
+            VALUE "OriginalFilename", "planly_ai.exe" "\0"
+            VALUE "ProductName", "Planly.ai" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

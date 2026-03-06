@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/app/controller/todo_controller.dart';
-import 'package:zest/app/ui/statistics/models/statistics_data.dart';
-import 'package:zest/app/services/statistics_service.dart';
-import 'package:zest/app/ui/statistics/widgets/completion_heatmap.dart';
-import 'package:zest/app/ui/statistics/widgets/hourly_progress_chart.dart';
-import 'package:zest/app/ui/statistics/widgets/stats_card.dart';
-import 'package:zest/app/ui/statistics/widgets/streak_widget.dart';
-import 'package:zest/app/ui/statistics/widgets/weekly_progress_chart.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/ui/statistics/models/statistics_data.dart';
+import 'package:planly_ai/app/services/statistics_service.dart';
+import 'package:planly_ai/app/ui/statistics/widgets/completion_heatmap.dart';
+import 'package:planly_ai/app/ui/statistics/widgets/hourly_progress_chart.dart';
+import 'package:planly_ai/app/ui/statistics/widgets/stats_card.dart';
+import 'package:planly_ai/app/ui/statistics/widgets/streak_widget.dart';
+import 'package:planly_ai/app/ui/statistics/widgets/weekly_progress_chart.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});

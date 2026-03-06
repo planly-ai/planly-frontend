@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
-import 'package:zest/main.dart';
+import 'package:planly_ai/main.dart';
 import 'package:get/get.dart';
 
 class NotificationShow {
-  final String _channelId = 'Zest';
+  final String _channelId = 'Planly.ai';
   final String _channelName = 'DARK NIGHT';
 
   static const String actionIdMarkDone = 'mark_done';

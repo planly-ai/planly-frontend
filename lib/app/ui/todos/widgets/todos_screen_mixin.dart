@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:zest/app/controller/fab_controller.dart';
-import 'package:zest/app/controller/todo_controller.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/ui/todos/widgets/todos_transfer.dart';
-import 'package:zest/app/ui/widgets/confirmation_dialog.dart';
-import 'package:zest/app/utils/navigation_helper.dart';
+import 'package:planly_ai/app/controller/fab_controller.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/ui/todos/widgets/todos_transfer.dart';
+import 'package:planly_ai/app/ui/widgets/confirmation_dialog.dart';
+import 'package:planly_ai/app/utils/navigation_helper.dart';
 
 mixin TodosScreenMixin<T extends StatefulWidget> on State<T> {
   late final TodoController todoController;

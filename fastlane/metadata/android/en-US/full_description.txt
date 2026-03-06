@@ -1,5 +1,5 @@
-<p>Tired of task chaos? Zest keeps you in control. 📱📅✅</p>
-<p>Zest offers a range of features to streamline your task management process:</p>
+<p>Tired of task chaos? Planly.ai keeps you in control. 📱📅✅</p>
+<p>Planly.ai offers a range of features to streamline your task management process:</p>
 <ul>
     <li>✨ <strong>Creating Categories:</strong> Organize your tasks by creating categories that make sense to you.</li>
     <li>✅ <strong>Creating Tasks in Categories:</strong> Add tasks within categories for a structured approach.</li>

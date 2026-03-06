@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/data/repositories/task_repository.dart';
-import 'package:zest/app/data/repositories/todo_repository.dart';
-import 'package:zest/app/services/notification_service.dart';
-import 'package:zest/app/utils/show_snack_bar.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/data/repositories/task_repository.dart';
+import 'package:planly_ai/app/data/repositories/todo_repository.dart';
+import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/utils/show_snack_bar.dart';
 
 class TaskService {
   final TaskRepository _taskRepo;

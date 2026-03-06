@@ -1,6 +1,6 @@
 import 'package:isar_community/isar.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/main.dart';
 
 class TodoRepository {
   final Isar _isar = isar;

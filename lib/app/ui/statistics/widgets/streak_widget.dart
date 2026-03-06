@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/app/ui/tasks/widgets/stat_chip.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/ui/tasks/widgets/stat_chip.dart';
 
 class StreakWidget extends StatelessWidget {
   final int currentStreak;

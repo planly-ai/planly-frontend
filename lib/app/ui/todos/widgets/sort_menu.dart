@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/constants/app_constants.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class SortMenu extends StatelessWidget {
   const SortMenu({

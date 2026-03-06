@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/data/repositories/task_repository.dart';
-import 'package:zest/app/data/repositories/todo_repository.dart';
-import 'package:zest/app/services/task_service.dart';
-import 'package:zest/app/services/todo_service.dart';
-import 'package:zest/app/services/notification_service.dart';
-import 'package:zest/app/constants/app_constants.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/data/repositories/task_repository.dart';
+import 'package:planly_ai/app/data/repositories/todo_repository.dart';
+import 'package:planly_ai/app/services/task_service.dart';
+import 'package:planly_ai/app/services/todo_service.dart';
+import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
 
 extension FirstWhereOrNull<E> on Iterable<E> {
   E? firstWhereOrNull(bool Function(E) test) {

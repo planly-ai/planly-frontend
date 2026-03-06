@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax_plus/iconsax_plus.dart' show IconsaxPlusBold;
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
-import 'package:zest/app/utils/progress_calculator.dart';
-import 'package:zest/app/utils/responsive_utils.dart';
+import 'package:planly_ai/app/utils/progress_calculator.dart';
+import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class CircularProgressWidget extends StatelessWidget {
   final int total;

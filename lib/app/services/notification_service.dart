@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/app/utils/notification.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/app/utils/notification.dart';
+import 'package:planly_ai/main.dart';
 
 class NotificationService {
   final _notificationShow = NotificationShow();

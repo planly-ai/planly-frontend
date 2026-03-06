@@ -6,14 +6,14 @@ import 'package:intl/intl.dart';
 import 'package:isar_community/isar.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:zest/app/data/db.dart';
-import 'package:zest/main.dart';
+import 'package:planly_ai/app/data/db.dart';
+import 'package:planly_ai/main.dart';
 
 class AutoBackupService {
   AutoBackupService._();
 
   static const _platform = MethodChannel('directory_picker');
-  static const String _autoBackupPrefix = 'auto_backup_zest_db_';
+  static const String _autoBackupPrefix = 'auto_backup_planly_ai_db_';
   static const String _backupExtension = '.isar';
   static const String _compressedExtension = '.gz';
   static const String _backupFolderName = 'auto_backups';
@@ -303,7 +303,7 @@ class AutoBackupService {
   }
 
   static String formatBackupFileName(String fileName) {
-    final regex = RegExp(r'auto_backup_zest_db_(\d{8})_(\d{6})');
+    final regex = RegExp(r'auto_backup_planly_ai_db_(\d{8})_(\d{6})');
     final match = regex.firstMatch(fileName);
 
     if (match == null) return fileName;

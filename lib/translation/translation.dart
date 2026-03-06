@@ -1,19 +1,19 @@
 import 'package:get/get.dart';
-import 'package:zest/translation/ar_ar.dart';
-import 'package:zest/translation/de_de.dart';
-import 'package:zest/translation/en_us.dart';
-import 'package:zest/translation/es_es.dart';
-import 'package:zest/translation/fa_ir.dart';
-import 'package:zest/translation/fr_fr.dart';
-import 'package:zest/translation/it_it.dart';
-import 'package:zest/translation/ko_kr.dart';
-import 'package:zest/translation/pl_pl.dart';
-import 'package:zest/translation/ru_ru.dart';
-import 'package:zest/translation/zh_cn.dart';
-import 'package:zest/translation/zh_tw.dart';
-import 'package:zest/translation/tr_tr.dart';
-import 'package:zest/translation/vi_vn.dart';
-import 'package:zest/translation/pt_pt.dart';
+import 'package:planly_ai/translation/ar_ar.dart';
+import 'package:planly_ai/translation/de_de.dart';
+import 'package:planly_ai/translation/en_us.dart';
+import 'package:planly_ai/translation/es_es.dart';
+import 'package:planly_ai/translation/fa_ir.dart';
+import 'package:planly_ai/translation/fr_fr.dart';
+import 'package:planly_ai/translation/it_it.dart';
+import 'package:planly_ai/translation/ko_kr.dart';
+import 'package:planly_ai/translation/pl_pl.dart';
+import 'package:planly_ai/translation/ru_ru.dart';
+import 'package:planly_ai/translation/zh_cn.dart';
+import 'package:planly_ai/translation/zh_tw.dart';
+import 'package:planly_ai/translation/tr_tr.dart';
+import 'package:planly_ai/translation/vi_vn.dart';
+import 'package:planly_ai/translation/pt_pt.dart';
 
 class Translation extends Translations {
   @override
