@@ -13,7 +13,6 @@ class ChatBubble extends StatelessWidget {
     final isUser = message.sender == SenderType.user;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingM,
@@ -41,7 +40,7 @@ class ChatBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isUser
                     ? colorScheme.primary
-                    : colorScheme.surfaceContainerHighest,
+                    : colorScheme.outlineVariant.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(
                     AppConstants.borderRadiusLarge,
@@ -65,7 +64,7 @@ class ChatBubble extends StatelessWidget {
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: isUser
                           ? colorScheme.onPrimary
-                          : colorScheme.onSurfaceVariant,
+                          : colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -74,7 +73,7 @@ class ChatBubble extends StatelessWidget {
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: isUser
                           ? colorScheme.onPrimary.withValues(alpha: 0.7)
-                          : colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                          : colorScheme.onSurface.withValues(alpha: 0.7),
                       fontSize: 10,
                     ),
                   ),

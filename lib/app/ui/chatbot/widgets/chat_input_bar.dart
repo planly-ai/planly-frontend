@@ -43,9 +43,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
     return ActionChip(
       label: Text(label),
       onPressed: () => _handlePresetPrompt(label),
-      backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(
-        alpha: 0.5,
-      ),
+      backgroundColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
       labelStyle: TextStyle(color: theme.colorScheme.onSurface),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
@@ -59,7 +57,6 @@ class _ChatInputBarState extends State<ChatInputBar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Stack(
       children: [
         Container(
@@ -96,8 +93,8 @@ class _ChatInputBarState extends State<ChatInputBar> {
               // Input Row
               Container(
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(32),
+                  color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 child: Row(
@@ -128,7 +125,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                           textInputAction: TextInputAction.send,
                           onSubmitted: (_) => controller.sendMessage(),
                           decoration: InputDecoration(
-                            hintText: '发消息或按住说话...'.tr,
+                            hintText: 'input_hint'.tr,
                             border: InputBorder.none,
                             enabledBorder: InputBorder.none, // 启用状态
                             focusedBorder: InputBorder.none, // 聚焦状态

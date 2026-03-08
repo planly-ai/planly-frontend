@@ -115,7 +115,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       Icon(
                         IconsaxPlusLinear.message_2,
                         size: 64,
-                        color: colorScheme.onSurfaceVariant.withValues(
+                        color: colorScheme.onSurface.withValues(
                           alpha: 0.5,
                         ),
                       ),
@@ -123,7 +123,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       Text(
                         'Start a conversation'.tr,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(
+                          color: colorScheme.onSurface.withValues(
                             alpha: 0.7,
                           ),
                         ),
@@ -159,7 +159,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           Text(
                             'Generating...'.tr,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
+                              color: colorScheme.onSurface,
                               fontStyle: FontStyle.italic,
                             ),
                           ),

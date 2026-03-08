@@ -239,5 +239,8 @@ class ZhCN {
     "create_new_event": "创建新日程",
     "set_reminder": "设置提醒",
     "view_week_overview": "查看本周概览",
+    "input_hint": "点击发送消息",
+    "voice_release_to_cancel": "松开手指，取消发送",
+    "voice_swipe_or_release": "上滑取消 或 松开发送",
   };
 }

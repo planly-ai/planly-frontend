@@ -245,5 +245,8 @@ class EnUs {
     "create_new_event": "Create new event",
     "set_reminder": "Set reminder",
     "view_week_overview": "View this week's overview",
+    "input_hint": "Send message",
+    "voice_release_to_cancel": "Release to cancel",
+    "voice_swipe_or_release": "Swipe up to cancel or release to send",
   };
 }

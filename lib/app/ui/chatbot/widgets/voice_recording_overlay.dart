@@ -38,7 +38,7 @@ class VoiceRecordingOverlay extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                isCancelling ? '松开手指，取消发送'.tr : '上滑取消 或 松开发送'.tr,
+                isCancelling ? 'voice_release_to_cancel'.tr : 'voice_swipe_or_release'.tr,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: isCancelling
                       ? colorScheme.error
