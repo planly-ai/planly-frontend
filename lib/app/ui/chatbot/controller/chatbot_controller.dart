@@ -14,6 +14,11 @@ class ChatbotController extends GetxController {
   var scrollController = ScrollController();
   var isTyping = false.obs;
 
+  // Voice Recording State
+  var isRecording = false.obs;
+  var isCancellingRecording = false.obs;
+  double _startRecordDy = 0;
+
   @override
   void onInit() {
     super.onInit();
@@ -178,5 +183,36 @@ class ChatbotController extends GetxController {
     isTyping.value = false;
     _scrollToBottom();
     loadSessions();
+  }
+
+  void startRecording(double startDy) {
+    isRecording.value = true;
+    isCancellingRecording.value = false;
+    _startRecordDy = startDy;
+    // TODO: init ASR sequence
+  }
+
+  void updateRecordingPointer(double dy) {
+    if (!isRecording.value) return;
+    // If user slides up by 50 pixels, mark as cancelling
+    if (_startRecordDy - dy > 50) {
+      isCancellingRecording.value = true;
+    } else {
+      isCancellingRecording.value = false;
+    }
+  }
+
+  void endRecording() async {
+    if (!isRecording.value) return;
+    isRecording.value = false;
+
+    if (isCancellingRecording.value) {
+      // Cancelled
+      isCancellingRecording.value = false;
+    } else {
+      // Send the speech recognition result when ready
+      textController.text = "This is a placeholder for voice recognition.";
+      await sendMessage();
+    }
   }
 }

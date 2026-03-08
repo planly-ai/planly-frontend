@@ -233,5 +233,11 @@ class ZhCN {
     'No history': '暂无历史对话',
     'Generating...': '思考中...',
     'Type a message...': '输入信息...',
+    "query_tomorrow_schedule": "查询明天的日程",
+    "generate_weekly_report": "生成周报",
+    "summarize_today_tasks": "总结今天的任务",
+    "create_new_event": "创建新日程",
+    "set_reminder": "设置提醒",
+    "view_week_overview": "查看本周概览",
   };
 }

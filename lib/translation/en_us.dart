@@ -239,5 +239,11 @@ class EnUs {
     'No history': 'No history',
     'Generating...': 'Generating...',
     'Type a message...': 'Type a message...',
+    "query_tomorrow_schedule": "Query tomorrow's schedule",
+    "generate_weekly_report": "Generate weekly report",
+    "summarize_today_tasks": "Summarize today's tasks",
+    "create_new_event": "Create new event",
+    "set_reminder": "Set reminder",
+    "view_week_overview": "View this week's overview",
   };
 }
