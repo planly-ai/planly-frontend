@@ -226,7 +226,12 @@ class ZhCN {
     'weeklyProgress': '每周进度',
     'hourlyProgress': '每小时进度',
     'errorLoadingStatistics': '加载统计数据时出错',
-    'noStatisticsAvailable': '无可用统计数据',
     'chatbot': 'AI助手',
+    'New Chat': '新对话',
+    'Chat History': '历史对话',
+    'Start a conversation': '开始新的对话',
+    'No history': '暂无历史对话',
+    'Generating...': '思考中...',
+    'Type a message...': '输入信息...',
   };
 }

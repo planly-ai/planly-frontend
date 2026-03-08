@@ -240,7 +240,13 @@ Future<Isar?> _getIsarInstance() async {
   if (Isar.instanceNames.isEmpty) {
     final dir = await getApplicationSupportDirectory();
     return await Isar.open(
-      [TasksSchema, TodosSchema, SettingsSchema],
+      [
+        TasksSchema,
+        TodosSchema,
+        SettingsSchema,
+        ChatSessionSchema,
+        ChatMessageSchema,
+      ],
       directory: dir.path,
       inspector: true,
     );

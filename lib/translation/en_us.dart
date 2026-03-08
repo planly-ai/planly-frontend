@@ -232,7 +232,12 @@ class EnUs {
     'weeklyProgress': 'Weekly Progress',
     'hourlyProgress': 'Hourly Progress',
     'errorLoadingStatistics': 'Error loading statistics',
-    'noStatisticsAvailable': 'No statistics available',
     'chatbot': 'Chatbot',
+    'New Chat': 'New Chat',
+    'Chat History': 'Chat History',
+    'Start a conversation': 'Start a conversation',
+    'No history': 'No history',
+    'Generating...': 'Generating...',
+    'Type a message...': 'Type a message...',
   };
 }

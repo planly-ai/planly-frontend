@@ -29,7 +29,13 @@ class IsarController {
     if (Isar.instanceNames.isEmpty) {
       final dir = await getApplicationSupportDirectory();
       final isarInstance = await Isar.open(
-        [TasksSchema, TodosSchema, SettingsSchema],
+        [
+          TasksSchema,
+          TodosSchema,
+          SettingsSchema,
+          ChatSessionSchema,
+          ChatMessageSchema,
+        ],
         directory: dir.path,
         inspector: true,
       );

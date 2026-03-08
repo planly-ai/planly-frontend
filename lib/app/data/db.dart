@@ -133,3 +133,52 @@ enum TodoStatus {
   bool get isCompleted =>
       this == TodoStatus.done || this == TodoStatus.cancelled;
 }
+
+@collection
+class ChatSession {
+  Id id = Isar.autoIncrement;
+  String title;
+  DateTime createdAt;
+  DateTime updatedAt;
+
+  @Backlink(to: 'session')
+  final messages = IsarLinks<ChatMessage>();
+
+  ChatSession({
+    this.id = Isar.autoIncrement,
+    this.title = 'New Chat',
+    required this.createdAt,
+    required this.updatedAt,
+  });
+}
+
+@collection
+class ChatMessage {
+  Id id = Isar.autoIncrement;
+  String text;
+  DateTime createdAt;
+
+  @enumerated
+  SenderType sender;
+
+  @enumerated
+  MessageType type;
+
+  // Optional: file path for images or audio
+  String? attachmentPath;
+
+  final session = IsarLink<ChatSession>();
+
+  ChatMessage({
+    this.id = Isar.autoIncrement,
+    required this.text,
+    required this.createdAt,
+    required this.sender,
+    this.type = MessageType.text,
+    this.attachmentPath,
+  });
+}
+
+enum SenderType { user, bot }
+
+enum MessageType { text, image, voice }
