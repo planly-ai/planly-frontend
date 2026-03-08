@@ -227,5 +227,6 @@ class ZhCN {
     'hourlyProgress': '每小时进度',
     'errorLoadingStatistics': '加载统计数据时出错',
     'noStatisticsAvailable': '无可用统计数据',
+    'chatbot': 'AI助手',
   };
 }

@@ -233,5 +233,6 @@ class EnUs {
     'hourlyProgress': 'Hourly Progress',
     'errorLoadingStatistics': 'Error loading statistics',
     'noStatisticsAvailable': 'No statistics available',
+    'chatbot': 'Chatbot',
   };
 }

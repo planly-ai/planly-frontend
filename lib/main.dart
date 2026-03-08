@@ -428,18 +428,13 @@ class _MyAppState extends State<MyApp> {
         }
         break;
       case 'action_all_todos':
-        if (_homeKey.currentState != null) {
-          _homeKey.currentState!.changeTabIndex(1);
-          _navigatorKey.currentState?.popUntil((r) => r.isFirst);
-        } else {
-          _navigatorKey.currentState?.push(
-            MaterialPageRoute(builder: (_) => const AllTodos()),
-          );
-        }
+        _navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const AllTodos()),
+        );
         break;
       case 'action_calendar_todos':
         if (_homeKey.currentState != null) {
-          _homeKey.currentState!.changeTabIndex(2);
+          _homeKey.currentState!.changeTabIndex(1);
           _navigatorKey.currentState?.popUntil((r) => r.isFirst);
         } else {
           _navigatorKey.currentState?.push(

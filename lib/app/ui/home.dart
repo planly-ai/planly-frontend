@@ -7,8 +7,8 @@ import 'package:planly_ai/app/ui/settings/view/settings.dart';
 import 'package:planly_ai/app/ui/statistics/view/statistics.dart';
 import 'package:planly_ai/app/ui/tasks/view/all_tasks.dart';
 import 'package:planly_ai/app/ui/tasks/widgets/tasks_action.dart';
-import 'package:planly_ai/app/ui/todos/view/all_todos.dart';
 import 'package:planly_ai/app/ui/todos/view/calendar_todos.dart';
+import 'package:planly_ai/app/ui/chatbot/view/chatbot_page.dart';
 import 'package:planly_ai/app/ui/todos/widgets/todos_action.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/navigation_helper.dart';
@@ -36,8 +36,8 @@ class HomePageState extends State<HomePage>
 
   static const List<Widget> _pages = [
     AllTasks(),
-    AllTodos(),
     CalendarTodos(),
+    ChatbotPage(),
     StatisticsPage(),
     SettingsPage(),
   ];
@@ -83,8 +83,8 @@ class HomePageState extends State<HomePage>
 
   List<String> get _screenKeys => [
     'categories',
-    'allTodos',
     'calendar',
+    'chatbot',
     'statistics',
   ];
 
@@ -163,13 +163,13 @@ class HomePageState extends State<HomePage>
           allScreens[0].tr,
         ),
         _buildRailDestination(
-          IconsaxPlusLinear.task_square,
-          IconsaxPlusBold.task_square,
+          IconsaxPlusLinear.calendar,
+          IconsaxPlusBold.calendar,
           allScreens[1].tr,
         ),
         _buildRailDestination(
-          IconsaxPlusLinear.calendar,
-          IconsaxPlusBold.calendar,
+          IconsaxPlusLinear.message_2,
+          IconsaxPlusBold.message_2,
           allScreens[2].tr,
         ),
         _buildRailDestination(
@@ -214,13 +214,13 @@ class HomePageState extends State<HomePage>
         label: allScreens[0].tr,
       ),
       _buildNavigationDestination(
-        icon: IconsaxPlusLinear.task_square,
-        selectedIcon: IconsaxPlusBold.task_square,
+        icon: IconsaxPlusLinear.calendar,
+        selectedIcon: IconsaxPlusBold.calendar,
         label: allScreens[1].tr,
       ),
       _buildNavigationDestination(
-        icon: IconsaxPlusLinear.calendar,
-        selectedIcon: IconsaxPlusBold.calendar,
+        icon: IconsaxPlusLinear.message_2,
+        selectedIcon: IconsaxPlusBold.message_2,
         label: allScreens[2].tr,
       ),
       _buildNavigationDestination(
@@ -249,10 +249,12 @@ class HomePageState extends State<HomePage>
   }
 
   Widget? _buildFloatingActionButton() {
+    const chatbotTabIndex = 2;
     const statisticsTabIndex = 3;
     const settingsTabIndex = 4;
 
-    if (_tabIndex == statisticsTabIndex ||
+    if (_tabIndex == chatbotTabIndex ||
+        _tabIndex == statisticsTabIndex ||
         _tabIndex == settingsTabIndex ||
         !_fabController.isVisible.value) {
       return null;
