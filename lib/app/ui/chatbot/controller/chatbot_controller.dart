@@ -5,6 +5,7 @@ import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/main.dart'; // To access the global `isar` instance
 import 'package:planly_ai/app/services/asr_service.dart';
 import 'package:planly_ai/app/services/audio_recording_service.dart';
+import 'package:planly_ai/app/utils/show_snack_bar.dart';
 
 class ChatbotController extends GetxController {
   // Observables
@@ -200,9 +201,9 @@ class ChatbotController extends GetxController {
       _startRecordDy = startDy;
       await _audioService.start();
     } else {
-      Get.snackbar(
-        'Permission Denied',
-        'Microphone permission is required for voice input.',
+      showSnackBar(
+        'voice_permission_denied'.tr,
+        isError: true,
       );
     }
   }
@@ -240,9 +241,9 @@ class ChatbotController extends GetxController {
         textController.text = recognizedText;
         await sendMessage();
       } else {
-        Get.snackbar(
-          'Recognition Failed',
-          'Could not recognize your voice. Please try again.',
+        showSnackBar(
+          'voice_recognition_failed'.tr,
+          isError: true,
         );
       }
     }

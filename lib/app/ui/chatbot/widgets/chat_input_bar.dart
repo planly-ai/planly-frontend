@@ -4,6 +4,7 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/voice_recording_overlay.dart';
+import 'package:planly_ai/app/utils/show_snack_bar.dart';
 
 class ChatInputBar extends StatefulWidget {
   const ChatInputBar({super.key});
@@ -169,7 +170,12 @@ class _ChatInputBarState extends State<ChatInputBar> {
                                     minHeight: 44,
                                   ), // 增大点击区域
                                   padding: EdgeInsets.zero, // 移除默认内边距避免挤压
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    showSnackBar(
+                                      'voice_long_press_hint'.tr,
+                                      isInfo: true,
+                                    );
+                                  },
                                 ),
                               ),
                               IconButton(

@@ -243,5 +243,8 @@ class ZhCN {
     "voice_release_to_cancel": "松开手指，取消发送",
     "voice_swipe_or_release": "上滑取消 或 松开发送",
     "voice_recognizing": "正在识别...",
+    "voice_long_press_hint": "长按发送语音",
+    "voice_permission_denied": "需要麦克风权限才能进行语音输入",
+    "voice_recognition_failed": "无法识别您的语音，请重试",
   };
 }

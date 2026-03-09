@@ -249,5 +249,8 @@ class EnUs {
     "voice_release_to_cancel": "Release to cancel",
     "voice_swipe_or_release": "Swipe up to cancel or release to send",
     "voice_recognizing": "Recognizing...",
+    "voice_long_press_hint": "Long press to send voice",
+    "voice_permission_denied": "Microphone permission is required for voice input",
+    "voice_recognition_failed": "Could not recognize your voice. Please try again",
   };
 }
