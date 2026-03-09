@@ -115,17 +115,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       Icon(
                         IconsaxPlusLinear.message_2,
                         size: 64,
-                        color: colorScheme.onSurface.withValues(
-                          alpha: 0.5,
-                        ),
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Start a conversation'.tr,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(
-                            alpha: 0.7,
-                          ),
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -138,37 +134,72 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 itemCount:
                     controller.messages.length +
+                    (controller.isRecognizing.value ? 1 : 0) +
                     (controller.isTyping.value ? 1 : 0),
                 itemBuilder: (context, index) {
-                  if (index == controller.messages.length) {
+                  // Message bubbles
+                  if (index < controller.messages.length) {
+                    final msg = controller.messages[index];
+                    return ChatBubble(message: msg);
+                  }
+
+                  // ASR Recognition state (User side)
+                  if (controller.isRecognizing.value &&
+                      index == controller.messages.length) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,
                       ),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          CircleAvatar(
-                            backgroundColor: colorScheme.primaryContainer,
-                            child: Icon(
-                              Icons.smart_toy,
-                              color: colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
                           Text(
-                            'Generating...'.tr,
+                            'Recognizing...'.tr,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurface,
                               fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          CircleAvatar(
+                            backgroundColor: colorScheme.secondaryContainer,
+                            child: Icon(
+                              Icons.person,
+                              color: colorScheme.onSecondaryContainer,
                             ),
                           ),
                         ],
                       ),
                     );
                   }
-                  final msg = controller.messages[index];
-                  return ChatBubble(message: msg);
+
+                  // Bot Typing state
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: colorScheme.primaryContainer,
+                          child: Icon(
+                            Icons.smart_toy,
+                            color: colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Generating...'.tr,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
                 },
               );
             }),

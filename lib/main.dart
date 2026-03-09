@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/controller/theme_controller.dart';
 import 'package:planly_ai/app/utils/device_info.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app/data/db.dart';
 import 'app/ui/todos/view/all_todos.dart';
 import 'app/utils/notification.dart';
@@ -67,6 +68,9 @@ void main() async {
 }
 
 Future<void> initializeApp() async {
+  // 加载环境变量
+  await dotenv.load(fileName: '.env');
+
   DeviceFeature().init();
   await PlatformFeatures.initialize();
 

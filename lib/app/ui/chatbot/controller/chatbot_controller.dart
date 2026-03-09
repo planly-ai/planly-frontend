@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/main.dart'; // To access the global `isar` instance
+import 'package:planly_ai/app/services/asr_service.dart';
+import 'package:planly_ai/app/services/audio_recording_service.dart';
 
 class ChatbotController extends GetxController {
   // Observables
@@ -13,6 +15,11 @@ class ChatbotController extends GetxController {
   var textController = TextEditingController();
   var scrollController = ScrollController();
   var isTyping = false.obs;
+  var isRecognizing = false.obs;
+
+  // Services
+  final AsrService _asrService = AsrService();
+  final AudioRecordingService _audioService = AudioRecordingService();
 
   // Voice Recording State
   var isRecording = false.obs;
@@ -29,6 +36,7 @@ class ChatbotController extends GetxController {
   void onClose() {
     textController.dispose();
     scrollController.dispose();
+    _audioService.dispose();
     super.onClose();
   }
 
@@ -185,11 +193,18 @@ class ChatbotController extends GetxController {
     loadSessions();
   }
 
-  void startRecording(double startDy) {
-    isRecording.value = true;
-    isCancellingRecording.value = false;
-    _startRecordDy = startDy;
-    // TODO: init ASR sequence
+  void startRecording(double startDy) async {
+    if (await _audioService.hasPermission()) {
+      isRecording.value = true;
+      isCancellingRecording.value = false;
+      _startRecordDy = startDy;
+      await _audioService.start();
+    } else {
+      Get.snackbar(
+        'Permission Denied',
+        'Microphone permission is required for voice input.',
+      );
+    }
   }
 
   void updateRecordingPointer(double dy) {
@@ -206,13 +221,30 @@ class ChatbotController extends GetxController {
     if (!isRecording.value) return;
     isRecording.value = false;
 
+    final path = await _audioService.stop();
+
     if (isCancellingRecording.value) {
       // Cancelled
       isCancellingRecording.value = false;
-    } else {
-      // Send the speech recognition result when ready
-      textController.text = "This is a placeholder for voice recognition.";
-      await sendMessage();
+      // Optionally delete the file if needed
+    } else if (path != null) {
+      // Show loading or typing state while ASR is working
+      isRecognizing.value = true;
+      _scrollToBottom();
+
+      final recognizedText = await _asrService.recognize(path);
+
+      isRecognizing.value = false;
+
+      if (recognizedText != null && recognizedText.isNotEmpty) {
+        textController.text = recognizedText;
+        await sendMessage();
+      } else {
+        Get.snackbar(
+          'Recognition Failed',
+          'Could not recognize your voice. Please try again.',
+        );
+      }
     }
   }
 }
