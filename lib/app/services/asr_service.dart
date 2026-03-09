@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+// Api doc: https://www.volcengine.com/docs/6561/1631584?lang=zh
 class AsrService {
   final String _apiUrl =
       'https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash';

@@ -155,7 +155,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'Recognizing...'.tr,
+                            'voice_recognizing'.tr,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colorScheme.onSurface,
                               fontStyle: FontStyle.italic,

@@ -248,5 +248,6 @@ class EnUs {
     "input_hint": "Send message",
     "voice_release_to_cancel": "Release to cancel",
     "voice_swipe_or_release": "Swipe up to cancel or release to send",
+    "voice_recognizing": "Recognizing...",
   };
 }

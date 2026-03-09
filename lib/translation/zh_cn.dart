@@ -242,5 +242,6 @@ class ZhCN {
     "input_hint": "点击发送消息",
     "voice_release_to_cancel": "松开手指，取消发送",
     "voice_swipe_or_release": "上滑取消 或 松开发送",
+    "voice_recognizing": "正在识别...",
   };
 }
