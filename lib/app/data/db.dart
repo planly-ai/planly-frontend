@@ -181,4 +181,4 @@ class ChatMessage {
 
 enum SenderType { user, bot }
 
-enum MessageType { text, image, voice }
+enum MessageType { text, image, voice, scheduleConfirmation, focusDuration, scheduleBreakdown, timelineSchedule }

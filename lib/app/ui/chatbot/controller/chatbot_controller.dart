@@ -172,23 +172,46 @@ class ChatbotController extends GetxController {
       return;
     }
 
-    // TODO: Backend AI response integration here
-    final aiMsg = ChatMessage(
-      text: "TODO: This is a placeholder for the actual AI response.",
-      createdAt: DateTime.now(),
-      sender: SenderType.bot,
-    );
+    // 一次性发送所有 4 种卡片用于预览
+    final messages = [
+      ChatMessage(
+        text: "这是您的日程安排，请确认",
+        createdAt: DateTime.now(),
+        sender: SenderType.bot,
+        type: MessageType.scheduleConfirmation,
+      ),
+      ChatMessage(
+        text: "这是您今天的专注时长统计",
+        createdAt: DateTime.now(),
+        sender: SenderType.bot,
+        type: MessageType.focusDuration,
+      ),
+      ChatMessage(
+        text: "这是为您拆解的任务清单",
+        createdAt: DateTime.now(),
+        sender: SenderType.bot,
+        type: MessageType.scheduleBreakdown,
+      ),
+      ChatMessage(
+        text: "这是您今天的时间轴安排",
+        createdAt: DateTime.now(),
+        sender: SenderType.bot,
+        type: MessageType.timelineSchedule,
+      ),
+    ];
 
     await isar.writeTxn(() async {
-      await isar.chatMessages.put(aiMsg);
-      session.messages.add(aiMsg);
-      await session.messages.save();
+      for (final msg in messages) {
+        await isar.chatMessages.put(msg);
+        session.messages.add(msg);
+        await session.messages.save();
+      }
 
       session.updatedAt = DateTime.now();
       await isar.chatSessions.put(session);
     });
 
-    messages.add(aiMsg);
+    messages.forEach((msg) => this.messages.add(msg));
     isTyping.value = false;
     _scrollToBottom();
     loadSessions();
