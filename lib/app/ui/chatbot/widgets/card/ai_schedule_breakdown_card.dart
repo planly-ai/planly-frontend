@@ -63,6 +63,9 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
 
     return Card(
       elevation: AppConstants.elevationLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
@@ -119,9 +122,10 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
               Text(
                 widget.title,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
+                  letterSpacing: -0.4,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -129,7 +133,8 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
               Text(
                 'subtask_ai_suggestion'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                  fontWeight: FontWeight.w400,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -177,8 +182,9 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
                         : colorScheme.onSurface,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      13,
+                      14,
                     ),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
                 Row(
@@ -199,8 +205,9 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
                         ),
                         fontSize: ResponsiveUtils.getResponsiveFontSize(
                           context,
-                          10,
+                          12,
                         ),
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -226,15 +233,16 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
               'total_progress'.tr,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                fontWeight: FontWeight.w400,
               ),
             ),
             Text(
               '${completed} / ${total} ${'unit_minute'.tr}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                fontWeight: FontWeight.w600,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
               ),
             ),
           ],
@@ -267,9 +275,7 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              AppConstants.borderRadiusMedium,
-            ),
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
           ),
         ),
       ),

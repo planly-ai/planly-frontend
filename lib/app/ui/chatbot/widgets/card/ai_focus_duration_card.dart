@@ -97,14 +97,16 @@ class AiFocusDurationCard extends StatelessWidget {
                 'focus_statistics_title'.tr,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
+                  letterSpacing: -0.2,
                 ),
               ),
               Text(
                 'focus_statistics_subtitle'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                  fontWeight: FontWeight.w400,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -131,23 +133,26 @@ class AiFocusDurationCard extends StatelessWidget {
           text: TextSpan(
             style: theme.textTheme.displayLarge?.copyWith(
               color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 48),
+              fontWeight: FontWeight.w600,
+              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+              letterSpacing: -0.4,
             ),
             children: [
               TextSpan(text: parts[0]),
               TextSpan(
                 text: ' ${parts[1]} ',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                  fontWeight: FontWeight.w400,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
               TextSpan(text: parts[2]),
               TextSpan(
                 text: ' ${parts[3]}',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                  fontWeight: FontWeight.w400,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -158,8 +163,8 @@ class AiFocusDurationCard extends StatelessWidget {
           'focus_total_duration_label'.tr,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.bold,
-            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 15),
+            fontWeight: FontWeight.w400,
+            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
           ),
         ),
       ],
@@ -247,17 +252,17 @@ class AiFocusDurationCard extends StatelessWidget {
             value,
             style: theme.textTheme.titleLarge?.copyWith(
               color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+              letterSpacing: -0.2,
             ),
           ),
           Text(
             subValue,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              fontSize: 12,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+              fontWeight: FontWeight.w400,
             ),
           ),
         ],
@@ -279,8 +284,9 @@ class AiFocusDurationCard extends StatelessWidget {
               'focus_distribution'.tr,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                letterSpacing: -0.2,
               ),
             ),
           ],

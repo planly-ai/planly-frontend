@@ -19,9 +19,6 @@ class TimelineScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Card(
       elevation: AppConstants.elevationLow,
       margin: EdgeInsets.all(ResponsiveUtils.getResponsiveCardMargin(context)),
@@ -82,15 +79,17 @@ class TimelineScheduleCard extends StatelessWidget {
               Text(
                 'timeline_title'.tr,
                 style: theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  letterSpacing: -0.4,
                 ),
               ),
               Text(
                 date,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                  fontWeight: FontWeight.w400,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -151,8 +150,9 @@ class TimelineScheduleCard extends StatelessWidget {
               label,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                fontWeight: FontWeight.w600,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                letterSpacing: -0.2,
               ),
             ),
             const SizedBox(height: 4),
@@ -163,24 +163,25 @@ class TimelineScheduleCard extends StatelessWidget {
                 Text(
                   value,
                   style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: color,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      24,
+                      16,
                     ),
+                    letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   unit,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
                     color: color,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      14,
+                      12,
                     ),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -310,22 +311,24 @@ class TimelineScheduleCard extends StatelessWidget {
                 Text(
                   event['title'] as String,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      15,
+                      14,
                     ),
+                    letterSpacing: -0.2,
                   ),
                 ),
                 Text(
                   event['time'] as String,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      13,
+                      12,
                     ),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],

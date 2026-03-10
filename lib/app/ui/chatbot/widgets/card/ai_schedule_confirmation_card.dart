@@ -34,6 +34,9 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
 
     return Card(
       elevation: AppConstants.elevationLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
@@ -49,9 +52,10 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
             Text(
               widget.title,
               style: theme.textTheme.headlineMedium?.copyWith(
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
-                fontWeight: FontWeight.bold,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+                fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
+                letterSpacing: -0.4,
               ),
             ),
             const SizedBox(height: AppConstants.spacingM),
@@ -123,15 +127,17 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
                 'schedule_confirmation_title'.tr,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
+                  letterSpacing: -0.2,
                 ),
               ),
               Text(
                 'schedule_confirmation_subtitle'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
                   color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -199,9 +205,7 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(
-              AppConstants.borderRadiusMedium,
-            ),
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
           ),
         ),
       ),
