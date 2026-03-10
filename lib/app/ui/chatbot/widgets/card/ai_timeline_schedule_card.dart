@@ -57,7 +57,7 @@ class TimelineScheduleCard extends StatelessWidget {
   Widget _buildIntegratedHeader(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final color = const Color(0xFF2962FF); // Timeline primary color
+    final color = colorScheme.primary; // Timeline primary color
 
     return Row(
       children: [
@@ -101,6 +101,7 @@ class TimelineScheduleCard extends StatelessWidget {
   }
 
   Widget _buildStatistics(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         _buildStatBox(
@@ -108,8 +109,8 @@ class TimelineScheduleCard extends StatelessWidget {
           label: '忙碌时段',
           value: '$busyHours',
           unit: '小时',
-          color: Colors.red,
-          bgColor: const Color(0xFFFFEBEE),
+          color: colorScheme.primary,
+          bgColor: colorScheme.primary.withValues(alpha: 0.12),
         ),
         const SizedBox(width: AppConstants.spacingM),
         _buildStatBox(
@@ -117,8 +118,8 @@ class TimelineScheduleCard extends StatelessWidget {
           label: '空闲时段',
           value: '$freeHours',
           unit: '小时',
-          color: const Color(0xFF00C853),
-          bgColor: const Color(0xFFE8F5E9),
+          color: colorScheme.onSurfaceVariant,
+          bgColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         ),
       ],
     );
@@ -190,20 +191,23 @@ class TimelineScheduleCard extends StatelessWidget {
   }
 
   Widget _buildSegmentedTimeline(BuildContext context) {
-    // Colors derived from the image
+    final colorScheme = Theme.of(context).colorScheme;
+    final primary = colorScheme.primary;
+
+    // Derived from primary theme with varying opacities
     final List<Color?> segments = [
       null,
-      const Color(0xFF2979FF),
-      const Color(0xFFAA00FF),
-      const Color(0xFFD500F9),
+      primary,
+      primary.withValues(alpha: 0.7),
+      primary.withValues(alpha: 0.4),
       null,
       null,
-      const Color(0xFFFF1744),
-      const Color(0xFF2979FF),
-      const Color(0xFF2979FF),
+      primary.withValues(alpha: 0.8),
+      primary,
+      primary,
       null,
       null,
-      const Color(0xFF2979FF),
+      primary,
       null,
       null,
     ];
@@ -213,7 +217,7 @@ class TimelineScheduleCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: segments.map((color) {
-            return _buildTimelineBar(color);
+            return _buildTimelineBar(context, color);
           }).toList(),
         ),
         const SizedBox(height: 8),
@@ -229,13 +233,13 @@ class TimelineScheduleCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineBar(Color? color) {
+  Widget _buildTimelineBar(BuildContext context, Color? color) {
     return Expanded(
       child: Container(
         height: 50,
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
-          color: color ?? const Color(0xFFEEEEEE),
+          color: color ?? Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(4),
         ),
       ),
@@ -246,7 +250,7 @@ class TimelineScheduleCard extends StatelessWidget {
     return Text(
       label,
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: const Color(0xFF9E9E9E),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
       ),
     );
@@ -259,13 +263,13 @@ class TimelineScheduleCard extends StatelessWidget {
     Color color;
     switch (event['tag']) {
       case '会议':
-        color = const Color(0xFF2979FF);
+        color = colorScheme.primary;
         break;
       case '专注':
-        color = const Color(0xFFAA00FF);
+        color = colorScheme.primary.withValues(alpha: 0.8);
         break;
       case '忙碌':
-        color = const Color(0xFFFF1744);
+        color = colorScheme.primary.withValues(alpha: 0.6);
         break;
       default:
         color = colorScheme.primary;
@@ -275,7 +279,7 @@ class TimelineScheduleCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9F9F9),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
       child: Row(
@@ -302,14 +306,14 @@ class TimelineScheduleCard extends StatelessWidget {
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
-                    fontSize: 15,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 15),
                   ),
                 ),
                 Text(
                   event['time'] as String,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF757575),
-                    fontSize: 13,
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
                   ),
                 ),
               ],
@@ -323,10 +327,10 @@ class TimelineScheduleCard extends StatelessWidget {
             ),
             child: Text(
               event['tag'] as String,
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: color,
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
               ),
             ),
           ),

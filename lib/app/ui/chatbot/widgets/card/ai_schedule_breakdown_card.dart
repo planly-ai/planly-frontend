@@ -91,7 +91,7 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
   Widget _buildIntegratedHeader(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final color = Colors.deepPurple; // Subtask primary color
+    final color = colorScheme.primary; // Subtask primary color
 
     return Row(
       children: [
@@ -231,7 +231,7 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
           child: LinearProgressIndicator(
             value: total > 0 ? completed / total : 0,
             backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.grey),
+            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
             minHeight: 4,
           ),
         ),
@@ -240,7 +240,7 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
   }
 
   Widget _buildConfirmButton(BuildContext context) {
-    final color = Colors.deepPurple;
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -249,7 +249,7 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
         icon: const Icon(Icons.check, size: 18),
         label: const Text('确认添加'),
         style: FilledButton.styleFrom(
-          backgroundColor: color,
+          backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           ),

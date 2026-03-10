@@ -78,7 +78,8 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
                     _isReminderEnabled = value;
                   });
                 },
-                activeColor: const Color(0xFF9C27B0),
+                activeColor: colorScheme.primary,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
 
@@ -95,7 +96,7 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
   Widget _buildIntegratedHeader(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final color = Colors.green; // Confirmation primary color
+    final color = colorScheme.primary; // Use project theme color
 
     return Row(
       children: [
@@ -147,6 +148,7 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
+      constraints: const BoxConstraints(minHeight: 48), // Force consistent height
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingM,
         vertical: AppConstants.spacingS,
@@ -171,13 +173,18 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
                   ),
             ),
           ),
-          if (trailing != null) trailing,
+          if (trailing != null)
+            Transform.scale(
+              scale: 0.8, // Scale down to fit the unified height
+              child: trailing,
+            ),
         ],
       ),
     );
   }
 
   Widget _buildConfirmButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 54,
@@ -186,7 +193,7 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
         icon: const Icon(Icons.check_circle_outline, size: 18),
         label: const Text('确认添加'),
         style: FilledButton.styleFrom(
-          backgroundColor: Colors.green,
+          backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           ),

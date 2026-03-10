@@ -47,19 +47,19 @@ class AiFocusDurationCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Main Statistic
-                _buildMainStat(context),
+                _buildMainStat(context, colorScheme),
                 const SizedBox(height: AppConstants.spacingXL),
 
                 // Comparison Metrics
-                _buildComparisonMetrics(context),
+                _buildComparisonMetrics(context, colorScheme),
                 const SizedBox(height: AppConstants.spacingXL),
 
                 // Chart Section
-                _buildChartSection(context),
+                _buildChartSection(context, colorScheme),
                 const SizedBox(height: AppConstants.spacingXL),
 
                 // Insight Box
-                _buildInsightBox(context),
+                _buildInsightBox(context, colorScheme),
               ],
             ),
           ],
@@ -71,7 +71,7 @@ class AiFocusDurationCard extends StatelessWidget {
   Widget _buildIntegratedHeader(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final color = const Color(0xFF9C27B0); // Focus primary color
+    final color = colorScheme.primary; // Focus primary color
 
     return Row(
       children: [
@@ -114,10 +114,9 @@ class AiFocusDurationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMainStat(BuildContext context) {
+  Widget _buildMainStat(BuildContext context, ColorScheme colorScheme) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
+    
     // Split "4 小时 5 分钟" into parts for styling
     final parts = totalDuration.split(' ');
     
@@ -125,8 +124,8 @@ class AiFocusDurationCard extends StatelessWidget {
       children: [
         RichText(
           text: TextSpan(
-            style: TextStyle(
-              color: const Color(0xFF263238),
+            style: theme.textTheme.displayLarge?.copyWith(
+              color: colorScheme.onSurface,
               fontWeight: FontWeight.bold,
               fontSize: ResponsiveUtils.getResponsiveFontSize(context, 48),
             ),
@@ -134,17 +133,17 @@ class AiFocusDurationCard extends StatelessWidget {
               TextSpan(text: parts[0]),
               TextSpan(
                 text: ' ${parts[1]} ',
-                style: TextStyle(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                  color: const Color(0xFF455A64),
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               TextSpan(text: parts[2]),
               TextSpan(
                 text: ' ${parts[3]}',
-                style: TextStyle(
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                  color: const Color(0xFF455A64),
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -153,7 +152,7 @@ class AiFocusDurationCard extends StatelessWidget {
         Text(
           '今日累计专注时长',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: const Color(0xFF9E9E9E),
+            color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.bold,
             fontSize: ResponsiveUtils.getResponsiveFontSize(context, 15),
           ),
@@ -162,7 +161,7 @@ class AiFocusDurationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildComparisonMetrics(BuildContext context) {
+  Widget _buildComparisonMetrics(BuildContext context, ColorScheme colorScheme) {
     return Row(
       children: [
         // Yesterday Comparison
@@ -172,10 +171,10 @@ class AiFocusDurationCard extends StatelessWidget {
             title: '对比昨日',
             value: comparisonText,
             subValue: '↑ $comparisonPercentage',
-            color: const Color(0xFF00C853),
-            bgColor: const Color(0xFFE3F2FD),
+            color: colorScheme.primary,
+            bgColor: colorScheme.primaryContainer.withValues(alpha: 0.3),
             icon: Icons.trending_up,
-            iconColor: const Color(0xFF2962FF),
+            iconColor: colorScheme.primary,
           ),
         ),
         const SizedBox(width: AppConstants.spacingM),
@@ -186,10 +185,10 @@ class AiFocusDurationCard extends StatelessWidget {
             title: '最长时段',
             value: longestSession,
             subValue: '连续专注',
-            color: const Color(0xFFD500F9),
-            bgColor: const Color(0xFFFCE4EC),
+            color: colorScheme.secondary,
+            bgColor: colorScheme.secondaryContainer.withValues(alpha: 0.3),
             icon: Icons.hourglass_empty,
-            iconColor: const Color(0xFFD500F9),
+            iconColor: colorScheme.secondary,
           ),
         ),
       ],
@@ -224,7 +223,7 @@ class AiFocusDurationCard extends StatelessWidget {
               Text(
                 title,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: const Color(0xFF757575),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -243,7 +242,7 @@ class AiFocusDurationCard extends StatelessWidget {
           Text(
             subValue,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF9E9E9E),
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
@@ -252,7 +251,7 @@ class AiFocusDurationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildChartSection(BuildContext context) {
+  Widget _buildChartSection(BuildContext context, ColorScheme colorScheme) {
     final theme = Theme.of(context);
 
     return Column(
@@ -265,7 +264,7 @@ class AiFocusDurationCard extends StatelessWidget {
             Text(
               '时段分布',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: const Color(0xFF455A64),
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
@@ -300,7 +299,10 @@ class AiFocusDurationCard extends StatelessWidget {
                     getTitlesWidget: (value, meta) {
                       return Text(
                         value.toInt().toString(),
-                        style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 12),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                        ),
                       );
                     },
                     reservedSize: 28,
@@ -321,7 +323,13 @@ class AiFocusDurationCard extends StatelessWidget {
                       }
                       return Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(text, style: const TextStyle(color: Color(0xFF9E9E9E), fontSize: 11)),
+                        child: Text(
+                          text,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 11),
+                          ),
+                        ),
                       );
                     },
                     reservedSize: 28,
@@ -337,8 +345,11 @@ class AiFocusDurationCard extends StatelessWidget {
                 LineChartBarData(
                   spots: chartData,
                   isCurved: true,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2962FF), Color(0xFFE040FB)],
+                  gradient: LinearGradient(
+                    colors: [
+                      colorScheme.primary,
+                      colorScheme.primary.withValues(alpha: 0.3),
+                    ],
                   ),
                   barWidth: 3,
                   isStrokeCapRound: true,
@@ -347,8 +358,8 @@ class AiFocusDurationCard extends StatelessWidget {
                     show: true,
                     gradient: LinearGradient(
                       colors: [
-                        const Color(0xFF2962FF).withValues(alpha: 0.1),
-                        const Color(0xFFE040FB).withValues(alpha: 0.05),
+                        colorScheme.primary.withValues(alpha: 0.15),
+                        colorScheme.primary.withValues(alpha: 0.02),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -358,12 +369,15 @@ class AiFocusDurationCard extends StatelessWidget {
               ],
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (spot) => Colors.blueAccent,
+                  getTooltipColor: (spot) => colorScheme.primary,
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
                       return LineTooltipItem(
                         '${spot.y.toInt()} 分钟',
-                        const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ) ?? const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       );
                     }).toList();
                   },
@@ -376,11 +390,11 @@ class AiFocusDurationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInsightBox(BuildContext context) {
+  Widget _buildInsightBox(BuildContext context, ColorScheme colorScheme) {
     return Container(
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3E5F5),
+        color: colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
       child: Row(
@@ -390,11 +404,14 @@ class AiFocusDurationCard extends StatelessWidget {
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: const TextStyle(color: Color(0xFF455A64), fontSize: 13),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
+                ),
                 children: [
-                  const TextSpan(
+                  TextSpan(
                     text: '洞察：',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF673AB7)),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary),
                   ),
                   TextSpan(text: insight),
                 ],
