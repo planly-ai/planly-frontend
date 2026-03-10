@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
@@ -35,7 +36,7 @@ class TimelineScheduleCard extends StatelessWidget {
           children: [
             // Integrated Header: Icon + Title (StatsCard Style)
             _buildIntegratedHeader(context),
-            
+
             const SizedBox(height: AppConstants.spacingL),
 
             // Statistics Section
@@ -79,7 +80,7 @@ class TimelineScheduleCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '今日时间轴',
+                'timeline_title'.tr,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   fontWeight: FontWeight.bold,
@@ -106,7 +107,7 @@ class TimelineScheduleCard extends StatelessWidget {
       children: [
         _buildStatBox(
           context,
-          label: '忙碌时段',
+          label: 'timeline_busy'.tr,
           value: '$busyHours',
           unit: '小时',
           color: colorScheme.primary,
@@ -115,7 +116,7 @@ class TimelineScheduleCard extends StatelessWidget {
         const SizedBox(width: AppConstants.spacingM),
         _buildStatBox(
           context,
-          label: '空闲时段',
+          label: 'timeline_free'.tr,
           value: '$freeHours',
           unit: '小时',
           color: colorScheme.onSurfaceVariant,
@@ -260,18 +261,23 @@ class TimelineScheduleCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    String tag;
     Color color;
     switch (event['tag']) {
       case '会议':
+        tag = 'tag_meeting'.tr;
         color = colorScheme.primary;
         break;
       case '专注':
+        tag = 'tag_focus'.tr;
         color = colorScheme.primary.withValues(alpha: 0.8);
         break;
       case '忙碌':
+        tag = 'tag_busy'.tr;
         color = colorScheme.primary.withValues(alpha: 0.6);
         break;
       default:
+        tag = event['tag'] as String;
         color = colorScheme.primary;
     }
 
@@ -306,14 +312,20 @@ class TimelineScheduleCard extends StatelessWidget {
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 15),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      15,
+                    ),
                   ),
                 ),
                 Text(
                   event['time'] as String,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      13,
+                    ),
                   ),
                 ),
               ],
@@ -326,7 +338,7 @@ class TimelineScheduleCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              event['tag'] as String,
+              tag,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: color,
                 fontWeight: FontWeight.bold,

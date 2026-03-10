@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
@@ -40,7 +41,7 @@ class AiFocusDurationCard extends StatelessWidget {
           children: [
             // Integrated Header: Icon + Title (StatsCard Style)
             _buildIntegratedHeader(context),
-            
+
             const SizedBox(height: AppConstants.spacingL),
 
             Column(
@@ -93,7 +94,7 @@ class AiFocusDurationCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '专注时长统计',
+                'focus_statistics_title'.tr,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   fontWeight: FontWeight.bold,
@@ -101,7 +102,7 @@ class AiFocusDurationCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '今天的深度思考记录',
+                'focus_statistics_subtitle'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -116,10 +117,14 @@ class AiFocusDurationCard extends StatelessWidget {
 
   Widget _buildMainStat(BuildContext context, ColorScheme colorScheme) {
     final theme = Theme.of(context);
-    
+
     // Split "4 小时 5 分钟" into parts for styling
     final parts = totalDuration.split(' ');
-    
+    // Handle the case where duration might be in different format or already translated if passed from outside
+    // But here totalDuration seems to be hardcoded in preview as "4 小时 5 分钟"
+    // We should probably translate the units if we can, but if it comes from AI it might be dynamic.
+    // Let's at least translate the label below.
+
     return Column(
       children: [
         RichText(
@@ -150,7 +155,7 @@ class AiFocusDurationCard extends StatelessWidget {
           ),
         ),
         Text(
-          '今日累计专注时长',
+          'focus_total_duration_label'.tr,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.bold,
@@ -161,14 +166,17 @@ class AiFocusDurationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildComparisonMetrics(BuildContext context, ColorScheme colorScheme) {
+  Widget _buildComparisonMetrics(
+    BuildContext context,
+    ColorScheme colorScheme,
+  ) {
     return Row(
       children: [
         // Yesterday Comparison
         Expanded(
           child: _buildMetricCard(
             context,
-            title: '对比昨日',
+            title: 'focus_compare_yesterday'.tr,
             value: comparisonText,
             subValue: '↑ $comparisonPercentage',
             color: colorScheme.primary,
@@ -182,9 +190,9 @@ class AiFocusDurationCard extends StatelessWidget {
         Expanded(
           child: _buildMetricCard(
             context,
-            title: '最长时段',
+            title: 'focus_longest_session'.tr,
             value: longestSession,
-            subValue: '连续专注',
+            subValue: 'focus_continuous_focus'.tr,
             color: colorScheme.secondary,
             bgColor: colorScheme.secondaryContainer.withValues(alpha: 0.3),
             icon: Icons.hourglass_empty,
@@ -220,12 +228,16 @@ class AiFocusDurationCard extends StatelessWidget {
             children: [
               Icon(icon, size: 16, color: iconColor),
               const SizedBox(width: 4),
-              Text(
-                title,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+              Expanded(
+                child: Text(
+                  title,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                  overflow: TextOverflow.visible,
+                  softWrap: true,
                 ),
               ),
             ],
@@ -242,7 +254,9 @@ class AiFocusDurationCard extends StatelessWidget {
           Text(
             subValue,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
@@ -262,7 +276,7 @@ class AiFocusDurationCard extends StatelessWidget {
             const Icon(Icons.access_time, size: 18, color: Color(0xFF757575)),
             const SizedBox(width: 8),
             Text(
-              '时段分布',
+              'focus_distribution'.tr,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
@@ -290,8 +304,12 @@ class AiFocusDurationCard extends StatelessWidget {
               ),
               titlesData: FlTitlesData(
                 show: true,
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -301,7 +319,10 @@ class AiFocusDurationCard extends StatelessWidget {
                         value.toInt().toString(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
+                          fontSize: ResponsiveUtils.getResponsiveFontSize(
+                            context,
+                            12,
+                          ),
                         ),
                       );
                     },
@@ -314,12 +335,24 @@ class AiFocusDurationCard extends StatelessWidget {
                     getTitlesWidget: (value, meta) {
                       String text = '';
                       switch (value.toInt()) {
-                        case 0: text = '9:00'; break;
-                        case 2: text = '10:00'; break;
-                        case 4: text = '11:00'; break;
-                        case 6: text = '14:00'; break;
-                        case 8: text = '15:00'; break;
-                        case 10: text = '16:00'; break;
+                        case 0:
+                          text = '9:00';
+                          break;
+                        case 2:
+                          text = '10:00';
+                          break;
+                        case 4:
+                          text = '11:00';
+                          break;
+                        case 6:
+                          text = '14:00';
+                          break;
+                        case 8:
+                          text = '15:00';
+                          break;
+                        case 10:
+                          text = '16:00';
+                          break;
                       }
                       return Padding(
                         padding: const EdgeInsets.only(top: 8.0),
@@ -327,7 +360,10 @@ class AiFocusDurationCard extends StatelessWidget {
                           text,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
-                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 11),
+                            fontSize: ResponsiveUtils.getResponsiveFontSize(
+                              context,
+                              11,
+                            ),
                           ),
                         ),
                       );
@@ -373,11 +409,15 @@ class AiFocusDurationCard extends StatelessWidget {
                   getTooltipItems: (touchedSpots) {
                     return touchedSpots.map((spot) {
                       return LineTooltipItem(
-                        '${spot.y.toInt()} 分钟',
+                        '${spot.y.toInt()} ${'unit_minute'.tr}',
                         theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ) ?? const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ) ??
+                            const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       );
                     }).toList();
                   },
@@ -410,8 +450,11 @@ class AiFocusDurationCard extends StatelessWidget {
                 ),
                 children: [
                   TextSpan(
-                    text: '洞察：',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary),
+                    text: 'focus_insight_label'.tr,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
                   ),
                   TextSpan(text: insight),
                 ],

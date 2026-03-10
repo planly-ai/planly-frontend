@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
@@ -19,7 +20,8 @@ class ScheduleConfirmationCard extends StatefulWidget {
   });
 
   @override
-  State<ScheduleConfirmationCard> createState() => _ScheduleConfirmationCardState();
+  State<ScheduleConfirmationCard> createState() =>
+      _ScheduleConfirmationCardState();
 }
 
 class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
@@ -40,7 +42,7 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
           children: [
             // Integrated Header: Icon + Title (StatsCard Style)
             _buildIntegratedHeader(context),
-            
+
             const SizedBox(height: AppConstants.spacingM),
 
             // Title Area
@@ -118,7 +120,7 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '日程确认',
+                'schedule_confirmation_title'.tr,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   fontWeight: FontWeight.bold,
@@ -126,7 +128,7 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
                 ),
               ),
               Text(
-                '请核对以下任务详情',
+                'schedule_confirmation_subtitle'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -148,7 +150,9 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 48), // Force consistent height
+      constraints: const BoxConstraints(
+        minHeight: 48,
+      ), // Force consistent height
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingM,
         vertical: AppConstants.spacingS,
@@ -168,9 +172,9 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
           Expanded(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface),
             ),
           ),
           if (trailing != null)
@@ -191,11 +195,13 @@ class _ScheduleConfirmationCardState extends State<ScheduleConfirmationCard> {
       child: FilledButton.icon(
         onPressed: widget.onConfirm,
         icon: const Icon(Icons.check_circle_outline, size: 18),
-        label: const Text('确认添加'),
+        label: Text('confirm_add'.tr),
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusMedium,
+            ),
           ),
         ),
       ),

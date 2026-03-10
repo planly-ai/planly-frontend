@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
@@ -52,7 +53,10 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    int totalMinutes = _tasks.fold(0, (sum, item) => sum + item.durationMinutes);
+    int totalMinutes = _tasks.fold(
+      0,
+      (sum, item) => sum + item.durationMinutes,
+    );
     int completedMinutes = _tasks
         .where((t) => t.isCompleted)
         .fold(0, (sum, item) => sum + item.durationMinutes);
@@ -67,19 +71,19 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
           children: [
             // Integrated Header: Icon + Title (StatsCard Style)
             _buildIntegratedHeader(context),
-            
+
             const SizedBox(height: AppConstants.spacingM),
 
             ..._tasks.asMap().entries.map((entry) {
               return _buildTaskItem(context, entry.value, entry.key);
             }),
             const SizedBox(height: AppConstants.spacingM),
-            
+
             // Progress Section
             _buildProgressSection(context, completedMinutes, totalMinutes),
-            
+
             const SizedBox(height: AppConstants.spacingL),
-            
+
             // Confirm Button
             _buildConfirmButton(context),
           ],
@@ -123,7 +127,7 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                'AI 建议的拆解任务',
+                'subtask_ai_suggestion'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -168,10 +172,13 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
                 Text(
                   task.title,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: task.isCompleted 
-                      ? colorScheme.onSurfaceVariant 
-                      : colorScheme.onSurface,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
+                    color: task.isCompleted
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.onSurface,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      13,
+                    ),
                   ),
                 ),
                 Row(
@@ -179,14 +186,21 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
                     Icon(
                       Icons.access_time,
                       size: 12,
-                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${task.durationMinutes} 分钟',
+                      '${task.durationMinutes} ${'unit_minute'.tr}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                        color: colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                        fontSize: ResponsiveUtils.getResponsiveFontSize(
+                          context,
+                          10,
+                        ),
                       ),
                     ),
                   ],
@@ -209,14 +223,14 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '总进度',
+              'total_progress'.tr,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
               ),
             ),
             Text(
-              '$completed / $total 分钟',
+              '${completed} / ${total} ${'unit_minute'.tr}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
@@ -230,7 +244,9 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
           child: LinearProgressIndicator(
             value: total > 0 ? completed / total : 0,
-            backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            backgroundColor: colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
             minHeight: 4,
           ),
@@ -247,11 +263,13 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
       child: FilledButton.icon(
         onPressed: widget.onConfirm,
         icon: const Icon(Icons.check, size: 18),
-        label: const Text('确认添加'),
+        label: Text('confirm_add'.tr),
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusMedium,
+            ),
           ),
         ),
       ),
