@@ -83,3 +83,62 @@ class StatsCard extends StatelessWidget {
     );
   }
 }
+
+void main() {
+  runApp(const StatsCardTestApp());
+}
+
+class StatsCardTestApp extends StatelessWidget {
+  const StatsCardTestApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'StatsCard Test',
+      // 配置 Material 3 主题，以适配你的 colorScheme 调用
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.deepPurple,
+        brightness: Brightness.light,
+      ),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('StatsCard 展示'), centerTitle: true),
+        // 使用灰色背景以便更好地观察卡片的 elevation 和圆角
+        backgroundColor: Colors.grey[100],
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // 示例 1: 专注时长
+              StatsCard(
+                title: '今日专注时长',
+                value: '4 小时 5 分钟',
+                icon: Icons.timer_outlined,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(height: 16),
+
+              // 示例 2: 任务完成率
+              StatsCard(
+                title: '任务完成率',
+                value: '87%',
+                icon: Icons.check_circle_outline,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 16),
+
+              // 示例 3: 连胜纪录
+              StatsCard(
+                title: '坚持天数',
+                value: '12 天',
+                icon: Icons.local_fire_department_outlined,
+                color: Colors.orange,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

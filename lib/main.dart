@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/controller/theme_controller.dart';
 import 'package:planly_ai/app/utils/device_info.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app/data/db.dart';
 import 'app/ui/todos/view/all_todos.dart';
 import 'app/utils/notification.dart';
@@ -67,6 +68,9 @@ void main() async {
 }
 
 Future<void> initializeApp() async {
+  // 加载环境变量
+  await dotenv.load(fileName: '.env');
+
   DeviceFeature().init();
   await PlatformFeatures.initialize();
 
@@ -240,7 +244,13 @@ Future<Isar?> _getIsarInstance() async {
   if (Isar.instanceNames.isEmpty) {
     final dir = await getApplicationSupportDirectory();
     return await Isar.open(
-      [TasksSchema, TodosSchema, SettingsSchema],
+      [
+        TasksSchema,
+        TodosSchema,
+        SettingsSchema,
+        ChatSessionSchema,
+        ChatMessageSchema,
+      ],
       directory: dir.path,
       inspector: true,
     );
@@ -428,18 +438,13 @@ class _MyAppState extends State<MyApp> {
         }
         break;
       case 'action_all_todos':
-        if (_homeKey.currentState != null) {
-          _homeKey.currentState!.changeTabIndex(1);
-          _navigatorKey.currentState?.popUntil((r) => r.isFirst);
-        } else {
-          _navigatorKey.currentState?.push(
-            MaterialPageRoute(builder: (_) => const AllTodos()),
-          );
-        }
+        _navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const AllTodos()),
+        );
         break;
       case 'action_calendar_todos':
         if (_homeKey.currentState != null) {
-          _homeKey.currentState!.changeTabIndex(2);
+          _homeKey.currentState!.changeTabIndex(1);
           _navigatorKey.currentState?.popUntil((r) => r.isFirst);
         } else {
           _navigatorKey.currentState?.push(

@@ -34,6 +34,9 @@ migrate_working_dir/
 /build/
 .upload-keystore
 
+# Environment variables
+.env
+
 # Web related
 lib/generated_plugin_registrant.dart
 
