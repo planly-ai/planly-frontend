@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   file_selector_windows
+  flutter_secure_storage_windows
   flutter_timezone
   isar_community_flutter_libs
   record_windows

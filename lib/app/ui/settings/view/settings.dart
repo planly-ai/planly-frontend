@@ -18,6 +18,7 @@ import 'package:planly_ai/app/utils/responsive_utils.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
 import 'package:planly_ai/main.dart';
 import 'package:planly_ai/app/controller/theme_controller.dart';
+import 'package:planly_ai/app/ui/settings/widgets/profile_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -80,6 +81,8 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
+                  const ProfileCard(),
+                  SizedBox(height: padding * 1.5),
                   _buildAppearanceSection(context),
                   SizedBox(height: padding * 1.5),
                   _buildDateTimeSection(context),
@@ -379,7 +382,8 @@ class _SettingsPageState extends State<SettingsPage> {
         SettingsTile(
           leading: const Icon(LineAwesomeIcons.github),
           title: '${'project'.tr} GitHub',
-          onTap: () => _urlLauncher('https://github.com/darkmoonight/Planly.ai'),
+          onTap: () =>
+              _urlLauncher('https://github.com/darkmoonight/Planly.ai'),
         ),
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.code_circle),

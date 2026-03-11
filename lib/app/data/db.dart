@@ -28,6 +28,10 @@ class Settings {
   DateTime? lastAutoBackupTime;
   int maxAutoBackups = 5;
   String? autoBackupPath;
+
+  // User Auth
+  String? username;
+  bool isLoggedIn = false;
 }
 
 enum SortOption {
@@ -181,4 +185,12 @@ class ChatMessage {
 
 enum SenderType { user, bot }
 
-enum MessageType { text, image, voice, scheduleConfirmation, focusDuration, scheduleBreakdown, timelineSchedule }
+enum MessageType {
+  text,
+  image,
+  voice,
+  scheduleConfirmation,
+  focusDuration,
+  scheduleBreakdown,
+  timelineSchedule,
+}

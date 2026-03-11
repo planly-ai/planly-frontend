@@ -10,6 +10,7 @@ import 'package:planly_ai/app/ui/tasks/widgets/tasks_action.dart';
 import 'package:planly_ai/app/ui/todos/view/calendar_todos.dart';
 import 'package:planly_ai/app/ui/chatbot/view/chatbot_page.dart';
 import 'package:planly_ai/app/ui/todos/widgets/todos_action.dart';
+import 'package:planly_ai/app/controller/home_controller.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/navigation_helper.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
@@ -29,10 +30,13 @@ class HomePageState extends State<HomePage>
     permanent: true,
   );
 
+  late final HomeController _homeController = Get.put(
+    HomeController(),
+    permanent: true,
+  );
+
   late final AnimationController _fabAnimationController;
   late final Animation<double> _fabScaleAnimation;
-
-  int _tabIndex = 0;
 
   static const List<Widget> _pages = [
     AllTasks(),
@@ -90,7 +94,7 @@ class HomePageState extends State<HomePage>
 
   void _initializeTabIndex() {
     allScreens = _screenKeys;
-    _tabIndex = allScreens.indexOf(
+    _homeController.tabIndex.value = allScreens.indexOf(
       allScreens.firstWhere(
         (element) => element == settings.defaultScreen,
         orElse: () => allScreens[0],
@@ -99,8 +103,8 @@ class HomePageState extends State<HomePage>
   }
 
   void changeTabIndex(int index) {
-    if (_tabIndex != index) {
-      setState(() => _tabIndex = index);
+    if (_homeController.tabIndex.value != index) {
+      _homeController.changeTabIndex(index);
     }
   }
 
@@ -109,24 +113,29 @@ class HomePageState extends State<HomePage>
     final isMobile = ResponsiveUtils.isMobile(context);
     final isDesktop = ResponsiveUtils.isDesktop(context);
 
-    final content = IndexedStack(index: _tabIndex, children: _pages);
+    return Obx(() {
+      final content = IndexedStack(
+        index: _homeController.tabIndex.value,
+        children: _pages,
+      );
 
-    final body = isMobile
-        ? content
-        : Row(
-            children: [
-              _buildNavigationRail(context, isDesktop),
-              const VerticalDivider(thickness: 1, width: 1),
-              Expanded(child: content),
-            ],
-          );
+      final body = isMobile
+          ? content
+          : Row(
+              children: [
+                _buildNavigationRail(context, isDesktop),
+                const VerticalDivider(thickness: 1, width: 1),
+                Expanded(child: content),
+              ],
+            );
 
-    return Scaffold(
-      body: body,
-      bottomNavigationBar: isMobile ? _buildBottomNavigationBar() : null,
-      floatingActionButton: _buildFloatingActionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    );
+      return Scaffold(
+        body: body,
+        bottomNavigationBar: isMobile ? _buildBottomNavigationBar() : null,
+        floatingActionButton: _buildFloatingActionButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      );
+    });
   }
 
   Widget _buildNavigationRail(BuildContext context, bool isExtended) {
@@ -134,7 +143,7 @@ class HomePageState extends State<HomePage>
     final padding = ResponsiveUtils.getResponsivePadding(context);
 
     return NavigationRail(
-      selectedIndex: _tabIndex,
+      selectedIndex: _homeController.tabIndex.value,
       extended: isExtended,
       groupAlignment: -1.0,
       onDestinationSelected: changeTabIndex,
@@ -201,7 +210,7 @@ class HomePageState extends State<HomePage>
   Widget _buildBottomNavigationBar() {
     return NavigationBar(
       onDestinationSelected: changeTabIndex,
-      selectedIndex: _tabIndex,
+      selectedIndex: _homeController.tabIndex.value,
       destinations: _buildNavigationDestinations(),
     );
   }
@@ -253,9 +262,9 @@ class HomePageState extends State<HomePage>
     const statisticsTabIndex = 3;
     const settingsTabIndex = 4;
 
-    if (_tabIndex == chatbotTabIndex ||
-        _tabIndex == statisticsTabIndex ||
-        _tabIndex == settingsTabIndex ||
+    if (_homeController.tabIndex.value == chatbotTabIndex ||
+        _homeController.tabIndex.value == statisticsTabIndex ||
+        _homeController.tabIndex.value == settingsTabIndex ||
         !_fabController.isVisible.value) {
       return null;
     }
@@ -284,7 +293,7 @@ class HomePageState extends State<HomePage>
   }
 
   Widget _getCreateWidget() {
-    return _tabIndex == 0
+    return _homeController.tabIndex.value == 0
         ? TasksAction(text: 'create'.tr, edit: false)
         : TodosAction(text: 'create'.tr, edit: false, category: true);
   }
