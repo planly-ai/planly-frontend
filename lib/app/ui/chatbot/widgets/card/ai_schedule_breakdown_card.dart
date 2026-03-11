@@ -50,9 +50,6 @@ class _ScheduleBreakdownCardState extends State<ScheduleBreakdownCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     int totalMinutes = _tasks.fold(
       0,
       (sum, item) => sum + item.durationMinutes,
