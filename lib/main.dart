@@ -22,6 +22,7 @@ import 'app/data/db.dart';
 import 'app/ui/todos/view/all_todos.dart';
 import 'app/utils/notification.dart';
 import 'translation/translation.dart';
+import 'package:planly_ai/app/controller/auth_controller.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:planly_ai/app/ui/todos/widgets/todos_action.dart';
@@ -300,6 +301,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final themeController = Get.put(ThemeController());
+  final authController = Get.put(AuthController());
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<HomePageState> _homeKey = GlobalKey<HomePageState>();
   String? _pendingShortcut;
