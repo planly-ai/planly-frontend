@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
@@ -69,17 +70,68 @@ class ChatbotController extends GetxController {
   }
 
   // Create a new session
-  Future<void> createNewSession() async {
+  Future<bool> createNewSession() async {
+    String? sessionId;
+    try {
+      final dio = dio_lib.Dio();
+      final authController = Get.find<AuthController>();
+      final token = await authController.getToken();
+      
+      final url = '${AppConstants.planlyBaseUrl}/api/v1/sessions/create';
+      debugPrint('[Session] Creating session at: $url');
+      
+      final response = await dio.post(
+        url,
+        options: dio_lib.Options(
+          headers: {
+            if (token != null) 'Authorization': 'Bearer $token',
+            'ClientId': AppConstants.clientId,
+          },
+        ),
+      );
+      
+      debugPrint('[Session] Response status: ${response.statusCode}');
+      debugPrint('[Session] Response data type: ${response.data.runtimeType}');
+      debugPrint('[Session] Response data: ${response.data}');
+
+      var responseData = response.data;
+      if (responseData is String) {
+        try {
+          responseData = jsonDecode(responseData);
+        } catch (e) {
+          debugPrint('[Session] Failed to parse response data as JSON: $e');
+        }
+      }
+
+      if (response.statusCode == 200 && responseData is Map && responseData['code'] == 200) {
+        sessionId = responseData['data'];
+        debugPrint('[Session] Created session ID: $sessionId');
+      } else {
+        debugPrint('[Session] Failed to create session. Status: ${response.statusCode}, Data: $responseData');
+        showSnackBar('session_creation_failed'.tr, isError: true);
+        return false;
+      }
+    } catch (e) {
+      debugPrint('[Session] Exception creating session: $e');
+      if (e is dio_lib.DioException) {
+        debugPrint('[Session] Dio error: ${e.response?.data}');
+      }
+      showSnackBar('session_creation_failed'.tr, isError: true);
+      return false;
+    }
+
     final session = ChatSession(
       title: 'New Chat'.tr,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      sessionId: sessionId,
     );
     await isar.writeTxn(() async {
       await isar.chatSessions.put(session);
     });
     await loadSessions();
-    selectSession(session.id);
+    await selectSession(session.id);
+    return true;
   }
 
   // Delete a session
@@ -142,7 +194,8 @@ class ChatbotController extends GetxController {
     textController.clear();
 
     if (currentSessionId.value == null) {
-      await createNewSession();
+      final success = await createNewSession();
+      if (!success) return;
     }
 
     final session = await isar.chatSessions.get(currentSessionId.value!);

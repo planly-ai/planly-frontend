@@ -249,6 +249,7 @@ class ZhCN {
     "file_too_large": "文件大小超过 50MB",
     "upload_failed": "上传失败",
     "uploading": "上传中...",
+    "session_creation_failed": "创建对话失败",
     'schedule_confirmation_title': '日程确认',
     'schedule_confirmation_subtitle': '请核对以下任务详情',
     'confirm_add': '确认添加',
