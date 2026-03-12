@@ -101,19 +101,104 @@ class _ChatInputBarState extends State<ChatInputBar> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    // Left Camera Icon
-                    IconButton(
-                      icon: const Icon(IconsaxPlusLinear.camera),
-                      iconSize: 28,
-                      constraints: const BoxConstraints(
-                        minWidth: 44,
-                        minHeight: 44,
-                      ), // 增大点击区域
-                      color: colorScheme.onSurfaceVariant,
-                      onPressed: () {
-                        // TODO: Implement camera functionality
-                      },
-                    ),
+                    // Left Camera Icon / File Thumbnail
+                    Obx(() {
+                      final hasFile = controller.selectedFile.value != null;
+                      final isUploading = controller.isUploading.value;
+                      final isImage = controller.uploadedFileName.value
+                              ?.toLowerCase()
+                              .endsWith('.png') ==
+                          true ||
+                          controller.uploadedFileName.value
+                              ?.toLowerCase()
+                              .endsWith('.jpg') ==
+                          true ||
+                          controller.uploadedFileName.value
+                              ?.toLowerCase()
+                              .endsWith('.jpeg') ==
+                          true;
+
+                      if (!hasFile) {
+                        return IconButton(
+                          icon: const Icon(IconsaxPlusLinear.camera),
+                          iconSize: 28,
+                          constraints: const BoxConstraints(
+                            minWidth: 44,
+                            minHeight: 44,
+                          ),
+                          color: colorScheme.onSurfaceVariant,
+                          onPressed: () {
+                            // TODO: Implement camera functionality
+                          },
+                        );
+                      }
+
+                      return Container(
+                        margin: const EdgeInsets.all(4),
+                        width: 36,
+                        height: 36,
+                        child: Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                color: colorScheme.outlineVariant,
+                                child: Center(
+                                  child: isImage
+                                      ? Image.network(
+                                          controller.uploadedUrl.value!,
+                                          fit: BoxFit.cover,
+                                          width: 36,
+                                          height: 36,
+                                          errorBuilder: (c, e, s) => const Icon(
+                                            IconsaxPlusLinear.document,
+                                            size: 20,
+                                          ),
+                                        )
+                                      : const Icon(IconsaxPlusLinear.document,
+                                          size: 20),
+                                ),
+                              ),
+                            ),
+                            if (isUploading)
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.black26,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else if (controller.uploadedUrl.value != null)
+                              Positioned.fill(
+                                child: Material(
+                                  color: Colors.black26,
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(8),
+                                    onTap: () => controller.removeSelectedFile(),
+                                    child: const Center(
+                                      child: Icon(
+                                        IconsaxPlusLinear.close_circle,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    }),
                     // Middle Text Field
                     Expanded(
                       child: Container(
@@ -128,8 +213,8 @@ class _ChatInputBarState extends State<ChatInputBar> {
                           decoration: InputDecoration(
                             hintText: 'input_hint'.tr,
                             border: InputBorder.none,
-                            enabledBorder: InputBorder.none, // 启用状态
-                            focusedBorder: InputBorder.none, // 聚焦状态
+                            enabledBorder: InputBorder.none,
+                            focusedBorder: InputBorder.none,
                             isDense: true,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -141,64 +226,74 @@ class _ChatInputBarState extends State<ChatInputBar> {
                     ),
                     const SizedBox(width: 4),
                     // Right Icons
-                    _isTextEmpty
-                        ? Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              GestureDetector(
-                                onLongPressStart: (details) {
-                                  controller.startRecording(
-                                    details.globalPosition.dy,
-                                  );
-                                },
-                                onLongPressMoveUpdate: (details) {
-                                  controller.updateRecordingPointer(
-                                    details.globalPosition.dy,
-                                  );
-                                },
-                                onLongPressEnd: (details) {
-                                  controller.endRecording();
-                                },
-                                child: IconButton(
-                                  icon: const Icon(
-                                    IconsaxPlusLinear.voice_cricle,
-                                  ),
-                                  color: colorScheme.onSurfaceVariant,
-                                  iconSize: 28, // 增大图标
-                                  constraints: const BoxConstraints(
-                                    minWidth: 44,
-                                    minHeight: 44,
-                                  ), // 增大点击区域
-                                  padding: EdgeInsets.zero, // 移除默认内边距避免挤压
-                                  onPressed: () {
-                                    showSnackBar(
-                                      'voice_long_press_hint'.tr,
-                                      isInfo: true,
-                                    );
-                                  },
-                                ),
+                    Obx(() {
+                      final hasFile = controller.selectedFile.value != null;
+                      final isUploading = controller.isUploading.value;
+                      final textNotEmpty = !_isTextEmpty;
+
+                      if (textNotEmpty || hasFile) {
+                        return IconButton(
+                          icon: const Icon(IconsaxPlusBold.send_1),
+                          color: (isUploading)
+                              ? colorScheme.outline
+                              : colorScheme.primary,
+                          iconSize: 28,
+                          onPressed: (isUploading)
+                              ? null
+                              : () => controller.sendMessage(),
+                        );
+                      }
+
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onLongPressStart: (details) {
+                              controller.startRecording(
+                                details.globalPosition.dy,
+                              );
+                            },
+                            onLongPressMoveUpdate: (details) {
+                              controller.updateRecordingPointer(
+                                details.globalPosition.dy,
+                              );
+                            },
+                            onLongPressEnd: (details) {
+                              controller.endRecording();
+                            },
+                            child: IconButton(
+                              icon: const Icon(
+                                IconsaxPlusLinear.voice_cricle,
                               ),
-                              IconButton(
-                                icon: const Icon(IconsaxPlusLinear.add_circle),
-                                color: colorScheme.onSurfaceVariant,
-                                iconSize: 28,
-                                constraints: const BoxConstraints(
-                                  minWidth: 44,
-                                  minHeight: 44,
-                                ), // 增大点击区域
-                                padding: EdgeInsets.zero,
-                                onPressed: () {
-                                  // TODO: Implement Add File functionality
-                                },
+                              color: colorScheme.onSurfaceVariant,
+                              iconSize: 28,
+                              constraints: const BoxConstraints(
+                                minWidth: 44,
+                                minHeight: 44,
                               ),
-                            ],
-                          )
-                        : IconButton(
-                            icon: const Icon(IconsaxPlusBold.send_1),
-                            color: colorScheme.primary,
-                            iconSize: 28,
-                            onPressed: () => controller.sendMessage(),
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                showSnackBar(
+                                  'voice_long_press_hint'.tr,
+                                  isInfo: true,
+                                );
+                              },
+                            ),
                           ),
+                          IconButton(
+                            icon: const Icon(IconsaxPlusLinear.add_circle),
+                            color: colorScheme.onSurfaceVariant,
+                            iconSize: 28,
+                            constraints: const BoxConstraints(
+                              minWidth: 44,
+                              minHeight: 44,
+                            ),
+                            padding: EdgeInsets.zero,
+                            onPressed: () => controller.pickAndUploadFile(),
+                          ),
+                        ],
+                      );
+                    }),
                   ],
                 ),
               ),
