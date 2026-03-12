@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:flutter/material.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/data/models/user.dart';
 import 'package:planly_ai/app/services/auth_service.dart';
@@ -15,14 +16,27 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadUserFromSettings();
+    _loadUserFromStorage();
   }
 
-  void _loadUserFromSettings() {
-    if (settings.isLoggedIn) {
+  Future<void> _loadUserFromStorage() async {
+    final isLoggedInStr = await _storage.read(key: 'is_logged_in');
+    final isLoggedIn = isLoggedInStr == 'true';
+
+    if (isLoggedIn) {
+      final username = await _storage.read(key: 'username');
+      final userId = await _storage.read(key: 'user_id');
+      final userType = await _storage.read(key: 'user_type');
+      final tenantId = await _storage.read(key: 'tenant_id');
+      final loginDate = await _storage.read(key: 'login_date');
+
       user.value = User(
-        username: settings.username ?? 'Guest',
+        username: username ?? 'Guest',
         isLoggedIn: true,
+        userId: userId,
+        userType: userType,
+        tenantId: tenantId,
+        loginDate: loginDate,
       );
     }
   }
@@ -34,28 +48,69 @@ class AuthController extends GetxController {
         password: password,
       );
 
-      // Check for success - assuming a successful login returns a token or at least the username
-      if (response.statusCode == 200) {
-        // Extract token - prioritize 'token' or 'access_token' or whatever is available
-        // User's example didn't have it, but they asked to save it.
-        final token = response.data['token'] ?? response.data['access_token'];
-        if (token != null) {
-          await _storage.write(key: 'auth_token', value: token);
+      final responseData = response.data;
+      final bool isSuccess = response.statusCode == 200 &&
+          (responseData['code'] == null || responseData['code'] == 200);
+
+      if (isSuccess) {
+        // Token 可能在根字段或 data 字段中
+        final token = responseData['token'] 
+            ?? responseData['access_token'] 
+            ?? responseData['data']?['token'] 
+            ?? responseData['data']?['access_token'];
+        
+        debugPrint('[Login] Response token: ${token != null ? "exists" : "null"}');
+        debugPrint('[Login] Response data keys: ${responseData.keys.toList()}');
+        if (responseData['data'] != null) {
+          debugPrint('[Login] Response data keys: ${responseData['data'].keys.toList()}');
         }
 
-        await _updateUser(username, true);
+        if (token != null) {
+          await _storage.write(key: 'auth_token', value: token);
+          debugPrint('[Login] Token saved to secure storage');
+
+          // Fetch detailed profile
+          try {
+            final profileResponse = await _authService.getProfile(token);
+            if (profileResponse.statusCode == 200 && profileResponse.data['code'] == 200) {
+              final userData = profileResponse.data['data']['user'];
+              debugPrint('[Login] Profile fetched successfully, userId: ${userData['userId']}');
+              await _updateUser(
+                username: userData['userName'] ?? username,
+                isLoggedIn: true,
+                userId: userData['userId'],
+                userType: userData['userType'],
+                tenantId: userData['tenantId'],
+                loginDate: userData['loginDate'],
+                authToken: token,
+              );
+            } else {
+              debugPrint('[Login] Profile fetch failed, status: ${profileResponse.statusCode}');
+              await _updateUser(username: username, isLoggedIn: true, authToken: token);
+            }
+          } catch (e) {
+            debugPrint('[Login] Profile fetch exception: $e');
+            await _updateUser(username: username, isLoggedIn: true, authToken: token);
+          }
+        } else {
+          debugPrint('[Login] No token in response');
+          await _updateUser(username: username, isLoggedIn: true);
+        }
+
         showSnackBar('loginSuccess'.tr);
 
-        // Navigate to settings tab (index 4)
         Get.find<HomeController>().changeTabIndex(4);
-        Get.back(); // Close the Login modal
+        Get.back();
 
         return true;
       } else {
-        showSnackBar(response.data['msg'] ?? 'error'.tr, isError: true);
+        final errorMsg =
+            responseData['msg'] ?? responseData['message'] ?? 'error'.tr;
+        showSnackBar(errorMsg, isError: true);
         return false;
       }
     } catch (e) {
+      debugPrint('[Login] Exception: $e');
       showSnackBar('error'.tr, isError: true);
       return false;
     }
@@ -70,7 +125,6 @@ class AuthController extends GetxController {
 
       if (response.statusCode == 200 && response.data['code'] == 200) {
         showSnackBar('registerSuccess'.tr);
-        // Navigate to Login page (it's already the previous page if we came from Login)
         Get.back();
         return true;
       } else {
@@ -88,17 +142,68 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
-    await _updateUser('Guest', false);
+    final token = await getToken();
+    if (token != null) {
+      try {
+        await _authService.logout(token);
+      } catch (e) {
+        // Ignored
+      }
+    }
+    await _updateUser(username: 'Guest', isLoggedIn: false);
     await _storage.delete(key: 'auth_token');
     showSnackBar('logoutSuccess'.tr);
   }
 
-  Future<void> _updateUser(String username, bool isLoggedIn) async {
-    user.value = User(username: username, isLoggedIn: isLoggedIn);
+  Future<void> _updateUser({
+    required String username,
+    required bool isLoggedIn,
+    String? userId,
+    String? userType,
+    String? tenantId,
+    String? loginDate,
+    String? authToken,
+  }) async {
+    user.value = User(
+      username: username,
+      isLoggedIn: isLoggedIn,
+      userId: userId,
+      userType: userType,
+      tenantId: tenantId,
+      loginDate: loginDate,
+    );
 
+    // Save to secure storage
+    if (isLoggedIn) {
+      await _storage.write(key: 'is_logged_in', value: 'true');
+      await _storage.write(key: 'username', value: username);
+      if (userId != null) await _storage.write(key: 'user_id', value: userId);
+      if (userType != null) await _storage.write(key: 'user_type', value: userType);
+      if (tenantId != null) await _storage.write(key: 'tenant_id', value: tenantId);
+      if (loginDate != null) await _storage.write(key: 'login_date', value: loginDate);
+      // Save auth token if provided
+      if (authToken != null) {
+        await _storage.write(key: 'auth_token', value: authToken);
+        debugPrint('[Auth] Token saved in _updateUser: ${authToken.substring(0, 20)}...');
+      }
+    } else {
+      await _storage.delete(key: 'is_logged_in');
+      await _storage.delete(key: 'username');
+      await _storage.delete(key: 'user_id');
+      await _storage.delete(key: 'user_type');
+      await _storage.delete(key: 'tenant_id');
+      await _storage.delete(key: 'login_date');
+      await _storage.delete(key: 'auth_token');
+    }
+
+    // Also update Isar settings for consistency if other parts of the app use it
     await isar.writeTxn(() async {
       settings.username = isLoggedIn ? username : null;
       settings.isLoggedIn = isLoggedIn;
+      settings.userId = isLoggedIn ? userId : null;
+      settings.userType = isLoggedIn ? userType : null;
+      settings.tenantId = isLoggedIn ? tenantId : null;
+      settings.loginDate = isLoggedIn ? loginDate : null;
       await isar.settings.put(settings);
     });
   }

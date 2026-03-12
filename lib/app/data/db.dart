@@ -32,6 +32,10 @@ class Settings {
   // User Auth
   String? username;
   bool isLoggedIn = false;
+  String? userId;
+  String? userType;
+  String? tenantId;
+  String? loginDate;
 }
 
 enum SortOption {
