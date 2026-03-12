@@ -5,7 +5,7 @@ import 'package:planly_ai/app/constants/app_constants.dart';
 class AuthService {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: AppConstants.authBaseUrl,
+      baseUrl: AppConstants.planlyBaseUrl,
       contentType: 'application/json',
     ),
   );
@@ -60,18 +60,14 @@ class AuthService {
   Future<Response> getProfile(String token) async {
     return await _dio.get(
       '/system/user/profile',
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
   }
 
   Future<Response> logout(String token) async {
     return await _dio.post(
       '/auth/logout',
-      options: Options(
-        headers: {'Authorization': 'Bearer $token'},
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
   }
 }
