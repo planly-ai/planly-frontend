@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/services/api/planly_api_client.dart';
 
 class AuthService {
-  final Dio _dio = Dio(
-    BaseOptions(
-      baseUrl: AppConstants.planlyBaseUrl,
-      contentType: 'application/json',
-    ),
-  );
+  final Dio _dio;
+
+  AuthService() : _dio = PlanlyApiClient.instance.dio;
 
   Future<Response> register({
     required String username,
@@ -57,17 +55,13 @@ class AuthService {
     return response;
   }
 
-  Future<Response> getProfile(String token) async {
-    return await _dio.get(
-      '/system/user/profile',
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
+  Future<Response> getProfile() async {
+    // token 会由 AuthInterceptor 自动添加
+    return await _dio.get('/system/user/profile');
   }
 
-  Future<Response> logout(String token) async {
-    return await _dio.post(
-      '/auth/logout',
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
+  Future<Response> logout() async {
+    // token 会由 AuthInterceptor 自动添加
+    return await _dio.post('/auth/logout');
   }
 }

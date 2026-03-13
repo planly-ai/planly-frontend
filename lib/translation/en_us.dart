@@ -254,6 +254,10 @@ class EnUs {
         "Microphone permission is required for voice input",
     "voice_recognition_failed":
         "Could not recognize your voice. Please try again",
+    "file_too_large": "File size exceeds 50MB",
+    "upload_failed": "Upload failed",
+    "uploading": "Uploading...",
+    "session_creation_failed": "Failed to create chat session",
     'schedule_confirmation_title': 'Schedule Confirmation',
     'schedule_confirmation_subtitle': 'Please check the following task details',
     'confirm_add': 'Confirm Add',

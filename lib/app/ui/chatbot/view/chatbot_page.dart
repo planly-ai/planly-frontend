@@ -5,6 +5,9 @@ import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/chat_bubble.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/chat_input_bar.dart';
 
+import 'package:planly_ai/app/ui/chatbot/widgets/card/session_card.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
+
 class ChatbotPage extends StatefulWidget {
   const ChatbotPage({super.key});
 
@@ -46,54 +49,97 @@ class _ChatbotPageState extends State<ChatbotPage> {
         ],
       ),
       endDrawer: Drawer(
+        width: MediaQuery.of(context).size.width * 0.85,
         child: SafeArea(
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                padding: const EdgeInsets.all(AppConstants.spacingM),
+                child: Column(
                   children: [
-                    Text('Chat History'.tr, style: theme.textTheme.titleMedium),
-                    IconButton(
-                      icon: const Icon(IconsaxPlusLinear.add_square),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        controller.createNewSession();
-                      },
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Chat History'.tr,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(IconsaxPlusLinear.close_circle),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppConstants.spacingM),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          controller.createNewSession();
+                        },
+                        label: Text(
+                          'New Chat'.tr,
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              AppConstants.borderRadiusLarge,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              const SizedBox(height: AppConstants.spacingS),
               Expanded(
                 child: Obx(() {
                   if (controller.sessions.isEmpty) {
-                    return Center(child: Text('No history'.tr));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            IconsaxPlusLinear.message_question,
+                            size: 48,
+                            color: colorScheme.outline,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No history'.tr,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                   return ListView.builder(
                     itemCount: controller.sessions.length,
+                    padding: const EdgeInsets.only(
+                      bottom: AppConstants.spacingXL,
+                    ),
                     itemBuilder: (context, index) {
                       final session = controller.sessions[index];
                       final isSelected =
                           session.id == controller.currentSessionId.value;
-                      return ListTile(
-                        selected: isSelected,
-                        selectedTileColor: colorScheme.primaryContainer
-                            .withValues(alpha: 0.5),
-                        title: Text(
-                          session.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(IconsaxPlusLinear.trash),
-                          onPressed: () => controller.deleteSession(session.id),
-                        ),
+                      return SessionCard(
+                        title: session.title,
+                        isSelected: isSelected,
                         onTap: () {
                           controller.selectSession(session.id);
                           Navigator.pop(context);
                         },
+                        onDelete: () => controller.deleteSession(session.id),
                       );
                     },
                   );

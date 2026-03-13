@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
@@ -6,6 +7,11 @@ import 'package:planly_ai/main.dart'; // To access the global `isar` instance
 import 'package:planly_ai/app/services/asr_service.dart';
 import 'package:planly_ai/app/services/audio_recording_service.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
+
+import 'package:file_selector/file_selector.dart';
+import 'package:dio/dio.dart' as dio_lib;
+import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/services/api/planly_api_client.dart';
 
 class ChatbotController extends GetxController {
   // Observables
@@ -18,6 +24,13 @@ class ChatbotController extends GetxController {
   var isTyping = false.obs;
   var isRecognizing = false.obs;
 
+  // File Upload State
+  var selectedFile = Rxn<XFile>();
+  var isUploading = false.obs;
+  var uploadedUrl = RxnString();
+  var uploadedFileName = RxnString();
+  var uploadedOssId = RxnString();
+
   // Services
   final AsrService _asrService = AsrService();
   final AudioRecordingService _audioService = AudioRecordingService();
@@ -26,6 +39,7 @@ class ChatbotController extends GetxController {
   var isRecording = false.obs;
   var isCancellingRecording = false.obs;
   double _startRecordDy = 0;
+  dio_lib.CancelToken? _uploadCancelToken;
 
   @override
   void onInit() {
@@ -56,17 +70,59 @@ class ChatbotController extends GetxController {
   }
 
   // Create a new session
-  Future<void> createNewSession() async {
+  Future<bool> createNewSession() async {
+    String? sessionId;
+    try {
+      final dio = PlanlyApiClient.instance.dio;
+      final url = '${AppConstants.planlyBaseUrl}/api/v1/sessions/create';
+      debugPrint('[Session] Creating session at: $url');
+
+      final response = await dio.post(
+        url,
+      );
+      
+      debugPrint('[Session] Response status: ${response.statusCode}');
+      debugPrint('[Session] Response data type: ${response.data.runtimeType}');
+      debugPrint('[Session] Response data: ${response.data}');
+
+      var responseData = response.data;
+      if (responseData is String) {
+        try {
+          responseData = jsonDecode(responseData);
+        } catch (e) {
+          debugPrint('[Session] Failed to parse response data as JSON: $e');
+        }
+      }
+
+      if (response.statusCode == 200 && responseData is Map && responseData['code'] == 200) {
+        sessionId = responseData['data'];
+        debugPrint('[Session] Created session ID: $sessionId');
+      } else {
+        debugPrint('[Session] Failed to create session. Status: ${response.statusCode}, Data: $responseData');
+        showSnackBar('session_creation_failed'.tr, isError: true);
+        return false;
+      }
+    } catch (e) {
+      debugPrint('[Session] Exception creating session: $e');
+      if (e is dio_lib.DioException) {
+        debugPrint('[Session] Dio error: ${e.response?.data}');
+      }
+      showSnackBar('session_creation_failed'.tr, isError: true);
+      return false;
+    }
+
     final session = ChatSession(
       title: 'New Chat'.tr,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      sessionId: sessionId,
     );
     await isar.writeTxn(() async {
       await isar.chatSessions.put(session);
     });
     await loadSessions();
-    selectSession(session.id);
+    await selectSession(session.id);
+    return true;
   }
 
   // Delete a session
@@ -119,15 +175,18 @@ class ChatbotController extends GetxController {
     });
   }
 
-  // Send a text message
+  // Send a message
   Future<void> sendMessage() async {
-    if (textController.text.trim().isEmpty) return;
-
     final text = textController.text.trim();
+    final hasAttachment = uploadedUrl.value != null;
+
+    if (text.isEmpty && !hasAttachment) return;
+
     textController.clear();
 
     if (currentSessionId.value == null) {
-      await createNewSession();
+      final success = await createNewSession();
+      if (!success) return;
     }
 
     final session = await isar.chatSessions.get(currentSessionId.value!);
@@ -137,7 +196,15 @@ class ChatbotController extends GetxController {
       text: text,
       createdAt: DateTime.now(),
       sender: SenderType.user,
+      type: hasAttachment ? MessageType.image : MessageType.text,
+      attachmentPath: uploadedUrl.value,
     );
+
+    // Reset upload state
+    selectedFile.value = null;
+    uploadedUrl.value = null;
+    uploadedFileName.value = null;
+    uploadedOssId.value = null;
 
     await isar.writeTxn(() async {
       await isar.chatMessages.put(userMsg);
@@ -147,7 +214,12 @@ class ChatbotController extends GetxController {
       session.updatedAt = DateTime.now();
       await session.messages.load();
       if (session.messages.length == 1 || session.title == 'New Chat'.tr) {
-        session.title = text.length > 20 ? '${text.substring(0, 20)}...' : text;
+        final displayTitle = text.isNotEmpty
+            ? text
+            : (userMsg.attachmentPath?.split('/').last ?? 'File');
+        session.title = displayTitle.length > 20
+            ? '${displayTitle.substring(0, 20)}...'
+            : displayTitle;
       }
       await isar.chatSessions.put(session);
     });
@@ -157,6 +229,91 @@ class ChatbotController extends GetxController {
     loadSessions();
 
     await _simulateAiResponse();
+  }
+
+  Future<void> pickAndUploadFile() async {
+    const XTypeGroup typeGroup = XTypeGroup(label: 'files');
+    final XFile? file = await openFile(
+      acceptedTypeGroups: <XTypeGroup>[typeGroup],
+    );
+
+    if (file == null) {
+      debugPrint('[Upload] User cancelled file selection');
+      return;
+    }
+
+    debugPrint('[Upload] Selected file: ${file.name}, path: ${file.path}');
+
+    final length = await file.length();
+    debugPrint('[Upload] File size: $length bytes');
+    
+    if (length > 50 * 1024 * 1024) {
+      debugPrint('[Upload] File too large, rejecting');
+      showSnackBar('file_too_large'.tr, isError: true);
+      return;
+    }
+
+    selectedFile.value = file;
+    isUploading.value = true;
+    _uploadCancelToken = dio_lib.CancelToken();
+
+    try {
+      final dio = PlanlyApiClient.instance.dio;
+      final formData = dio_lib.FormData.fromMap({
+        'file': await dio_lib.MultipartFile.fromFile(
+          file.path,
+          filename: file.name,
+        ),
+      });
+
+      final url = '${AppConstants.planlyBaseUrl}/resource/oss/upload';
+      debugPrint('[Upload] Request URL: $url');
+
+      final response = await dio.post(
+        url,
+        data: formData,
+        cancelToken: _uploadCancelToken,
+      );
+
+      debugPrint('[Upload] Response status code: ${response.statusCode}');
+      debugPrint('[Upload] Response data: ${response.data}');
+
+      if (response.statusCode == 200 && response.data['code'] == 200) {
+        final data = response.data['data'];
+        debugPrint('[Upload] Upload successful: ${data['url']}');
+        uploadedUrl.value = data['url'];
+        uploadedFileName.value = data['fileName'];
+        uploadedOssId.value = data['ossId'];
+      } else {
+        debugPrint('[Upload] Upload failed with code: ${response.data['code']}, msg: ${response.data['msg']}');
+        showSnackBar('upload_failed'.tr, isError: true);
+        removeSelectedFile();
+      }
+    } catch (e) {
+      debugPrint('[Upload] Exception caught: $e');
+      if (e is dio_lib.DioException) {
+        debugPrint('[Upload] DioException type: ${e.type}');
+        debugPrint('[Upload] DioException message: ${e.message}');
+        debugPrint('[Upload] DioException response: ${e.response?.data}');
+        debugPrint('[Upload] DioException status code: ${e.response?.statusCode}');
+      }
+      if (e is dio_lib.DioException &&
+          e.type != dio_lib.DioExceptionType.cancel) {
+        showSnackBar('upload_failed'.tr, isError: true);
+        removeSelectedFile();
+      }
+    } finally {
+      isUploading.value = false;
+    }
+  }
+
+  void removeSelectedFile() {
+    _uploadCancelToken?.cancel();
+    selectedFile.value = null;
+    uploadedUrl.value = null;
+    uploadedFileName.value = null;
+    uploadedOssId.value = null;
+    isUploading.value = false;
   }
 
   Future<void> _simulateAiResponse() async {
@@ -224,10 +381,7 @@ class ChatbotController extends GetxController {
       _startRecordDy = startDy;
       await _audioService.start();
     } else {
-      showSnackBar(
-        'voice_permission_denied'.tr,
-        isError: true,
-      );
+      showSnackBar('voice_permission_denied'.tr, isError: true);
     }
   }
 
@@ -264,10 +418,7 @@ class ChatbotController extends GetxController {
         textController.text = recognizedText;
         await sendMessage();
       } else {
-        showSnackBar(
-          'voice_recognition_failed'.tr,
-          isError: true,
-        );
+        showSnackBar('voice_recognition_failed'.tr, isError: true);
       }
     }
   }

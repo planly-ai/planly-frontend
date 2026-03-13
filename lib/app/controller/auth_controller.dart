@@ -71,7 +71,7 @@ class AuthController extends GetxController {
 
           // Fetch detailed profile
           try {
-            final profileResponse = await _authService.getProfile(token);
+            final profileResponse = await _authService.getProfile();
             if (profileResponse.statusCode == 200 && profileResponse.data['code'] == 200) {
               final userData = profileResponse.data['data']['user'];
               debugPrint('[Login] Profile fetched successfully, userId: ${userData['userId']}');
@@ -142,13 +142,11 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
-    final token = await getToken();
-    if (token != null) {
-      try {
-        await _authService.logout(token);
-      } catch (e) {
-        // Ignored
-      }
+    // token 会由 AuthInterceptor 自动添加
+    try {
+      await _authService.logout();
+    } catch (e) {
+      // Ignored
     }
     await _updateUser(username: 'Guest', isLoggedIn: false);
     await _storage.delete(key: 'auth_token');

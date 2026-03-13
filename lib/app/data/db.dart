@@ -148,6 +148,7 @@ class ChatSession {
   String title;
   DateTime createdAt;
   DateTime updatedAt;
+  String? sessionId;
 
   @Backlink(to: 'session')
   final messages = IsarLinks<ChatMessage>();
@@ -157,6 +158,7 @@ class ChatSession {
     this.title = 'New Chat',
     required this.createdAt,
     required this.updatedAt,
+    this.sessionId,
   });
 }
 
