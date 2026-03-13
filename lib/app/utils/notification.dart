@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 
 class NotificationShow {
   final String _channelId = 'Planly.ai';
-  final String _channelName = 'DARK NIGHT';
+  final String _channelName = 'PLANLY AI';
 
   static const String actionIdMarkDone = 'mark_done';
   static const String actionIdSnooze = 'snooze';

@@ -8,7 +8,7 @@
 PRODUCT_NAME = Planly.ai
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.yoshi.todark
+PRODUCT_BUNDLE_IDENTIFIER = ai.planly.todo
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2025

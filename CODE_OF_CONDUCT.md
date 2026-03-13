@@ -24,10 +24,6 @@ Unacceptable behavior includes but is not limited to:
 
 3. **Hostile Conduct**: No actions intended to create a hostile atmosphere in the community.
 
-## Reporting Procedure
-
-If you believe you're experiencing a violation of the code of conduct, please report it by sending an email to darkmoonight2022@gmail.com.
-
 ## Conclusion
 
 We encourage all participants to adhere to this code of conduct. Violation of these principles may result in temporary or permanent exclusion from the community.
