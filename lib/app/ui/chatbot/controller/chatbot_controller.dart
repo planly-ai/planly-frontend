@@ -7,11 +7,11 @@ import 'package:planly_ai/main.dart'; // To access the global `isar` instance
 import 'package:planly_ai/app/services/asr_service.dart';
 import 'package:planly_ai/app/services/audio_recording_service.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
-import 'package:planly_ai/app/controller/auth_controller.dart';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:dio/dio.dart' as dio_lib;
 import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/services/api/planly_api_client.dart';
 
 class ChatbotController extends GetxController {
   // Observables
@@ -73,21 +73,12 @@ class ChatbotController extends GetxController {
   Future<bool> createNewSession() async {
     String? sessionId;
     try {
-      final dio = dio_lib.Dio();
-      final authController = Get.find<AuthController>();
-      final token = await authController.getToken();
-      
+      final dio = PlanlyApiClient.instance.dio;
       final url = '${AppConstants.planlyBaseUrl}/api/v1/sessions/create';
       debugPrint('[Session] Creating session at: $url');
-      
+
       final response = await dio.post(
         url,
-        options: dio_lib.Options(
-          headers: {
-            if (token != null) 'Authorization': 'Bearer $token',
-            'ClientId': AppConstants.clientId,
-          },
-        ),
       );
       
       debugPrint('[Session] Response status: ${response.statusCode}');
@@ -267,12 +258,7 @@ class ChatbotController extends GetxController {
     _uploadCancelToken = dio_lib.CancelToken();
 
     try {
-      final dio = dio_lib.Dio();
-      final authController = Get.find<AuthController>();
-      final token = await authController.getToken();
-
-      debugPrint('[Upload] Token: ${token != null ? "Bearer ${token.substring(0, 20)}..." : "null"}');
-
+      final dio = PlanlyApiClient.instance.dio;
       final formData = dio_lib.FormData.fromMap({
         'file': await dio_lib.MultipartFile.fromFile(
           file.path,
@@ -282,16 +268,10 @@ class ChatbotController extends GetxController {
 
       final url = '${AppConstants.planlyBaseUrl}/resource/oss/upload';
       debugPrint('[Upload] Request URL: $url');
-      debugPrint('[Upload] Request headers: Authorization: ${token != null ? "Bearer $token" : "null"}');
 
       final response = await dio.post(
         url,
         data: formData,
-        options: dio_lib.Options(
-          headers: {
-            if (token != null) 'Authorization': 'Bearer $token',
-          },
-        ),
         cancelToken: _uploadCancelToken,
       );
 
