@@ -13,6 +13,7 @@ import 'package:dio/dio.dart' as dio_lib;
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/services/api/planly_api_client.dart';
 import 'package:planly_ai/app/services/chat_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatbotController extends GetxController {
   // Observables
@@ -211,6 +212,8 @@ class ChatbotController extends GetxController {
       ossId: uploadedOssId.value,
     );
 
+    final currentOssId = uploadedOssId.value;
+
     // Reset upload state
     selectedFile.value = null;
     uploadedUrl.value = null;
@@ -239,7 +242,7 @@ class ChatbotController extends GetxController {
     _scrollToBottom();
     loadSessions();
 
-    await _handleBotResponse(text, uploadedOssId.value, session.sessionId!);
+    await _handleBotResponse(text, currentOssId, session.sessionId!);
   }
 
   Future<void> _handleBotResponse(String text, String? ossId, String sessionId) async {
@@ -321,11 +324,27 @@ class ChatbotController extends GetxController {
       return;
     }
 
+    await _uploadFile(file);
+  }
+
+  Future<void> takePhoto() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+
+    if (photo == null) {
+      debugPrint('[Upload] User cancelled camera');
+      return;
+    }
+
+    await _uploadFile(photo);
+  }
+
+  Future<void> _uploadFile(XFile file) async {
     debugPrint('[Upload] Selected file: ${file.name}, path: ${file.path}');
 
     final length = await file.length();
     debugPrint('[Upload] File size: $length bytes');
-    
+
     if (length > 50 * 1024 * 1024) {
       debugPrint('[Upload] File too large, rejecting');
       showSnackBar('file_too_large'.tr, isError: true);
@@ -364,7 +383,8 @@ class ChatbotController extends GetxController {
         uploadedFileName.value = data['fileName'];
         uploadedOssId.value = data['ossId'];
       } else {
-        debugPrint('[Upload] Upload failed with code: ${response.data['code']}, msg: ${response.data['msg']}');
+        debugPrint(
+            '[Upload] Upload failed with code: ${response.data['code']}, msg: ${response.data['msg']}');
         showSnackBar('upload_failed'.tr, isError: true);
         removeSelectedFile();
       }
@@ -374,7 +394,8 @@ class ChatbotController extends GetxController {
         debugPrint('[Upload] DioException type: ${e.type}');
         debugPrint('[Upload] DioException message: ${e.message}');
         debugPrint('[Upload] DioException response: ${e.response?.data}');
-        debugPrint('[Upload] DioException status code: ${e.response?.statusCode}');
+        debugPrint(
+            '[Upload] DioException status code: ${e.response?.statusCode}');
       }
       if (e is dio_lib.DioException &&
           e.type != dio_lib.DioExceptionType.cancel) {

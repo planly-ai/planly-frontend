@@ -128,7 +128,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
                           ),
                           color: colorScheme.onSurfaceVariant,
                           onPressed: () {
-                            // TODO: Implement camera functionality
+                            controller.takePhoto();
                           },
                         );
                       }
