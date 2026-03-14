@@ -12,6 +12,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:dio/dio.dart' as dio_lib;
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/services/api/planly_api_client.dart';
+import 'package:planly_ai/app/services/chat_service.dart';
 
 class ChatbotController extends GetxController {
   // Observables
@@ -34,6 +35,7 @@ class ChatbotController extends GetxController {
   // Services
   final AsrService _asrService = AsrService();
   final AudioRecordingService _audioService = AudioRecordingService();
+  final ChatService _chatService = ChatService();
 
   // Voice Recording State
   var isRecording = false.obs;
@@ -73,16 +75,9 @@ class ChatbotController extends GetxController {
   Future<bool> createNewSession() async {
     String? sessionId;
     try {
-      final dio = PlanlyApiClient.instance.dio;
-      final url = '${AppConstants.planlyBaseUrl}/api/v1/sessions/create';
-      debugPrint('[Session] Creating session at: $url');
-
-      final response = await dio.post(
-        url,
-      );
+      final response = await _chatService.createSession();
       
       debugPrint('[Session] Response status: ${response.statusCode}');
-      debugPrint('[Session] Response data type: ${response.data.runtimeType}');
       debugPrint('[Session] Response data: ${response.data}');
 
       var responseData = response.data;
@@ -228,7 +223,75 @@ class ChatbotController extends GetxController {
     _scrollToBottom();
     loadSessions();
 
-    await _simulateAiResponse();
+    await _handleBotResponse(text, uploadedOssId.value, session.sessionId!);
+  }
+
+  Future<void> _handleBotResponse(String text, String? ossId, String sessionId) async {
+    isTyping.value = true;
+    _scrollToBottom();
+
+    try {
+      final response = await _chatService.chat(
+        message: text,
+        ossIds: ossId != null ? [ossId] : null,
+        sessionId: sessionId,
+      );
+
+      debugPrint('[Chat] Response status: ${response.statusCode}');
+      debugPrint('[Chat] Response data: ${response.data}');
+
+      var responseData = response.data;
+      if (responseData is String) {
+        try {
+          responseData = jsonDecode(responseData);
+        } catch (e) {
+          debugPrint('[Chat] Failed to parse response data as JSON: $e');
+        }
+      }
+
+      if (response.statusCode == 200 && responseData is Map && responseData['code'] == 200) {
+        final data = responseData['data'];
+        final type = data['type'];
+        final content = data['content'] ?? '';
+
+        if (type == 'TEXT') {
+          final botMsg = ChatMessage(
+            text: content,
+            createdAt: DateTime.now(),
+            sender: SenderType.bot,
+            type: MessageType.text,
+          );
+
+          final session = await isar.chatSessions.get(currentSessionId.value!);
+          if (session != null) {
+            await isar.writeTxn(() async {
+              await isar.chatMessages.put(botMsg);
+              session.messages.add(botMsg);
+              await session.messages.save();
+
+              session.updatedAt = DateTime.now();
+              await isar.chatSessions.put(session);
+            });
+            messages.add(botMsg);
+          }
+        } else {
+          // Handle card types which we were told to ignore for now but we'll log it
+          debugPrint('[Chat] Received card response type: $type. Content: $content');
+        }
+      } else {
+        debugPrint('[Chat] Failed to get response. Status: ${response.statusCode}, Data: $responseData');
+        showSnackBar('error'.tr, isError: true);
+      }
+    } catch (e) {
+      debugPrint('[Chat] Exception in response handling: $e');
+      if (e is dio_lib.DioException) {
+        debugPrint('[Chat] Dio error: ${e.response?.data}');
+      }
+      showSnackBar('error'.tr, isError: true);
+    } finally {
+      isTyping.value = false;
+      _scrollToBottom();
+    }
   }
 
   Future<void> pickAndUploadFile() async {
@@ -316,63 +379,7 @@ class ChatbotController extends GetxController {
     isUploading.value = false;
   }
 
-  Future<void> _simulateAiResponse() async {
-    isTyping.value = true;
-    _scrollToBottom();
 
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 1500));
-
-    final session = await isar.chatSessions.get(currentSessionId.value!);
-    if (session == null) {
-      isTyping.value = false;
-      return;
-    }
-
-    // 一次性发送所有 4 种卡片用于预览
-    final messages = [
-      ChatMessage(
-        text: "这是您的日程安排，请确认",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.scheduleConfirmation,
-      ),
-      ChatMessage(
-        text: "这是您今天的专注时长统计",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.focusDuration,
-      ),
-      ChatMessage(
-        text: "这是为您拆解的任务清单",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.scheduleBreakdown,
-      ),
-      ChatMessage(
-        text: "这是您今天的时间轴安排",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.timelineSchedule,
-      ),
-    ];
-
-    await isar.writeTxn(() async {
-      for (final msg in messages) {
-        await isar.chatMessages.put(msg);
-        session.messages.add(msg);
-        await session.messages.save();
-      }
-
-      session.updatedAt = DateTime.now();
-      await isar.chatSessions.put(session);
-    });
-
-    messages.forEach((msg) => this.messages.add(msg));
-    isTyping.value = false;
-    _scrollToBottom();
-    loadSessions();
-  }
 
   void startRecording(double startDy) async {
     if (await _audioService.hasPermission()) {

@@ -7,6 +7,7 @@ import 'package:planly_ai/app/ui/chatbot/widgets/card/ai_focus_duration_card.dar
 import 'package:planly_ai/app/ui/chatbot/widgets/card/ai_schedule_breakdown_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/ai_timeline_schedule_card.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
@@ -205,12 +206,40 @@ class ChatBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    message.text,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isUser
-                          ? colorScheme.onPrimary
-                          : colorScheme.onSurface,
+                  MarkdownBody(
+                    data: message.text,
+                    styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                      p: theme.textTheme.bodyMedium?.copyWith(
+                        color: isUser
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                      ),
+                      strong: theme.textTheme.bodyMedium?.copyWith(
+                        color: isUser
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      listBullet: theme.textTheme.bodyMedium?.copyWith(
+                        color: isUser
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                      ),
+                      h1: theme.textTheme.headlineMedium?.copyWith(
+                        color: isUser
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                      ),
+                      h2: theme.textTheme.headlineSmall?.copyWith(
+                        color: isUser
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                      ),
+                      h3: theme.textTheme.titleLarge?.copyWith(
+                        color: isUser
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
