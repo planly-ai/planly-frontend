@@ -187,12 +187,28 @@ class ChatbotController extends GetxController {
     final session = await isar.chatSessions.get(currentSessionId.value!);
     if (session == null) return;
 
+    MessageType msgType = MessageType.text;
+    if (hasAttachment) {
+      final fileName = uploadedFileName.value?.toLowerCase() ?? '';
+      if (fileName.endsWith('.jpg') ||
+          fileName.endsWith('.jpeg') ||
+          fileName.endsWith('.png') ||
+          fileName.endsWith('.gif') ||
+          fileName.endsWith('.webp')) {
+        msgType = MessageType.image;
+      } else {
+        msgType = MessageType.file;
+      }
+    }
+
     final userMsg = ChatMessage(
       text: text,
       createdAt: DateTime.now(),
       sender: SenderType.user,
-      type: hasAttachment ? MessageType.image : MessageType.text,
+      type: msgType,
       attachmentPath: uploadedUrl.value,
+      attachmentName: uploadedFileName.value,
+      ossId: uploadedOssId.value,
     );
 
     // Reset upload state

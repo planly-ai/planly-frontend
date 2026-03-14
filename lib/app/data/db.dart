@@ -176,6 +176,8 @@ class ChatMessage {
 
   // Optional: file path for images or audio
   String? attachmentPath;
+  String? attachmentName;
+  String? ossId;
 
   final session = IsarLink<ChatSession>();
 
@@ -186,6 +188,8 @@ class ChatMessage {
     required this.sender,
     this.type = MessageType.text,
     this.attachmentPath,
+    this.attachmentName,
+    this.ossId,
   });
 }
 
@@ -194,6 +198,7 @@ enum SenderType { user, bot }
 enum MessageType {
   text,
   image,
+  file,
   voice,
   scheduleConfirmation,
   focusDuration,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
@@ -206,7 +207,10 @@ class ChatBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MarkdownBody(
+                  if (message.attachmentPath != null)
+                    _buildAttachment(context, message, isUser, colorScheme, theme),
+                  if (message.text.isNotEmpty)
+                    MarkdownBody(
                     data: message.text,
                     styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
                       p: theme.textTheme.bodyMedium?.copyWith(
@@ -268,6 +272,110 @@ class ChatBubble extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+
+  Widget _buildAttachment(
+    BuildContext context,
+    ChatMessage message,
+    bool isUser,
+    ColorScheme colorScheme,
+    ThemeData theme,
+  ) {
+    if (message.attachmentPath == null) return const SizedBox.shrink();
+
+    final isImage = message.type == MessageType.image;
+
+    return Container(
+      margin: message.text.isNotEmpty
+          ? const EdgeInsets.only(bottom: AppConstants.spacingS)
+          : EdgeInsets.zero,
+      constraints: const BoxConstraints(maxWidth: 240, maxHeight: 240),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+        border: Border.all(
+          color: isUser
+              ? colorScheme.onPrimary.withValues(alpha: 0.2)
+              : colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: isImage
+          ? Image.network(
+              message.attachmentPath!,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  width: 200,
+                  height: 150,
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 200,
+                height: 150,
+                color: colorScheme.surfaceContainerHighest,
+                padding: const EdgeInsets.all(AppConstants.spacingM),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.image_not_supported, color: colorScheme.error),
+                    const SizedBox(height: 4),
+                    Text(
+                      'image_load_failed'.tr,
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.spacingM,
+                vertical: AppConstants.spacingS,
+              ),
+              color: isUser
+                  ? colorScheme.onPrimary.withValues(alpha: 0.1)
+                  : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.insert_drive_file,
+                    color: isUser ? colorScheme.onPrimary : colorScheme.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppConstants.spacingS),
+                  Flexible(
+                    child: Text(
+                      message.attachmentName ?? 'File',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isUser
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }
