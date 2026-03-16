@@ -30,4 +30,21 @@ class ChatService {
       },
     );
   }
+
+  /// Get the chat response stream using SSE
+  /// 
+  /// [sessionId] - the session ID for the conversation
+  Future<Response<ResponseBody>> getChatStream(String sessionId) async {
+    return await _dio.get<ResponseBody>(
+      '/api/v1/chat/stream/$sessionId',
+      options: Options(
+        responseType: ResponseType.stream,
+        headers: {
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+        },
+        receiveTimeout: const Duration(minutes: 5), // Long timeout for streaming
+      ),
+    );
+  }
 }
