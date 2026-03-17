@@ -54,11 +54,8 @@ Future<void> createSampleChatSessionWithAllCards() async {
       type: MessageType.cardEvent,
       cardContent: jsonEncode({
         'title': '项目周会',
-        'time': '2026-03-17 18:00',
-        'startTime': '2026-03-17 18:00',
-        'endTime': '2026-03-17 19:00',
-        'location': '3 楼会议室 A',
-        'reminder': '提前 15 分钟',
+        'startTime': '2026-03-17T18:00:00.000Z',
+        'endTime': '2026-03-17T19:00:00.000Z',
         'description': '每周例行项目同步会议',
       }),
     );
@@ -73,12 +70,10 @@ Future<void> createSampleChatSessionWithAllCards() async {
       type: MessageType.cardTask,
       cardContent: jsonEncode({
         'title': '编写 API 文档',
-        'subTasks': [
-          {'title': '整理接口清单', 'durationMinutes': 20, 'isCompleted': false},
-          {'title': '补充请求参数说明', 'durationMinutes': 30, 'isCompleted': false},
-          {'title': '输出示例代码', 'durationMinutes': 40, 'isCompleted': false},
-          {'title': '审核并发布', 'durationMinutes': 15, 'isCompleted': true},
-        ],
+        'description': '完成 Sync 接口的对接文档编写',
+        'taskEnum': 'WORK',
+        'isCompleted': 0.5,
+        'spentTime': 60,
       }),
     );
     await isar.chatMessages.put(taskCardMsg);
@@ -92,10 +87,9 @@ Future<void> createSampleChatSessionWithAllCards() async {
       type: MessageType.cardAlert,
       cardContent: jsonEncode({
         'title': '喝水提醒',
-        'alertTime': '2026-03-17 15:00',
+        'alertTime': '2026-03-17T15:00:00.000Z',
         'message': '工作很久了，起来喝杯水活动一下吧！保持水分对身体好哦~',
         'repeatStrategy': 'DAILY',
-        'description': '定时提醒喝水',
       }),
     );
     await isar.chatMessages.put(alertCardMsg);
@@ -108,14 +102,19 @@ Future<void> createSampleChatSessionWithAllCards() async {
       sender: SenderType.bot,
       type: MessageType.cardSchedule,
       cardContent: jsonEncode({
-        'date': '2026 年 3 月 17 日 星期二',
-        'busyHours': 7,
-        'freeHours': 7,
-        'events': [
-          {'title': '团队站会', 'time': '09:00 - 10:00', 'tag': '会议'},
-          {'title': '深度工作时间', 'time': '10:00 - 12:00', 'tag': '专注'},
-          {'title': '处理邮件和消息', 'time': '14:00 - 15:00', 'tag': '忙碌'},
-          {'title': '客户需求评审', 'time': '15:00 - 17:00', 'tag': '会议'},
+        'title': '今日工作日规划',
+        'timeDescription': '今天的主要目标是攻克核心模块',
+        'eventList': [
+          {
+            'title': '团队站会',
+            'startTime': '2026-03-17T09:00:00.000Z',
+            'endTime': '2026-03-17T10:00:00.000Z'
+          },
+          {
+            'title': '深度工作',
+            'startTime': '2026-03-17T10:00:00.000Z',
+            'endTime': '2026-03-17T12:00:00.000Z'
+          },
         ],
       }),
     );
@@ -129,19 +128,13 @@ Future<void> createSampleChatSessionWithAllCards() async {
       sender: SenderType.bot,
       type: MessageType.cardGraph,
       cardContent: jsonEncode({
-        'totalDuration': '4 小时 5 分钟',
-        'comparisonText': '+65 分钟',
-        'comparisonPercentage': '36%',
-        'longestSession': '90 分钟',
-        'chartData': [
-          {'x': 0, 'y': 45},
-          {'x': 2, 'y': 60},
-          {'x': 4, 'y': 30},
-          {'x': 6, 'y': 55},
-          {'x': 8, 'y': 45},
-          {'x': 10, 'y': 15},
-        ],
-        'insight': '今天的专注时间超过 3 小时，保持得非常好！上午 10 点是你效率最高的时段。',
+        'title': '本周专注时长统计',
+        'graph': {
+          'chartType': 'line',
+          'xAxis': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+          'data': [4.5, 6, 3, 5.5, 4.5],
+          'unit': 'h'
+        },
       }),
     );
     await isar.chatMessages.put(graphCardMsg);
@@ -158,21 +151,21 @@ Future<void> createSampleChatSessionWithAllCards() async {
         'eventCards': [
           {
             'title': '晨会',
-            'startTime': '2026-03-17 09:00',
-            'endTime': '2026-03-17 09:30',
+            'startTime': '2026-03-17T09:00:00.000Z',
+            'endTime': '2026-03-17T09:30:00.000Z',
             'description': '全员同步今日工作计划',
           },
           {
             'title': '代码评审',
-            'startTime': '2026-03-17 14:00',
-            'endTime': '2026-03-17 15:00',
+            'startTime': '2026-03-17T14:00:00.000Z',
+            'endTime': '2026-03-17T15:00:00.000Z',
             'description': 'Review PR #1024',
           },
           {
             'title': '产品需求讨论',
-            'startTime': '2026-03-17 16:00',
-            'endTime': '2026-03-17 17:00',
-            'description': '与产品经理讨论新功能需求',
+            'startTime': '2026-03-17T16:00:00.000Z',
+            'endTime': '2026-03-17T17:00:00.000Z',
+            'description': '与产品经理讨论新功能需求讨论',
           },
         ],
       }),

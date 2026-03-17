@@ -4,22 +4,21 @@ import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class GraphCard extends StatelessWidget {
-  final String totalDuration;
-  final String comparisonText;
-  final String comparisonPercentage;
-  final String longestSession;
-  final List<FlSpot> chartData;
-  final String insight;
+  final String title;
+  final GraphData graph;
 
   const GraphCard({
     super.key,
-    required this.totalDuration,
-    required this.comparisonText,
-    required this.comparisonPercentage,
-    required this.longestSession,
-    required this.chartData,
-    required this.insight,
+    required this.title,
+    required this.graph,
   });
+
+  factory GraphCard.fromJson(Map<String, dynamic> json) {
+    return GraphCard(
+      title: json['title'] ?? '',
+      graph: GraphData.fromJson(json['graph'] ?? {}),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,17 +39,15 @@ class GraphCard extends StatelessWidget {
           children: [
             _buildIntegratedHeader(context),
             const SizedBox(height: AppConstants.spacingL),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildMainStat(context, colorScheme),
-                const SizedBox(height: AppConstants.spacingXL),
-                _buildComparisonMetrics(context, colorScheme),
-                const SizedBox(height: AppConstants.spacingXL),
-                _buildChartSection(context, colorScheme),
-                const SizedBox(height: AppConstants.spacingXL),
-                _buildInsightBox(context, colorScheme),
-              ],
+            _buildChartSection(context, colorScheme),
+            const SizedBox(height: AppConstants.spacingM),
+            Center(
+              child: Text(
+                '单位: ${graph.unit}',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ],
         ),
@@ -72,7 +69,7 @@ class GraphCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
           ),
           child: Icon(
-            Icons.psychology,
+            graph.chartType == 'line' ? Icons.psychology : Icons.bar_chart,
             size: AppConstants.iconSizeMedium,
             color: color,
           ),
@@ -83,7 +80,7 @@ class GraphCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '专注时长统计',
+                title,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   fontWeight: FontWeight.bold,
@@ -91,7 +88,7 @@ class GraphCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '今天的深度思考记录',
+                '数据分析图表',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -104,321 +101,202 @@ class GraphCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMainStat(BuildContext context, ColorScheme colorScheme) {
-    final theme = Theme.of(context);
-    final parts = totalDuration.split(' ');
-
-    return Column(
-      children: [
-        RichText(
-          text: TextSpan(
-            style: theme.textTheme.displayLarge?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.bold,
-              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 48),
-            ),
-            children: [
-              TextSpan(text: parts[0]),
-              TextSpan(
-                text: ' ${parts[1]} ',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-              TextSpan(text: parts[2]),
-              TextSpan(
-                text: ' ${parts[3]}',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 20),
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Text(
-          '今日累计专注时长',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.bold,
-            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 15),
-          ),
-        ),
-      ],
+  Widget _buildChartSection(BuildContext context, ColorScheme colorScheme) {
+    return SizedBox(
+      height: 200,
+      child: graph.chartType == 'bar'
+          ? _buildBarChart(context, colorScheme)
+          : _buildLineChart(context, colorScheme),
     );
   }
 
-  Widget _buildComparisonMetrics(BuildContext context, ColorScheme colorScheme) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildMetricCard(
-            context,
-            title: '对比昨日',
-            value: comparisonText,
-            subValue: '↑ $comparisonPercentage',
-            color: colorScheme.primary,
-            bgColor: colorScheme.primaryContainer.withValues(alpha: 0.3),
-            icon: Icons.trending_up,
-            iconColor: colorScheme.primary,
-          ),
-        ),
-        const SizedBox(width: AppConstants.spacingM),
-        Expanded(
-          child: _buildMetricCard(
-            context,
-            title: '最长时段',
-            value: longestSession,
-            subValue: '连续专注',
-            color: colorScheme.secondary,
-            bgColor: colorScheme.secondaryContainer.withValues(alpha: 0.3),
-            icon: Icons.hourglass_empty,
-            iconColor: colorScheme.secondary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMetricCard(
-    BuildContext context, {
-    required String title,
-    required String value,
-    required String subValue,
-    required Color color,
-    required Color bgColor,
-    required IconData icon,
-    required Color iconColor,
-  }) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: iconColor),
-              const SizedBox(width: 4),
-              Text(
-                title,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+  Widget _buildBarChart(BuildContext context, ColorScheme colorScheme) {
+    return BarChart(
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: _getMaxY() * 1.2,
+        barTouchData: BarTouchData(
+          touchTooltipData: BarTouchTooltipData(
+            getTooltipColor: (_) => Colors.transparent,
+            tooltipPadding: EdgeInsets.zero,
+            tooltipMargin: 4,
+            getTooltipItem: (group, groupIndex, rod, rodIndex) {
+              return BarTooltipItem(
+                rod.toY.toString(),
+                TextStyle(
+                  color: colorScheme.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
+              );
+            },
+          ),
+        ),
+        titlesData: _getTitlesData(context, colorScheme),
+        borderData: FlBorderData(show: false),
+        gridData: const FlGridData(show: false),
+        barGroups: graph.data.asMap().entries.map((entry) {
+          return BarChartGroupData(
+            x: entry.key,
+            barRods: [
+              BarChartRodData(
+                toY: entry.value.toDouble(),
+                color: colorScheme.primary.withValues(alpha: 0.8),
+                width: 16,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: theme.textTheme.titleLarge?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-          Text(
-            subValue,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-              fontSize: 12,
-            ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildChartSection(BuildContext context, ColorScheme colorScheme) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.access_time, size: 18, color: Color(0xFF757575)),
-            const SizedBox(width: 8),
-            Text(
-              '时段分布',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ],
+  Widget _buildLineChart(BuildContext context, ColorScheme colorScheme) {
+    return LineChart(
+      LineChartData(
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            getTooltipColor: (_) => Colors.transparent,
+            tooltipPadding: EdgeInsets.zero,
+            tooltipMargin: 8,
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.map((spot) {
+                return LineTooltipItem(
+                  spot.y.toString(),
+                  TextStyle(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                );
+              }).toList();
+            },
+          ),
         ),
-        const SizedBox(height: AppConstants.spacingL),
-        SizedBox(
-          height: 180,
-          child: LineChart(
-            LineChartData(
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: false,
-                horizontalInterval: 15,
-                getDrawingHorizontalLine: (value) {
-                  return const FlLine(
-                    color: Color(0xFFEEEEEE),
-                    strokeWidth: 1,
-                    dashArray: [5, 5],
-                  );
-                },
-              ),
-              titlesData: FlTitlesData(
-                show: true,
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 15,
-                    getTitlesWidget: (value, meta) {
-                      return Text(
-                        value.toInt().toString(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-                        ),
-                      );
-                    },
-                    reservedSize: 28,
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      String text = '';
-                      switch (value.toInt()) {
-                        case 0:
-                          text = '9:00';
-                          break;
-                        case 2:
-                          text = '10:00';
-                          break;
-                        case 4:
-                          text = '11:00';
-                          break;
-                        case 6:
-                          text = '14:00';
-                          break;
-                        case 8:
-                          text = '15:00';
-                          break;
-                        case 10:
-                          text = '16:00';
-                          break;
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          text,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
-                            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 11),
-                          ),
-                        ),
-                      );
-                    },
-                    reservedSize: 28,
-                  ),
-                ),
-              ),
-              borderData: FlBorderData(show: false),
-              minX: 0,
-              maxX: 10,
-              minY: 0,
-              maxY: 60,
-              lineBarsData: [
-                LineChartBarData(
-                  spots: chartData,
-                  isCurved: true,
-                  gradient: LinearGradient(
-                    colors: [
-                      colorScheme.primary,
-                      colorScheme.primary.withValues(alpha: 0.3),
-                    ],
-                  ),
-                  barWidth: 3,
-                  isStrokeCapRound: true,
-                  dotData: const FlDotData(show: false),
-                  belowBarData: BarAreaData(
-                    show: true,
-                    gradient: LinearGradient(
-                      colors: [
-                        colorScheme.primary.withValues(alpha: 0.15),
-                        colorScheme.primary.withValues(alpha: 0.02),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-                  ),
-                ),
+        gridData: const FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: 2,
+          getDrawingHorizontalLine: _getDrawingHorizontalLine,
+        ),
+        titlesData: _getTitlesData(context, colorScheme),
+        borderData: FlBorderData(show: false),
+        minX: 0,
+        maxX: (graph.xAxis.length - 1).toDouble(),
+        minY: 0,
+        maxY: _getMaxY() * 1.2,
+        lineBarsData: [
+          LineChartBarData(
+            spots: graph.data.asMap().entries.map((entry) {
+              return FlSpot(entry.key.toDouble(), entry.value.toDouble());
+            }).toList(),
+            isCurved: true,
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.primary,
+                colorScheme.primary.withValues(alpha: 0.4),
               ],
-              lineTouchData: LineTouchData(
-                touchTooltipData: LineTouchTooltipData(
-                  getTooltipColor: (spot) => colorScheme.primary,
-                  getTooltipItems: (touchedSpots) {
-                    return touchedSpots.map((spot) {
-                      return LineTooltipItem(
-                        '${spot.y.toInt()} 分钟',
-                        theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ) ??
-                            const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      );
-                    }).toList();
-                  },
-                ),
-              ),
             ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInsightBox(BuildContext context, ColorScheme colorScheme) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-      ),
-      child: Row(
-        children: [
-          const Text('💡', style: TextStyle(fontSize: 18)),
-          const SizedBox(width: 8),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
-                    ),
-                children: [
-                  TextSpan(
-                    text: '洞察：',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.primary),
-                  ),
-                  TextSpan(text: insight),
+            barWidth: 4,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: true),
+            belowBarData: BarAreaData(
+              show: true,
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.primary.withValues(alpha: 0.2),
+                  colorScheme.primary.withValues(alpha: 0.0),
                 ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  static FlLine _getDrawingHorizontalLine(double value) {
+    return const FlLine(
+      color: Color(0xFFEEEEEE),
+      strokeWidth: 1,
+      dashArray: [5, 5],
+    );
+  }
+
+  double _getMaxY() {
+    if (graph.data.isEmpty) return 10;
+    return graph.data.reduce((a, b) => a > b ? a : b).toDouble();
+  }
+
+  FlTitlesData _getTitlesData(BuildContext context, ColorScheme colorScheme) {
+    return FlTitlesData(
+      show: true,
+      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      leftTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          interval: 2,
+          getTitlesWidget: (value, meta) {
+            return Text(
+              value.toInt().toString(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+            );
+          },
+          reservedSize: 20,
+        ),
+      ),
+      bottomTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          getTitlesWidget: (value, meta) {
+            final index = value.toInt();
+            if (index >= 0 && index < graph.xAxis.length) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  graph.xAxis[index],
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontSize: 10,
+                      ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+          reservedSize: 28,
+        ),
+      ),
+    );
+  }
+}
+
+class GraphData {
+  final String chartType;
+  final List<String> xAxis;
+  final List<num> data;
+  final String unit;
+
+  GraphData({
+    required this.chartType,
+    required this.xAxis,
+    required this.data,
+    required this.unit,
+  });
+
+  factory GraphData.fromJson(Map<String, dynamic> json) {
+    return GraphData(
+      chartType: json['chartType'] ?? 'bar',
+      xAxis: List<String>.from(json['xAxis'] ?? []),
+      data: List<num>.from(json['data'] ?? []),
+      unit: json['unit'] ?? '',
     );
   }
 }
@@ -446,21 +324,25 @@ class GraphCardTestApp extends StatelessWidget {
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            children: const [
+            children: [
               GraphCard(
-                totalDuration: "4 小时 5 分钟",
-                comparisonText: "+65 分钟",
-                comparisonPercentage: "36%",
-                longestSession: "90 分钟",
-                chartData: [
-                  FlSpot(0, 45),
-                  FlSpot(2, 60),
-                  FlSpot(4, 30),
-                  FlSpot(6, 55),
-                  FlSpot(8, 45),
-                  FlSpot(10, 15),
-                ],
-                insight: "今天的专注时间超过3小时，保持得非常好！",
+                title: "本周专注时长统计",
+                graph: GraphData(
+                  chartType: "line",
+                  xAxis: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+                  data: [4.5, 6, 3, 5.5, 4.5],
+                  unit: "h",
+                ),
+              ),
+              const SizedBox(height: 20),
+              GraphCard(
+                title: "任务完成分布",
+                graph: GraphData(
+                  chartType: "bar",
+                  xAxis: ["Bug", "Feature", "Refactor", "Test"],
+                  data: [12, 8, 15, 6],
+                  unit: "个",
+                ),
               ),
             ],
           ),

@@ -1,29 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class EventCard extends StatefulWidget {
   final String title;
-  final String time;
-  final String location;
-  final String reminder;
+  final String startTime;
+  final String endTime;
+  final String? description;
   final VoidCallback? onConfirm;
 
   const EventCard({
     super.key,
     required this.title,
-    required this.time,
-    required this.location,
-    required this.reminder,
+    required this.startTime,
+    required this.endTime,
+    this.description,
     this.onConfirm,
   });
+
+  factory EventCard.fromJson(Map<String, dynamic> json) {
+    return EventCard(
+      title: json['title'] ?? '',
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'] ?? '',
+      description: json['description'],
+    );
+  }
 
   @override
   State<EventCard> createState() => _EventCardState();
 }
 
 class _EventCardState extends State<EventCard> {
-  bool _isReminderEnabled = true;
+  String _formatTimeRange(String start, String end) {
+    try {
+      final startDate = DateTime.parse(start).toLocal();
+      final endDate = DateTime.parse(end).toLocal();
+      final formatter = DateFormat('yyyy-MM-dd HH:mm');
+      return '${formatter.format(startDate)} - ${DateFormat('HH:mm').format(endDate)}';
+    } catch (e) {
+      return '$start - $end';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,30 +71,16 @@ class _EventCardState extends State<EventCard> {
             _buildDetailRow(
               context,
               icon: Icons.access_time,
-              label: widget.time,
+              label: _formatTimeRange(widget.startTime, widget.endTime),
             ),
-            const SizedBox(height: AppConstants.spacingS),
-            _buildDetailRow(
-              context,
-              icon: Icons.location_on_outlined,
-              label: widget.location,
-            ),
-            const SizedBox(height: AppConstants.spacingS),
-            _buildDetailRow(
-              context,
-              icon: Icons.notifications_none,
-              label: widget.reminder,
-              trailing: Switch(
-                value: _isReminderEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    _isReminderEnabled = value;
-                  });
-                },
-                activeColor: colorScheme.primary,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            if (widget.description != null && widget.description!.isNotEmpty) ...[
+              const SizedBox(height: AppConstants.spacingS),
+              _buildDetailRow(
+                context,
+                icon: Icons.description_outlined,
+                label: widget.description!,
               ),
-            ),
+            ],
             const SizedBox(height: AppConstants.spacingXL),
             _buildConfirmButton(context),
           ],
@@ -220,9 +225,9 @@ class EventCardTestApp extends StatelessWidget {
             children: [
               EventCard(
                 title: "项目周会",
-                time: "2024-03-15 18:00",
-                location: "3 楼会议室 A",
-                reminder: "提前 15 分钟",
+                startTime: "2024-03-15T10:00:00.000Z",
+                endTime: "2024-03-15T11:30:00.000Z",
+                description: "讨论下周开发计划与任务分配",
               ),
             ],
           ),

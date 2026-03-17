@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class EventListCard extends StatelessWidget {
   final String title;
-  final List<Map<String, String>> eventCards;
+  final List<EventCardData> eventCards;
 
   const EventListCard({
     super.key,
     required this.title,
     required this.eventCards,
   });
+
+  factory EventListCard.fromJson(Map<String, dynamic> json) {
+    final list = json['eventCards'] as List? ?? [];
+    return EventListCard(
+      title: json['title'] ?? '',
+      eventCards: list.map((e) => EventCardData.fromJson(e)).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +71,19 @@ class EventListCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEventItem(
-      BuildContext context, Map<String, String> e) {
+  Widget _buildEventItem(BuildContext context, EventCardData e) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    String timeRange = '';
+    try {
+      final start = DateTime.parse(e.startTime).toLocal();
+      final end = DateTime.parse(e.endTime).toLocal();
+      timeRange = '${DateFormat('HH:mm').format(start)} - ${DateFormat('HH:mm').format(end)}';
+    } catch (_) {
+      timeRange = '${e.startTime} - ${e.endTime}';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
       padding: const EdgeInsets.all(AppConstants.spacingM),
@@ -93,7 +111,7 @@ class EventListCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  e['title'] ?? '',
+                  e.title,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
@@ -101,19 +119,18 @@ class EventListCard extends StatelessWidget {
                         ResponsiveUtils.getResponsiveFontSize(context, 15),
                   ),
                 ),
-                if ((e['startTime'] ?? '').isNotEmpty &&
-                    (e['endTime'] ?? '').isNotEmpty)
+                if (e.startTime.isNotEmpty && e.endTime.isNotEmpty)
                   Text(
-                    '${e['startTime']} - ${e['endTime']}',
+                    timeRange,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       fontSize:
                           ResponsiveUtils.getResponsiveFontSize(context, 13),
                     ),
                   ),
-                if ((e['description'] ?? '').isNotEmpty)
+                if (e.description != null && e.description!.isNotEmpty)
                   Text(
-                    e['description'] ?? '',
+                    e.description!,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
                       fontSize:
@@ -125,6 +142,29 @@ class EventListCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class EventCardData {
+  final String title;
+  final String startTime;
+  final String endTime;
+  final String? description;
+
+  EventCardData({
+    required this.title,
+    required this.startTime,
+    required this.endTime,
+    this.description,
+  });
+
+  factory EventCardData.fromJson(Map<String, dynamic> json) {
+    return EventCardData(
+      title: json['title'] ?? '',
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'] ?? '',
+      description: json['description'],
     );
   }
 }
@@ -152,22 +192,22 @@ class EventListCardTestApp extends StatelessWidget {
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            children: const [
+            children: [
               EventListCard(
                 title: "今日待办事项",
                 eventCards: [
-                  {
-                    "title": "晨会",
-                    "startTime": "2024-03-15 09:00",
-                    "endTime": "2024-03-15 09:30",
-                    "description": "全员同步"
-                  },
-                  {
-                    "title": "代码评审",
-                    "startTime": "2024-03-15 14:00",
-                    "endTime": "2024-03-15 15:00",
-                    "description": "Review PR #1024"
-                  }
+                  EventCardData(
+                    title: "晨会",
+                    startTime: "2024-03-15T09:00:00.000Z",
+                    endTime: "2024-03-15T09:30:00.000Z",
+                    description: "全员同步",
+                  ),
+                  EventCardData(
+                    title: "代码评审",
+                    startTime: "2024-03-15T14:00:00.000Z",
+                    endTime: "2024-03-15T15:00:00.000Z",
+                    description: "Review PR #1024",
+                  ),
                 ],
               ),
             ],

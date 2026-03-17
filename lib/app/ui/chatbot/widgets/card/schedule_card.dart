@@ -1,25 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class ScheduleCard extends StatelessWidget {
-  final String date;
-  final int busyHours;
-  final int freeHours;
-  final List<Map<String, dynamic>> events;
+  final String title;
+  final String timeDescription;
+  final List<ScheduleEventData> eventList;
 
   const ScheduleCard({
     super.key,
-    required this.date,
-    required this.busyHours,
-    required this.freeHours,
-    required this.events,
+    required this.title,
+    required this.timeDescription,
+    required this.eventList,
   });
+
+  factory ScheduleCard.fromJson(Map<String, dynamic> json) {
+    final list = json['eventList'] as List? ?? [];
+    return ScheduleCard(
+      title: json['title'] ?? '',
+      timeDescription: json['timeDescription'] ?? '',
+      eventList: list.map((e) => ScheduleEventData.fromJson(e)).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    // Calculate busy hours
+    double totalBusyMinutes = 0;
+    for (var event in eventList) {
+      try {
+        final start = DateTime.parse(event.startTime);
+        final end = DateTime.parse(event.endTime);
+        totalBusyMinutes += end.difference(start).inMinutes;
+      } catch (_) {}
+    }
+    int busyHours = (totalBusyMinutes / 60).round();
+    int freeHours = 14 - busyHours; // Assume a 14-hour workday (8am - 10pm)
+    if (freeHours < 0) freeHours = 0;
 
     return Card(
       elevation: AppConstants.elevationLow,
@@ -35,11 +56,19 @@ class ScheduleCard extends StatelessWidget {
           children: [
             _buildIntegratedHeader(context),
             const SizedBox(height: AppConstants.spacingL),
-            _buildStatistics(context),
+            Text(
+              timeDescription,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: AppConstants.spacingL),
+            _buildStatistics(context, busyHours, freeHours),
             const SizedBox(height: AppConstants.spacingL),
             _buildSegmentedTimeline(context),
             const SizedBox(height: AppConstants.spacingXL),
-            ...events.map((event) => _buildEventItem(context, event)),
+            ...eventList.map((event) => _buildEventItem(context, event)),
           ],
         ),
       ),
@@ -71,7 +100,7 @@ class ScheduleCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '今日时间轴',
+                title,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   fontWeight: FontWeight.bold,
@@ -79,7 +108,7 @@ class ScheduleCard extends StatelessWidget {
                 ),
               ),
               Text(
-                date,
+                '今日时间轴',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -92,7 +121,7 @@ class ScheduleCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatistics(BuildContext context) {
+  Widget _buildStatistics(BuildContext context, int busyHours, int freeHours) {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
@@ -247,23 +276,18 @@ class ScheduleCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEventItem(BuildContext context, Map<String, dynamic> event) {
+  Widget _buildEventItem(BuildContext context, ScheduleEventData event) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final color = colorScheme.primary;
 
-    Color color;
-    switch (event['tag']) {
-      case '会议':
-        color = colorScheme.primary;
-        break;
-      case '专注':
-        color = colorScheme.primary.withValues(alpha: 0.8);
-        break;
-      case '忙碌':
-        color = colorScheme.primary.withValues(alpha: 0.6);
-        break;
-      default:
-        color = colorScheme.primary;
+    String timeRange = '';
+    try {
+      final start = DateTime.parse(event.startTime).toLocal();
+      final end = DateTime.parse(event.endTime).toLocal();
+      timeRange = '${DateFormat('HH:mm').format(start)} - ${DateFormat('HH:mm').format(end)}';
+    } catch (_) {
+      timeRange = '${event.startTime} - ${event.endTime}';
     }
 
     return Container(
@@ -281,8 +305,8 @@ class ScheduleCard extends StatelessWidget {
               color: color,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              event['icon'] as IconData,
+            child: const Icon(
+              Icons.event_available,
               color: Colors.white,
               size: AppConstants.iconSizeMedium,
             ),
@@ -293,7 +317,7 @@ class ScheduleCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  event['title'] as String,
+                  event.title,
                   style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
@@ -301,7 +325,7 @@ class ScheduleCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  event['time'] as String,
+                  timeRange,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
@@ -310,23 +334,28 @@ class ScheduleCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              event['tag'] as String,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-              ),
-            ),
-          ),
         ],
       ),
+    );
+  }
+}
+
+class ScheduleEventData {
+  final String title;
+  final String startTime;
+  final String endTime;
+
+  ScheduleEventData({
+    required this.title,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  factory ScheduleEventData.fromJson(Map<String, dynamic> json) {
+    return ScheduleEventData(
+      title: json['title'] ?? '',
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'] ?? '',
     );
   }
 }
@@ -351,39 +380,24 @@ class ScheduleCardTestApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('SCHEDULE 卡片展示'), centerTitle: true),
         backgroundColor: Colors.grey[100],
-        body: const SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               ScheduleCard(
-                date: "2026年3月10日 星期二",
-                busyHours: 7,
-                freeHours: 7,
-                events: [
-                  {
-                    "title": "团队站会",
-                    "time": "09:00 - 10:00",
-                    "tag": "会议",
-                    "icon": Icons.groups,
-                  },
-                  {
-                    "title": "深度工作时间",
-                    "time": "10:00 - 12:00",
-                    "tag": "专注",
-                    "icon": Icons.menu_book,
-                  },
-                  {
-                    "title": "处理邮件和消息",
-                    "time": "14:00 - 15:00",
-                    "tag": "忙碌",
-                    "icon": Icons.business_center,
-                  },
-                  {
-                    "title": "客户需求评审",
-                    "time": "15:00 - 17:00",
-                    "tag": "会议",
-                    "icon": Icons.groups,
-                  },
+                title: "高效工作日规划",
+                timeDescription: "今天的主要目标是攻克核心模块，注意劳逸结合",
+                eventList: [
+                  ScheduleEventData(
+                    title: "深度工作 - 核心功能开发",
+                    startTime: "2024-03-15T09:30:00.000Z",
+                    endTime: "2024-03-15T11:30:00.000Z",
+                  ),
+                  ScheduleEventData(
+                    title: "午休与阅读",
+                    startTime: "2024-03-15T12:00:00.000Z",
+                    endTime: "2024-03-15T13:30:00.000Z",
+                  ),
                 ],
               ),
             ],

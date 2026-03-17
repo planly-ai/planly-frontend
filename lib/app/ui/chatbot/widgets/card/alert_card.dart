@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
@@ -18,10 +19,25 @@ class AlertCard extends StatelessWidget {
     this.onAction,
   });
 
+  factory AlertCard.fromJson(Map<String, dynamic> json) {
+    return AlertCard(
+      title: json['title'] ?? '',
+      alertTime: json['alertTime'] ?? '',
+      message: json['message'] ?? '',
+      repeatStrategy: json['repeatStrategy'] ?? 'ONCE',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    String formattedTime = alertTime;
+    try {
+      final dateTime = DateTime.parse(alertTime).toLocal();
+      formattedTime = DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
+    } catch (_) {}
 
     return Card(
       elevation: AppConstants.elevationLow,
@@ -61,7 +77,7 @@ class AlertCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '提醒时间 $alertTime',
+                        '提醒时间 $formattedTime',
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: ResponsiveUtils.getResponsiveFontSize(
                               context, 12),
@@ -140,7 +156,7 @@ class AlertCardTestApp extends StatelessWidget {
             children: [
               AlertCard(
                 title: "喝水提醒",
-                alertTime: "2024-03-15 15:00",
+                alertTime: "2024-03-15T15:00:00.000Z",
                 message: "工作很久了，起来喝杯水活动一下吧！",
                 repeatStrategy: "DAILY",
               ),

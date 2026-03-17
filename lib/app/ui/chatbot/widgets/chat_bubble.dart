@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'dart:convert';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/alert_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/event_card.dart';
@@ -44,99 +43,32 @@ class ChatBubble extends StatelessWidget {
 
   Widget _buildEventCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
-    return EventCard(
-      title: data['title'] ?? '',
-      time: data['time'] ?? '${data['startTime'] ?? ''} - ${data['endTime'] ?? ''}',
-      location: data['location'] ?? data['description'] ?? '',
-      reminder: data['reminder'] ?? 'None',
-    );
+    return EventCard.fromJson(data);
   }
 
   Widget _buildTaskCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
-    final subtasksData = data['subTasks'] as List? ?? [];
-    final subTasks = subtasksData.map((s) {
-      return AiSubTask(
-        title: s['title'] ?? '',
-        durationMinutes: s['durationMinutes'] ?? 0,
-        isCompleted: s['isCompleted'] ?? false,
-      );
-    }).toList();
-
-    return TaskCard(
-      title: data['title'] ?? '',
-      subTasks: subTasks,
-    );
+    return TaskCard.fromJson(data);
   }
 
   Widget _buildAlertCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
-    return AlertCard(
-      title: data['title'] ?? '',
-      alertTime: data['alertTime'] ?? data['startTime'] ?? '',
-      message: data['message'] ?? data['description'] ?? '',
-      repeatStrategy: data['repeatStrategy'] ?? 'ONCE',
-    );
+    return AlertCard.fromJson(data);
   }
 
   Widget _buildGraphCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
-    final chartDataJson = data['chartData'] as List? ?? [];
-    final chartData = chartDataJson.map((s) {
-      return FlSpot(
-        (s['x'] ?? 0).toDouble(),
-        (s['y'] ?? 0).toDouble(),
-      );
-    }).toList();
-
-    return GraphCard(
-      totalDuration: data['totalDuration'] ?? '',
-      comparisonText: data['comparisonText'] ?? '',
-      comparisonPercentage: data['comparisonPercentage'] ?? '',
-      longestSession: data['longestSession'] ?? '',
-      chartData: chartData,
-      insight: data['insight'] ?? '',
-    );
+    return GraphCard.fromJson(data);
   }
 
   Widget _buildScheduleCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
-    final eventsData = data['events'] as List? ?? [];
-    final events = eventsData.map((e) {
-      return {
-        'title': e['title'] ?? '',
-        'time': e['time'] ?? '',
-        'tag': e['tag'] ?? '',
-        'icon': _getIconForTag(e['tag']),
-      };
-    }).toList();
-
-    return ScheduleCard(
-      date: data['date'] ?? '',
-      busyHours: data['busyHours'] ?? 0,
-      freeHours: data['freeHours'] ?? 0,
-      events: events,
-    );
-  }
-
-  IconData _getIconForTag(String? tag) {
-    switch (tag) {
-      case '会议': return Icons.groups;
-      case '专注': return Icons.menu_book;
-      case '忙碌': return Icons.business_center;
-      default: return Icons.event;
-    }
+    return ScheduleCard.fromJson(data);
   }
 
   Widget _buildEventListCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
-    final eventCardsData = data['eventCards'] as List? ?? [];
-    final eventCards = eventCardsData.map((e) => Map<String, String>.from(e)).toList();
-
-    return EventListCard(
-      title: data['title'] ?? '',
-      eventCards: eventCards,
-    );
+    return EventListCard.fromJson(data);
   }
 
   Widget _buildCardWithAvatar(

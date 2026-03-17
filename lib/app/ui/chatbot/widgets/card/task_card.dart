@@ -2,22 +2,220 @@ import 'package:flutter/material.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
-class AiSubTask {
+class TaskCard extends StatelessWidget {
   final String title;
-  final int durationMinutes;
-  final bool isCompleted;
+  final String? description;
+  final String? taskEnum;
+  final double isCompleted;
+  final int spentTime;
+  final VoidCallback? onConfirm;
 
-  const AiSubTask({
+  const TaskCard({
+    super.key,
     required this.title,
-    required this.durationMinutes,
-    this.isCompleted = false,
+    this.description,
+    this.taskEnum,
+    required this.isCompleted,
+    required this.spentTime,
+    this.onConfirm,
   });
 
-  AiSubTask copyWith({bool? isCompleted}) {
-    return AiSubTask(
-      title: title,
-      durationMinutes: durationMinutes,
-      isCompleted: isCompleted ?? this.isCompleted,
+  factory TaskCard.fromJson(Map<String, dynamic> json) {
+    return TaskCard(
+      title: json['title'] ?? '',
+      description: json['description'],
+      taskEnum: json['taskEnum'],
+      isCompleted: (json['isCompleted'] ?? 0).toDouble(),
+      spentTime: json['spentTime'] ?? 0,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      elevation: AppConstants.elevationLow,
+      child: Padding(
+        padding: const EdgeInsets.all(AppConstants.spacingM),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildIntegratedHeader(context),
+            const SizedBox(height: AppConstants.spacingM),
+            if (description != null && description!.isNotEmpty) ...[
+              Text(
+                description!,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: AppConstants.spacingM),
+            ],
+            _buildDetailRow(
+              context,
+              icon: Icons.category_outlined,
+              label: '任务类型: ${taskEnum ?? "未分类"}',
+            ),
+            const SizedBox(height: AppConstants.spacingS),
+            _buildDetailRow(
+              context,
+              icon: Icons.timer_outlined,
+              label: '已投入时间: $spentTime 分钟',
+            ),
+            const SizedBox(height: AppConstants.spacingM),
+            _buildProgressSection(context, isCompleted),
+            const SizedBox(height: AppConstants.spacingL),
+            _buildConfirmButton(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIntegratedHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final color = colorScheme.primary;
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(AppConstants.spacingXS),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+          ),
+          child: Icon(
+            Icons.task_alt,
+            size: AppConstants.iconSizeMedium,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: AppConstants.spacingS),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                '任务详情',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppConstants.spacingM,
+        vertical: AppConstants.spacingS,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: AppConstants.iconSizeSmall,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppConstants.spacingM),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressSection(BuildContext context, double progress) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '当前进度',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+              ),
+            ),
+            Text(
+              '${(progress * 100).toInt()}%',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.bold,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppConstants.spacingXS),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+            minHeight: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConfirmButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: FilledButton.icon(
+        onPressed: onConfirm,
+        icon: const Icon(Icons.check, size: 18),
+        label: const Text('确认更新'),
+        style: FilledButton.styleFrom(
+          backgroundColor: colorScheme.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -42,246 +240,18 @@ class TaskCardTestApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('TASK 卡片展示'), centerTitle: true),
         backgroundColor: Colors.grey[100],
-        body: const SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               TaskCard(
                 title: '编写 API 文档',
-                subTasks: [
-                  AiSubTask(title: '整理接口清单', durationMinutes: 20),
-                  AiSubTask(title: '补充请求参数说明', durationMinutes: 30),
-                  AiSubTask(title: '输出示例代码', durationMinutes: 40),
-                ],
+                description: '完成 Sync 接口的对接文档编写',
+                taskEnum: 'WORK',
+                isCompleted: 0.5,
+                spentTime: 60,
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TaskCard extends StatefulWidget {
-  final String title;
-  final List<AiSubTask> subTasks;
-  final VoidCallback? onConfirm;
-
-  const TaskCard({
-    super.key,
-    required this.title,
-    required this.subTasks,
-    this.onConfirm,
-  });
-
-  @override
-  State<TaskCard> createState() => _TaskCardState();
-}
-
-class _TaskCardState extends State<TaskCard> {
-  late List<AiSubTask> _tasks;
-
-  @override
-  void initState() {
-    super.initState();
-    _tasks = List.from(widget.subTasks);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    int totalMinutes = _tasks.fold(0, (sum, item) => sum + item.durationMinutes);
-    int completedMinutes =
-        _tasks.where((t) => t.isCompleted).fold(0, (sum, item) => sum + item.durationMinutes);
-
-    return Card(
-      elevation: AppConstants.elevationLow,
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.spacingM),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildIntegratedHeader(context),
-            const SizedBox(height: AppConstants.spacingM),
-            ..._tasks.asMap().entries.map((entry) {
-              return _buildTaskItem(context, entry.value, entry.key);
-            }),
-            const SizedBox(height: AppConstants.spacingM),
-            _buildProgressSection(context, completedMinutes, totalMinutes),
-            const SizedBox(height: AppConstants.spacingL),
-            _buildConfirmButton(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIntegratedHeader(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final color = colorScheme.primary;
-
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(AppConstants.spacingXS),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.15),
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
-          ),
-          child: Icon(
-            Icons.auto_awesome,
-            size: AppConstants.iconSizeMedium,
-            color: color,
-          ),
-        ),
-        const SizedBox(width: AppConstants.spacingS),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.title,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                'AI 建议的拆解任务',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTaskItem(BuildContext context, AiSubTask task, int index) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppConstants.spacingXS),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: Checkbox(
-              value: task.isCompleted,
-              onChanged: (value) {
-                setState(() {
-                  _tasks[index] = task.copyWith(isCompleted: value ?? false);
-                });
-              },
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
-          const SizedBox(width: AppConstants.spacingS),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.title,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color:
-                        task.isCompleted ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
-                  ),
-                ),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 12,
-                      color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${task.durationMinutes} 分钟',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                        fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressSection(BuildContext context, int completed, int total) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '总进度',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
-              ),
-            ),
-            Text(
-              '$completed / $total 分钟',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.spacingXS),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
-          child: LinearProgressIndicator(
-            value: total > 0 ? completed / total : 0,
-            backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
-            minHeight: 4,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildConfirmButton(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return SizedBox(
-      width: double.infinity,
-      height: 48,
-      child: FilledButton.icon(
-        onPressed: widget.onConfirm,
-        icon: const Icon(Icons.check, size: 18),
-        label: const Text('确认添加'),
-        style: FilledButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           ),
         ),
       ),
