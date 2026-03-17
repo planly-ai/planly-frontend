@@ -29,6 +29,9 @@ import 'package:planly_ai/app/ui/todos/widgets/todos_action.dart';
 import 'platform/platform_features.dart'
     if (dart.library.io) 'platform/platform_features_mobile.dart'
     hide DynamicColorBuilder;
+import 'app/constants/debug_config.dart' show DebugConfig;
+import 'app/data/sample_chat_session.dart'
+    show createSampleChatSessionWithAllCards, removeSampleChatSessions;
 
 FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
 
@@ -82,6 +85,16 @@ Future<void> initializeApp() async {
   await initializeTimeZone();
   await initializeNotifications();
   await IsarController.openDB();
+
+  // 示例数据：创建包含所有类型卡片的聊天会话
+  // 开关位置：lib/app/constants/debug_config.dart -> createSampleChatSession
+  if (DebugConfig.createSampleChatSession) {
+    if (DebugConfig.autoRemoveOldSampleSessions) {
+      await removeSampleChatSessions();
+    }
+    await createSampleChatSessionWithAllCards();
+  }
+
   await initSettings();
 
   Future.microtask(() => AutoBackupService.checkAndPerformAutoBackup());
