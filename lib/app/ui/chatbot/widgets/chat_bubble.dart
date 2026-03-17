@@ -3,12 +3,15 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
-import 'package:planly_ai/app/ui/chatbot/widgets/card/ai_schedule_confirmation_card.dart';
-import 'package:planly_ai/app/ui/chatbot/widgets/card/ai_focus_duration_card.dart';
-import 'package:planly_ai/app/ui/chatbot/widgets/card/ai_schedule_breakdown_card.dart';
-import 'package:planly_ai/app/ui/chatbot/widgets/card/ai_timeline_schedule_card.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'dart:convert';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/alert_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/event_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/event_list_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/graph_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/schedule_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/task_card.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
@@ -21,110 +24,119 @@ class ChatBubble extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // 卡片类型消息的渲染
-    if (!isUser && message.type == MessageType.scheduleConfirmation) {
-      return _buildCardWithAvatar(
-        context,
-        colorScheme,
-        ScheduleConfirmationCard(
-          title: "季度工作汇报会议",
-          time: "2026 年 3 月 10 日 下午 3:00",
-          location: "3 楼会议室 A",
-          reminder: "提前 15 分钟",
-          onConfirm: () {
-            debugPrint('日程确认按钮被点击');
-          },
-        ),
-      );
+    switch (message.type) {
+      case MessageType.cardEvent:
+        return _buildCardWithAvatar(context, colorScheme, _buildEventCard());
+      case MessageType.cardTask:
+        return _buildCardWithAvatar(context, colorScheme, _buildTaskCard());
+      case MessageType.cardAlert:
+        return _buildCardWithAvatar(context, colorScheme, _buildAlertCard());
+      case MessageType.cardGraph:
+        return _buildCardWithAvatar(context, colorScheme, _buildGraphCard());
+      case MessageType.cardSchedule:
+        return _buildCardWithAvatar(context, colorScheme, _buildScheduleCard());
+      case MessageType.cardEventList:
+        return _buildCardWithAvatar(context, colorScheme, _buildEventListCard());
+      default:
+        return _buildTextBubble(context, isUser, colorScheme, theme);
     }
+  }
 
-    if (!isUser && message.type == MessageType.focusDuration) {
-      return _buildCardWithAvatar(
-        context,
-        colorScheme,
-        AiFocusDurationCard(
-          totalDuration: "4 小时 5 分钟",
-          comparisonText: "+65 分钟",
-          comparisonPercentage: "36%",
-          longestSession: "90 分钟",
-          chartData: const [
-            FlSpot(0, 45),
-            FlSpot(2, 60),
-            FlSpot(4, 30),
-            FlSpot(6, 55),
-            FlSpot(8, 45),
-            FlSpot(10, 15),
-          ],
-          insight: "今天的专注时间超过 3 小时，保持得非常好！",
-        ),
+  Widget _buildEventCard() {
+    final data = jsonDecode(message.cardContent ?? '{}');
+    return EventCard(
+      title: data['title'] ?? '',
+      time: data['time'] ?? '${data['startTime'] ?? ''} - ${data['endTime'] ?? ''}',
+      location: data['location'] ?? data['description'] ?? '',
+      reminder: data['reminder'] ?? 'None',
+    );
+  }
+
+  Widget _buildTaskCard() {
+    final data = jsonDecode(message.cardContent ?? '{}');
+    final subtasksData = data['subTasks'] as List? ?? [];
+    final subTasks = subtasksData.map((s) {
+      return AiSubTask(
+        title: s['title'] ?? '',
+        durationMinutes: s['durationMinutes'] ?? 0,
+        isCompleted: s['isCompleted'] ?? false,
       );
-    }
+    }).toList();
 
-    if (!isUser && message.type == MessageType.scheduleBreakdown) {
-      return _buildCardWithAvatar(
-        context,
-        colorScheme,
-        ScheduleBreakdownCard(
-          title: '准备季度总结报告',
-          subTasks: [
-            AiSubTask(title: '收集本季度各项目数据', durationMinutes: 30),
-            AiSubTask(title: '分析数据并制作图表', durationMinutes: 45),
-            AiSubTask(title: '撰写报告初稿', durationMinutes: 60),
-            AiSubTask(title: '审核并修改报告内容', durationMinutes: 30),
-          ],
-          onConfirm: () {
-            debugPrint('任务拆解确认按钮被点击');
-          },
-        ),
+    return TaskCard(
+      title: data['title'] ?? '',
+      subTasks: subTasks,
+    );
+  }
+
+  Widget _buildAlertCard() {
+    final data = jsonDecode(message.cardContent ?? '{}');
+    return AlertCard(
+      title: data['title'] ?? '',
+      alertTime: data['alertTime'] ?? data['startTime'] ?? '',
+      message: data['message'] ?? data['description'] ?? '',
+      repeatStrategy: data['repeatStrategy'] ?? 'ONCE',
+    );
+  }
+
+  Widget _buildGraphCard() {
+    final data = jsonDecode(message.cardContent ?? '{}');
+    final chartDataJson = data['chartData'] as List? ?? [];
+    final chartData = chartDataJson.map((s) {
+      return FlSpot(
+        (s['x'] ?? 0).toDouble(),
+        (s['y'] ?? 0).toDouble(),
       );
-    }
+    }).toList();
 
-    if (!isUser && message.type == MessageType.timelineSchedule) {
-      return _buildCardWithAvatar(
-        context,
-        colorScheme,
-        TimelineScheduleCard(
-          date: "2026 年 3 月 10 日 星期二",
-          busyHours: 7,
-          freeHours: 7,
-          events: [
-            {
-              "title": "团队站会",
-              "time": "09:00 - 10:00",
-              "tag": "会议",
-              "icon": Icons.groups,
-            },
-            {
-              "title": "深度工作时间",
-              "time": "10:00 - 12:00",
-              "tag": "专注",
-              "icon": Icons.menu_book,
-            },
-            {
-              "title": "处理邮件和消息",
-              "time": "14:00 - 15:00",
-              "tag": "忙碌",
-              "icon": Icons.business_center,
-            },
-            {
-              "title": "客户需求评审",
-              "time": "15:00 - 17:00",
-              "tag": "会议",
-              "icon": Icons.groups,
-            },
-            {
-              "title": "项目复盘会",
-              "time": "19:00 - 20:00",
-              "tag": "会议",
-              "icon": Icons.groups,
-            },
-          ],
-        ),
-      );
-    }
+    return GraphCard(
+      totalDuration: data['totalDuration'] ?? '',
+      comparisonText: data['comparisonText'] ?? '',
+      comparisonPercentage: data['comparisonPercentage'] ?? '',
+      longestSession: data['longestSession'] ?? '',
+      chartData: chartData,
+      insight: data['insight'] ?? '',
+    );
+  }
 
-    // 普通文本消息的渲染
-    return _buildTextBubble(context, isUser, colorScheme, theme);
+  Widget _buildScheduleCard() {
+    final data = jsonDecode(message.cardContent ?? '{}');
+    final eventsData = data['events'] as List? ?? [];
+    final events = eventsData.map((e) {
+      return {
+        'title': e['title'] ?? '',
+        'time': e['time'] ?? '',
+        'tag': e['tag'] ?? '',
+        'icon': _getIconForTag(e['tag']),
+      };
+    }).toList();
+
+    return ScheduleCard(
+      date: data['date'] ?? '',
+      busyHours: data['busyHours'] ?? 0,
+      freeHours: data['freeHours'] ?? 0,
+      events: events,
+    );
+  }
+
+  IconData _getIconForTag(String? tag) {
+    switch (tag) {
+      case '会议': return Icons.groups;
+      case '专注': return Icons.menu_book;
+      case '忙碌': return Icons.business_center;
+      default: return Icons.event;
+    }
+  }
+
+  Widget _buildEventListCard() {
+    final data = jsonDecode(message.cardContent ?? '{}');
+    final eventCardsData = data['eventCards'] as List? ?? [];
+    final eventCards = eventCardsData.map((e) => Map<String, String>.from(e)).toList();
+
+    return EventListCard(
+      title: data['title'] ?? '',
+      eventCards: eventCards,
+    );
   }
 
   Widget _buildCardWithAvatar(
@@ -143,10 +155,7 @@ class ChatBubble extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundColor: colorScheme.primaryContainer,
-            child: Icon(
-              Icons.smart_toy,
-              color: colorScheme.onPrimaryContainer,
-            ),
+            child: Icon(Icons.smart_toy, color: colorScheme.onPrimaryContainer),
           ),
           const SizedBox(width: AppConstants.spacingS),
           Expanded(child: card),
@@ -208,44 +217,50 @@ class ChatBubble extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (message.attachmentPath != null)
-                    _buildAttachment(context, message, isUser, colorScheme, theme),
+                    _buildAttachment(
+                      context,
+                      message,
+                      isUser,
+                      colorScheme,
+                      theme,
+                    ),
                   if (message.text.isNotEmpty)
                     MarkdownBody(
-                    data: message.text,
-                    styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
-                      p: theme.textTheme.bodyMedium?.copyWith(
-                        color: isUser
-                            ? colorScheme.onPrimary
-                            : colorScheme.onSurface,
-                      ),
-                      strong: theme.textTheme.bodyMedium?.copyWith(
-                        color: isUser
-                            ? colorScheme.onPrimary
-                            : colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      listBullet: theme.textTheme.bodyMedium?.copyWith(
-                        color: isUser
-                            ? colorScheme.onPrimary
-                            : colorScheme.onSurface,
-                      ),
-                      h1: theme.textTheme.headlineMedium?.copyWith(
-                        color: isUser
-                            ? colorScheme.onPrimary
-                            : colorScheme.onSurface,
-                      ),
-                      h2: theme.textTheme.headlineSmall?.copyWith(
-                        color: isUser
-                            ? colorScheme.onPrimary
-                            : colorScheme.onSurface,
-                      ),
-                      h3: theme.textTheme.titleLarge?.copyWith(
-                        color: isUser
-                            ? colorScheme.onPrimary
-                            : colorScheme.onSurface,
+                      data: message.text,
+                      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                        p: theme.textTheme.bodyMedium?.copyWith(
+                          color: isUser
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
+                        ),
+                        strong: theme.textTheme.bodyMedium?.copyWith(
+                          color: isUser
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        listBullet: theme.textTheme.bodyMedium?.copyWith(
+                          color: isUser
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
+                        ),
+                        h1: theme.textTheme.headlineMedium?.copyWith(
+                          color: isUser
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
+                        ),
+                        h2: theme.textTheme.headlineSmall?.copyWith(
+                          color: isUser
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
+                        ),
+                        h3: theme.textTheme.titleLarge?.copyWith(
+                          color: isUser
+                              ? colorScheme.onPrimary
+                              : colorScheme.onSurface,
+                        ),
                       ),
                     ),
-                  ),
                   const SizedBox(height: 4),
                   Text(
                     DateFormat('HH:mm').format(message.createdAt),
@@ -309,7 +324,9 @@ class ChatBubble extends StatelessWidget {
                 return Container(
                   width: 200,
                   height: 150,
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                   child: Center(
                     child: SizedBox(
                       width: 24,
@@ -317,7 +334,7 @@ class ChatBubble extends StatelessWidget {
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
                             ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
+                                  loadingProgress.expectedTotalBytes!
                             : null,
                         strokeWidth: 2,
                       ),

@@ -179,6 +179,9 @@ class ChatMessage {
   String? attachmentName;
   String? ossId;
 
+  // Optional: raw JSON data for cards
+  String? cardContent;
+
   final session = IsarLink<ChatSession>();
 
   ChatMessage({
@@ -190,6 +193,7 @@ class ChatMessage {
     this.attachmentPath,
     this.attachmentName,
     this.ossId,
+    this.cardContent,
   });
 }
 
@@ -204,4 +208,10 @@ enum MessageType {
   focusDuration,
   scheduleBreakdown,
   timelineSchedule,
+  cardEvent,
+  cardTask,
+  cardSchedule,
+  cardAlert,
+  cardGraph,
+  cardEventList,
 }

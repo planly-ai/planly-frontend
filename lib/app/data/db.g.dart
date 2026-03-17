@@ -7854,21 +7854,26 @@ const ChatMessageSchema = CollectionSchema(
       name: r'attachmentPath',
       type: IsarType.string,
     ),
-    r'createdAt': PropertySchema(
+    r'cardContent': PropertySchema(
       id: 2,
+      name: r'cardContent',
+      type: IsarType.string,
+    ),
+    r'createdAt': PropertySchema(
+      id: 3,
       name: r'createdAt',
       type: IsarType.dateTime,
     ),
-    r'ossId': PropertySchema(id: 3, name: r'ossId', type: IsarType.string),
+    r'ossId': PropertySchema(id: 4, name: r'ossId', type: IsarType.string),
     r'sender': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'sender',
       type: IsarType.byte,
       enumMap: _ChatMessagesenderEnumValueMap,
     ),
-    r'text': PropertySchema(id: 5, name: r'text', type: IsarType.string),
+    r'text': PropertySchema(id: 6, name: r'text', type: IsarType.string),
     r'type': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'type',
       type: IsarType.byte,
       enumMap: _ChatMessagetypeEnumValueMap,
@@ -7916,6 +7921,12 @@ int _chatMessageEstimateSize(
     }
   }
   {
+    final value = object.cardContent;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.ossId;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -7933,11 +7944,12 @@ void _chatMessageSerialize(
 ) {
   writer.writeString(offsets[0], object.attachmentName);
   writer.writeString(offsets[1], object.attachmentPath);
-  writer.writeDateTime(offsets[2], object.createdAt);
-  writer.writeString(offsets[3], object.ossId);
-  writer.writeByte(offsets[4], object.sender.index);
-  writer.writeString(offsets[5], object.text);
-  writer.writeByte(offsets[6], object.type.index);
+  writer.writeString(offsets[2], object.cardContent);
+  writer.writeDateTime(offsets[3], object.createdAt);
+  writer.writeString(offsets[4], object.ossId);
+  writer.writeByte(offsets[5], object.sender.index);
+  writer.writeString(offsets[6], object.text);
+  writer.writeByte(offsets[7], object.type.index);
 }
 
 ChatMessage _chatMessageDeserialize(
@@ -7949,15 +7961,16 @@ ChatMessage _chatMessageDeserialize(
   final object = ChatMessage(
     attachmentName: reader.readStringOrNull(offsets[0]),
     attachmentPath: reader.readStringOrNull(offsets[1]),
-    createdAt: reader.readDateTime(offsets[2]),
+    cardContent: reader.readStringOrNull(offsets[2]),
+    createdAt: reader.readDateTime(offsets[3]),
     id: id,
-    ossId: reader.readStringOrNull(offsets[3]),
+    ossId: reader.readStringOrNull(offsets[4]),
     sender:
-        _ChatMessagesenderValueEnumMap[reader.readByteOrNull(offsets[4])] ??
+        _ChatMessagesenderValueEnumMap[reader.readByteOrNull(offsets[5])] ??
         SenderType.user,
-    text: reader.readString(offsets[5]),
+    text: reader.readString(offsets[6]),
     type:
-        _ChatMessagetypeValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+        _ChatMessagetypeValueEnumMap[reader.readByteOrNull(offsets[7])] ??
         MessageType.text,
   );
   return object;
@@ -7975,16 +7988,18 @@ P _chatMessageDeserializeProp<P>(
     case 1:
       return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readDateTime(offset)) as P;
-    case 3:
       return (reader.readStringOrNull(offset)) as P;
+    case 3:
+      return (reader.readDateTime(offset)) as P;
     case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
       return (_ChatMessagesenderValueEnumMap[reader.readByteOrNull(offset)] ??
               SenderType.user)
           as P;
-    case 5:
-      return (reader.readString(offset)) as P;
     case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (_ChatMessagetypeValueEnumMap[reader.readByteOrNull(offset)] ??
               MessageType.text)
           as P;
@@ -8004,6 +8019,12 @@ const _ChatMessagetypeEnumValueMap = {
   'focusDuration': 5,
   'scheduleBreakdown': 6,
   'timelineSchedule': 7,
+  'cardEvent': 8,
+  'cardTask': 9,
+  'cardSchedule': 10,
+  'cardAlert': 11,
+  'cardGraph': 12,
+  'cardEventList': 13,
 };
 const _ChatMessagetypeValueEnumMap = {
   0: MessageType.text,
@@ -8014,6 +8035,12 @@ const _ChatMessagetypeValueEnumMap = {
   5: MessageType.focusDuration,
   6: MessageType.scheduleBreakdown,
   7: MessageType.timelineSchedule,
+  8: MessageType.cardEvent,
+  9: MessageType.cardTask,
+  10: MessageType.cardSchedule,
+  11: MessageType.cardAlert,
+  12: MessageType.cardGraph,
+  13: MessageType.cardEventList,
 };
 
 Id _chatMessageGetId(ChatMessage object) {
@@ -8436,6 +8463,165 @@ extension ChatMessageQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.greaterThan(property: r'attachmentPath', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'cardContent'),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'cardContent'),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'cardContent',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'cardContent',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'cardContent',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'cardContent',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'cardContent',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'cardContent',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'cardContent',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'cardContent',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'cardContent', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
+  cardContentIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'cardContent', value: ''),
       );
     });
   }
@@ -9032,6 +9218,18 @@ extension ChatMessageQuerySortBy
     });
   }
 
+  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy> sortByCardContent() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cardContent', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy> sortByCardContentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cardContent', Sort.desc);
+    });
+  }
+
   QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy> sortByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.asc);
@@ -9118,6 +9316,18 @@ extension ChatMessageQuerySortThenBy
   thenByAttachmentPathDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'attachmentPath', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy> thenByCardContent() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cardContent', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy> thenByCardContentDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'cardContent', Sort.desc);
     });
   }
 
@@ -9218,6 +9428,14 @@ extension ChatMessageQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ChatMessage, ChatMessage, QDistinct> distinctByCardContent({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'cardContent', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ChatMessage, ChatMessage, QDistinct> distinctByCreatedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'createdAt');
@@ -9272,6 +9490,12 @@ extension ChatMessageQueryProperty
   attachmentPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'attachmentPath');
+    });
+  }
+
+  QueryBuilder<ChatMessage, String?, QQueryOperations> cardContentProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'cardContent');
     });
   }
 

@@ -329,8 +329,51 @@ class ChatbotController extends GetxController {
             debugPrint('[Chat] Error parsing message JSON: $e');
           }
         } else if (currentPrefix == 'card') {
-          debugPrint('[Chat] TODO: Handle card event: $dataStr');
-        } else if (currentPrefix == 'connected') {
+          debugPrint('[Chat] Processing card event: $dataStr');
+          try {
+            final data = jsonDecode(dataStr);
+            final typeStr = (data['type'] ?? '').toString().toUpperCase();
+            
+            MessageType msgType = MessageType.text; // Default or fallback
+            if (typeStr == 'EVENT') {
+              msgType = MessageType.cardEvent;
+            } else if (typeStr == 'TASK') {
+              msgType = MessageType.cardTask;
+            } else if (typeStr == 'ALERT') {
+              msgType = MessageType.cardAlert;
+            } else if (typeStr == 'GRAPH') {
+              msgType = MessageType.cardGraph;
+            } else if (typeStr == 'SCHEDULE') {
+              msgType = MessageType.cardSchedule;
+            } else if (typeStr == 'EVENT_LIST') {
+              msgType = MessageType.cardEventList;
+            }
+
+            final cardMsg = ChatMessage(
+              text: '', // Cards might not have display text
+              createdAt: DateTime.now(),
+              sender: SenderType.bot,
+              type: msgType,
+              cardContent: dataStr,
+            );
+
+            final session = await isar.chatSessions.get(currentSessionId.value!);
+            if (session != null) {
+              await isar.writeTxn(() async {
+                await isar.chatMessages.put(cardMsg);
+                session.messages.add(cardMsg);
+                await session.messages.save();
+                session.updatedAt = DateTime.now();
+                await isar.chatSessions.put(session);
+              });
+              messages.add(cardMsg);
+              _scrollToBottom();
+            }
+          } catch (e) {
+            debugPrint('[Chat] Error parsing card JSON: $e');
+          }
+        }
+ else if (currentPrefix == 'connected') {
           debugPrint('[Chat] SSE Connected successfully: $dataStr');
         } else if (currentPrefix == 'end') {
           debugPrint('[Chat] SSE Stream ended: $dataStr');
