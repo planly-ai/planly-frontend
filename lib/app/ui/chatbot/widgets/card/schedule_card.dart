@@ -281,13 +281,13 @@ class ScheduleCard extends StatelessWidget {
   Widget _buildEventItem(BuildContext context, ScheduleEventData event) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final color = colorScheme.primary;
 
     String timeRange = '';
     try {
       final start = DateTime.parse(event.startTime).toLocal();
       final end = DateTime.parse(event.endTime).toLocal();
-      timeRange = '${DateFormat('HH:mm').format(start)} - ${DateFormat('HH:mm').format(end)}';
+      timeRange =
+          '${DateFormat('HH:mm').format(start)} - ${DateFormat('HH:mm').format(end)}';
     } catch (_) {
       timeRange = '${event.startTime} - ${event.endTime}';
     }
@@ -306,7 +306,9 @@ class ScheduleCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppConstants.spacingS),
             decoration: BoxDecoration(
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+              borderRadius: BorderRadius.circular(
+                AppConstants.borderRadiusSmall,
+              ),
             ),
             child: Icon(
               Icons.event_available,
@@ -324,7 +326,10 @@ class ScheduleCard extends StatelessWidget {
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      14,
+                    ),
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -332,7 +337,10 @@ class ScheduleCard extends StatelessWidget {
                   timeRange,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      13,
+                    ),
                   ),
                 ),
               ],
@@ -382,7 +390,10 @@ class ScheduleCardTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: Text('schedule_card_preview'.tr), centerTitle: true),
+        appBar: AppBar(
+          title: Text('schedule_card_preview'.tr),
+          centerTitle: true,
+        ),
         backgroundColor: Colors.grey[100],
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

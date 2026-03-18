@@ -119,7 +119,7 @@ class _EventCardState extends State<EventCard> {
               Text(
                 'schedule_confirmation_title'.tr,
                 style: theme.textTheme.titleSmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                   fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
                 ),
