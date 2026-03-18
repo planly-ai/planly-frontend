@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
@@ -114,7 +115,7 @@ class _EventCardState extends State<EventCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '日程确认',
+                'schedule_confirmation_title'.tr,
                 style: theme.textTheme.headlineMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   fontWeight: FontWeight.bold,
@@ -122,7 +123,7 @@ class _EventCardState extends State<EventCard> {
                 ),
               ),
               Text(
-                '请核对以下任务详情',
+                'schedule_confirmation_subtitle'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -187,7 +188,7 @@ class _EventCardState extends State<EventCard> {
       child: FilledButton.icon(
         onPressed: widget.onConfirm,
         icon: const Icon(Icons.check_circle_outline, size: 18),
-        label: const Text('确认添加'),
+        label: Text('confirm_add'.tr),
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
@@ -217,7 +218,7 @@ class EventCardTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: const Text('EVENT 卡片展示'), centerTitle: true),
+        appBar: AppBar(title: Text('event_card_preview'.tr), centerTitle: true),
         backgroundColor: Colors.grey[100],
         body: const SingleChildScrollView(
           padding: EdgeInsets.all(16.0),

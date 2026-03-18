@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
@@ -108,7 +109,7 @@ class ScheduleCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '今日时间轴',
+                'timeline_title'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -127,18 +128,18 @@ class ScheduleCard extends StatelessWidget {
       children: [
         _buildStatBox(
           context,
-          label: '忙碌时段',
+          label: 'timeline_busy'.tr,
           value: '$busyHours',
-          unit: '小时',
+          unit: 'unit_hour'.tr,
           color: colorScheme.primary,
           bgColor: colorScheme.primary.withValues(alpha: 0.12),
         ),
         const SizedBox(width: AppConstants.spacingM),
         _buildStatBox(
           context,
-          label: '空闲时段',
+          label: 'timeline_free'.tr,
           value: '$freeHours',
-          unit: '小时',
+          unit: 'unit_hour'.tr,
           color: colorScheme.onSurfaceVariant,
           bgColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         ),
@@ -378,7 +379,7 @@ class ScheduleCardTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: const Text('SCHEDULE 卡片展示'), centerTitle: true),
+        appBar: AppBar(title: Text('schedule_card_preview'.tr), centerTitle: true),
         backgroundColor: Colors.grey[100],
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

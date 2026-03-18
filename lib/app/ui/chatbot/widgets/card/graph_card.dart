@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
@@ -43,7 +44,7 @@ class GraphCard extends StatelessWidget {
             const SizedBox(height: AppConstants.spacingM),
             Center(
               child: Text(
-                '单位: ${graph.unit}',
+                'unit_label'.trParams({'unit': graph.unit}),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -88,7 +89,7 @@ class GraphCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '数据分析图表',
+                'data_analysis_chart'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -319,7 +320,7 @@ class GraphCardTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: const Text('GRAPH 卡片展示'), centerTitle: true),
+        appBar: AppBar(title: Text('graph_card_preview'.tr), centerTitle: true),
         backgroundColor: Colors.grey[100],
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

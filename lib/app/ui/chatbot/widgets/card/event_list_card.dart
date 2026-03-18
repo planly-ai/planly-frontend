@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
@@ -187,7 +188,7 @@ class EventListCardTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: const Text('EVENT_LIST 卡片展示'), centerTitle: true),
+        appBar: AppBar(title: Text('event_list_card_preview'.tr), centerTitle: true),
         backgroundColor: Colors.grey[100],
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

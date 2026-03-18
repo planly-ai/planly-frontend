@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
@@ -57,13 +58,13 @@ class TaskCard extends StatelessWidget {
             _buildDetailRow(
               context,
               icon: Icons.category_outlined,
-              label: '任务类型: ${taskEnum ?? "未分类"}',
+              label: 'task_type_label'.trParams({'type': taskEnum ?? 'unclassified'.tr}),
             ),
             const SizedBox(height: AppConstants.spacingS),
             _buildDetailRow(
               context,
               icon: Icons.timer_outlined,
-              label: '已投入时间: $spentTime 分钟',
+              label: 'time_spent_label'.trParams({'minutes': spentTime.toString()}),
             ),
             const SizedBox(height: AppConstants.spacingM),
             _buildProgressSection(context, isCompleted),
@@ -110,7 +111,7 @@ class TaskCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                '任务详情',
+                'details'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
                   color: colorScheme.onSurfaceVariant,
@@ -170,7 +171,7 @@ class TaskCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '当前进度',
+              'current_progress'.tr,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
                 fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
@@ -208,7 +209,7 @@ class TaskCard extends StatelessWidget {
       child: FilledButton.icon(
         onPressed: onConfirm,
         icon: const Icon(Icons.check, size: 18),
-        label: const Text('确认更新'),
+        label: Text('confirm_update'.tr),
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
@@ -238,7 +239,7 @@ class TaskCardTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: const Text('TASK 卡片展示'), centerTitle: true),
+        appBar: AppBar(title: Text('task_card_preview'.tr), centerTitle: true),
         backgroundColor: Colors.grey[100],
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
