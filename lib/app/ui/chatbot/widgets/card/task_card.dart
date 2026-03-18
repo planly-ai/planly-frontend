@@ -50,6 +50,7 @@ class TaskCard extends StatelessWidget {
               Text(
                 description!,
                 style: theme.textTheme.bodyMedium?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   color: colorScheme.onSurface,
                 ),
               ),
@@ -102,10 +103,11 @@ class TaskCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
+                  letterSpacing: -0.3,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -113,7 +115,7 @@ class TaskCard extends StatelessWidget {
               Text(
                 'details'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -140,6 +142,7 @@ class TaskCard extends StatelessWidget {
         color: colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
+      constraints: const BoxConstraints(minHeight: 48),
       child: Row(
         children: [
           Icon(
@@ -152,8 +155,9 @@ class TaskCard extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                color: colorScheme.onSurface,
+              ),
             ),
           ),
         ],
@@ -174,15 +178,15 @@ class TaskCard extends StatelessWidget {
               'current_progress'.tr,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
               ),
             ),
             Text(
               '${(progress * 100).toInt()}%',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                fontWeight: FontWeight.w600,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
               ),
             ),
           ],
@@ -209,7 +213,13 @@ class TaskCard extends StatelessWidget {
       child: FilledButton.icon(
         onPressed: onConfirm,
         icon: const Icon(Icons.check, size: 18),
-        label: Text('confirm_update'.tr),
+        label: Text(
+          'confirm_update'.tr,
+          style: TextStyle(
+            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(

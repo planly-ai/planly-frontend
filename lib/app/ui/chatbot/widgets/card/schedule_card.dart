@@ -102,16 +102,17 @@ class ScheduleCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
+                  letterSpacing: -0.3,
                 ),
               ),
               Text(
                 'timeline_title'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -172,7 +173,7 @@ class ScheduleCard extends StatelessWidget {
               label,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: color,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
               ),
             ),
@@ -195,12 +196,12 @@ class ScheduleCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   unit,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                     color: color,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      14,
+                      12,
                     ),
                   ),
                 ),
@@ -295,20 +296,21 @@ class ScheduleCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
+      constraints: const BoxConstraints(minHeight: 48),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppConstants.spacingS),
             decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.event_available,
-              color: Colors.white,
+              color: colorScheme.onSurfaceVariant,
               size: AppConstants.iconSizeMedium,
             ),
           ),
@@ -319,10 +321,11 @@ class ScheduleCard extends StatelessWidget {
               children: [
                 Text(
                   event.title,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 15),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                    letterSpacing: -0.2,
                   ),
                 ),
                 Text(

@@ -62,10 +62,11 @@ class _EventCardState extends State<EventCard> {
             const SizedBox(height: AppConstants.spacingM),
             Text(
               widget.title,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 18),
-                fontWeight: FontWeight.bold,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+                fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
+                letterSpacing: -0.3,
               ),
             ),
             const SizedBox(height: AppConstants.spacingM),
@@ -74,7 +75,8 @@ class _EventCardState extends State<EventCard> {
               icon: Icons.access_time,
               label: _formatTimeRange(widget.startTime, widget.endTime),
             ),
-            if (widget.description != null && widget.description!.isNotEmpty) ...[
+            if (widget.description != null &&
+                widget.description!.isNotEmpty) ...[
               const SizedBox(height: AppConstants.spacingS),
               _buildDetailRow(
                 context,
@@ -116,16 +118,16 @@ class _EventCardState extends State<EventCard> {
             children: [
               Text(
                 'schedule_confirmation_title'.tr,
-                style: theme.textTheme.headlineMedium?.copyWith(
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
                 ),
               ),
               Text(
                 'schedule_confirmation_subtitle'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -166,15 +168,12 @@ class _EventCardState extends State<EventCard> {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                  ),
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                color: colorScheme.onSurface,
+              ),
             ),
           ),
-          if (trailing != null)
-            Transform.scale(
-              scale: 0.8,
-              child: trailing,
-            ),
+          if (trailing != null) Transform.scale(scale: 0.8, child: trailing),
         ],
       ),
     );
@@ -184,15 +183,23 @@ class _EventCardState extends State<EventCard> {
     final colorScheme = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
-      height: 54,
+      height: 48,
       child: FilledButton.icon(
         onPressed: widget.onConfirm,
-        icon: const Icon(Icons.check_circle_outline, size: 18),
-        label: Text('confirm_add'.tr),
+        icon: const Icon(Icons.check, size: 18),
+        label: Text(
+          'confirm_add'.tr,
+          style: TextStyle(
+            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusMedium,
+            ),
           ),
         ),
       ),

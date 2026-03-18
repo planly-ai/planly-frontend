@@ -54,11 +54,12 @@ class EventListCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: theme.textTheme.headlineMedium?.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontSize:
                           ResponsiveUtils.getResponsiveFontSize(context, 16),
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
+                      letterSpacing: -0.3,
                     ),
                   ),
                 ),
@@ -89,20 +90,21 @@ class EventListCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
+      constraints: const BoxConstraints(minHeight: 48),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppConstants.spacingS),
             decoration: BoxDecoration(
-              color: colorScheme.primary,
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.event,
-              color: Colors.white,
+              color: colorScheme.onSurfaceVariant,
               size: AppConstants.iconSizeMedium,
             ),
           ),
@@ -113,11 +115,12 @@ class EventListCard extends StatelessWidget {
               children: [
                 Text(
                   e.title,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
                     fontSize:
-                        ResponsiveUtils.getResponsiveFontSize(context, 15),
+                        ResponsiveUtils.getResponsiveFontSize(context, 14),
+                    letterSpacing: -0.2,
                   ),
                 ),
                 if (e.startTime.isNotEmpty && e.endTime.isNotEmpty)

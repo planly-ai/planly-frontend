@@ -46,6 +46,7 @@ class GraphCard extends StatelessWidget {
               child: Text(
                 'unit_label'.trParams({'unit': graph.unit}),
                 style: theme.textTheme.labelSmall?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -82,16 +83,17 @@ class GraphCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                  fontWeight: FontWeight.bold,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
+                  fontWeight: FontWeight.w600,
                   color: colorScheme.onSurface,
+                  letterSpacing: -0.3,
                 ),
               ),
               Text(
                 'data_analysis_chart'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
+                  fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),

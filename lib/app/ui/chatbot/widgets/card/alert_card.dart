@@ -54,8 +54,9 @@ class AlertCard extends StatelessWidget {
                   padding: const EdgeInsets.all(AppConstants.spacingXS),
                   decoration: BoxDecoration(
                     color: colorScheme.primary.withValues(alpha: 0.15),
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.borderRadiusSmall),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.borderRadiusSmall,
+                    ),
                   ),
                   child: Icon(
                     Icons.notifications_active,
@@ -70,18 +71,23 @@ class AlertCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: theme.textTheme.headlineMedium?.copyWith(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontSize: ResponsiveUtils.getResponsiveFontSize(
-                              context, 16),
-                          fontWeight: FontWeight.bold,
+                            context,
+                            16,
+                          ),
+                          fontWeight: FontWeight.w600,
                           color: colorScheme.onSurface,
+                          letterSpacing: -0.3,
                         ),
                       ),
                       Text(
                         'alert_time_label'.trParams({'time': formattedTime}),
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: ResponsiveUtils.getResponsiveFontSize(
-                              context, 12),
+                            context,
+                            12,
+                          ),
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -94,6 +100,7 @@ class AlertCard extends StatelessWidget {
             Text(
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                 color: colorScheme.onSurface,
               ),
             ),
@@ -102,25 +109,53 @@ class AlertCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.5),
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.borderRadiusSmall),
+                    color: colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.borderRadiusSmall,
+                    ),
                   ),
                   child: Text(
                     'repeat_label'.trParams({'strategy': repeatStrategy}),
                     style: theme.textTheme.labelSmall?.copyWith(
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(
+                        context,
+                        11,
+                      ),
                       color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                TextButton.icon(
-                  onPressed: onAction,
-                  icon: const Icon(Icons.done_all, size: 16),
-                  label: Text('ready'.tr),
+                SizedBox(
+                  height: 48,
+                  child: FilledButton.icon(
+                    onPressed: onAction,
+                    icon: const Icon(Icons.check, size: 18),
+                    label: Text(
+                      'ready'.tr,
+                      style: TextStyle(
+                        fontSize: ResponsiveUtils.getResponsiveFontSize(
+                          context,
+                          14,
+                        ),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppConstants.borderRadiusMedium,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
