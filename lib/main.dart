@@ -46,21 +46,8 @@ RxString firstDay = 'monday'.obs;
 Locale locale = const Locale('en', 'US');
 
 final List<Map<String, dynamic>> appLanguages = [
-  {'name': 'العربية', 'locale': const Locale('ar', 'AR')},
-  {'name': 'Deutsch', 'locale': const Locale('de', 'DE')},
   {'name': 'English', 'locale': const Locale('en', 'US')},
-  {'name': 'Español', 'locale': const Locale('es', 'ES')},
-  {'name': 'Français', 'locale': const Locale('fr', 'FR')},
-  {'name': 'Italiano', 'locale': const Locale('it', 'IT')},
-  {'name': '한국어', 'locale': const Locale('ko', 'KR')},
-  {'name': 'فارسی', 'locale': const Locale('fa', 'IR')},
-  {'name': 'Polski', 'locale': const Locale('pl', 'PL')},
-  {'name': 'Русский', 'locale': const Locale('ru', 'RU')},
-  {'name': 'Tiếng việt', 'locale': const Locale('vi', 'VN')},
-  {'name': 'Türkçe', 'locale': const Locale('tr', 'TR')},
   {'name': '中文(简体)', 'locale': const Locale('zh', 'CN')},
-  {'name': '中文(繁體)', 'locale': const Locale('zh', 'TW')},
-  {'name': 'Português', 'locale': const Locale('pt', 'PT')},
 ];
 
 List<String> allScreens = [];
