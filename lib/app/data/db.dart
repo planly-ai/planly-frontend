@@ -219,7 +219,6 @@ enum MessageType {
 @collection
 class DailyReview {
   Id id = Isar.autoIncrement;
-  @Index(unique: true)
   String? serverId;
   String? userId;
   @Index()

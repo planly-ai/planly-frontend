@@ -9578,19 +9578,6 @@ const DailyReviewSchema = CollectionSchema(
   deserializeProp: _dailyReviewDeserializeProp,
   idName: r'id',
   indexes: {
-    r'serverId': IndexSchema(
-      id: -7950187970872907662,
-      name: r'serverId',
-      unique: true,
-      replace: false,
-      properties: [
-        IndexPropertySchema(
-          name: r'serverId',
-          type: IndexType.hash,
-          caseSensitive: true,
-        ),
-      ],
-    ),
     r'reviewDate': IndexSchema(
       id: -4677418855940269689,
       name: r'reviewDate',
@@ -9724,63 +9711,6 @@ void _dailyReviewAttach(
   object.id = id;
 }
 
-extension DailyReviewByIndex on IsarCollection<DailyReview> {
-  Future<DailyReview?> getByServerId(String? serverId) {
-    return getByIndex(r'serverId', [serverId]);
-  }
-
-  DailyReview? getByServerIdSync(String? serverId) {
-    return getByIndexSync(r'serverId', [serverId]);
-  }
-
-  Future<bool> deleteByServerId(String? serverId) {
-    return deleteByIndex(r'serverId', [serverId]);
-  }
-
-  bool deleteByServerIdSync(String? serverId) {
-    return deleteByIndexSync(r'serverId', [serverId]);
-  }
-
-  Future<List<DailyReview?>> getAllByServerId(List<String?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return getAllByIndex(r'serverId', values);
-  }
-
-  List<DailyReview?> getAllByServerIdSync(List<String?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'serverId', values);
-  }
-
-  Future<int> deleteAllByServerId(List<String?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'serverId', values);
-  }
-
-  int deleteAllByServerIdSync(List<String?> serverIdValues) {
-    final values = serverIdValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'serverId', values);
-  }
-
-  Future<Id> putByServerId(DailyReview object) {
-    return putByIndex(r'serverId', object);
-  }
-
-  Id putByServerIdSync(DailyReview object, {bool saveLinks = true}) {
-    return putByIndexSync(r'serverId', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByServerId(List<DailyReview> objects) {
-    return putAllByIndex(r'serverId', objects);
-  }
-
-  List<Id> putAllByServerIdSync(
-    List<DailyReview> objects, {
-    bool saveLinks = true,
-  }) {
-    return putAllByIndexSync(r'serverId', objects, saveLinks: saveLinks);
-  }
-}
-
 extension DailyReviewQueryWhereSort
     on QueryBuilder<DailyReview, DailyReview, QWhere> {
   QueryBuilder<DailyReview, DailyReview, QAfterWhere> anyId() {
@@ -9859,82 +9789,6 @@ extension DailyReviewQueryWhere
           includeUpper: includeUpper,
         ),
       );
-    });
-  }
-
-  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> serverIdIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IndexWhereClause.equalTo(indexName: r'serverId', value: [null]),
-      );
-    });
-  }
-
-  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause>
-  serverIdIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IndexWhereClause.between(
-          indexName: r'serverId',
-          lower: [null],
-          includeLower: false,
-          upper: [],
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> serverIdEqualTo(
-    String? serverId,
-  ) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        IndexWhereClause.equalTo(indexName: r'serverId', value: [serverId]),
-      );
-    });
-  }
-
-  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> serverIdNotEqualTo(
-    String? serverId,
-  ) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'serverId',
-                lower: [],
-                upper: [serverId],
-                includeUpper: false,
-              ),
-            )
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'serverId',
-                lower: [serverId],
-                includeLower: false,
-                upper: [],
-              ),
-            );
-      } else {
-        return query
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'serverId',
-                lower: [serverId],
-                includeLower: false,
-                upper: [],
-              ),
-            )
-            .addWhereClause(
-              IndexWhereClause.between(
-                indexName: r'serverId',
-                lower: [],
-                upper: [serverId],
-                includeUpper: false,
-              ),
-            );
-      }
     });
   }
 
