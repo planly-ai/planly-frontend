@@ -11,7 +11,7 @@ class DebugConfig {
 
   /// 是否启动时自动创建示例聊天会话
   /// 启用后会在应用启动时创建一个包含所有类型卡片的示例会话
-  static const bool createSampleChatSession = true;
+  static const bool createSampleChatSession = false;
 
   /// 是否自动删除旧的示例会话
   /// 启用后会在创建新示例数据前先清理旧的示例数据
@@ -21,7 +21,7 @@ class DebugConfig {
 
   /// 是否启动时自动创建示例日程数据
   /// 按照运行日期生成前后两周的时间段中的大学生日常日程
-  static const bool createSampleTodoData = true;
+  static const bool createSampleTodoData = false;
 
   /// 是否自动删除旧的示例日程数据
   static const bool autoRemoveOldSampleTodos = false;
