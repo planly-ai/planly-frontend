@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
+import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
+import 'package:planly_ai/main.dart';
 
 class EventCard extends StatefulWidget {
   final String title;
@@ -10,22 +14,28 @@ class EventCard extends StatefulWidget {
   final String endTime;
   final String? description;
   final VoidCallback? onConfirm;
+  final ChatMessage message;
+  final bool isActionDone;
 
   const EventCard({
     super.key,
     required this.title,
     required this.startTime,
     required this.endTime,
+    required this.message,
+    this.isActionDone = false,
     this.description,
     this.onConfirm,
   });
 
-  factory EventCard.fromJson(Map<String, dynamic> json) {
+  factory EventCard.fromJson(Map<String, dynamic> json, {required ChatMessage message}) {
     return EventCard(
       title: json['title'] ?? '',
       startTime: json['startTime'] ?? '',
       endTime: json['endTime'] ?? '',
       description: json['description'],
+      message: message,
+      isActionDone: json['isActionDone'] ?? false,
     );
   }
 
@@ -34,6 +44,14 @@ class EventCard extends StatefulWidget {
 }
 
 class _EventCardState extends State<EventCard> {
+  late bool _isAdded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isAdded = widget.isActionDone;
+  }
+
   String _formatTimeRange(String start, String end) {
     try {
       final startDate = DateTime.parse(start).toLocal();
@@ -42,6 +60,50 @@ class _EventCardState extends State<EventCard> {
       return '${formatter.format(startDate)} - ${DateFormat('HH:mm').format(endDate)}';
     } catch (e) {
       return '$start - $end';
+    }
+  }
+
+  Future<void> _handleAddTodo() async {
+    if (_isAdded) return;
+
+    final todoController = Get.find<TodoController>();
+
+    final targetTask = todoController.tasks.firstWhereOrNull(
+          (t) =>
+              !t.archive &&
+              (t.title.toLowerCase() == 'uncategorized' ||
+                  t.title == 'unclassified'.tr ||
+                  t.title == '未分类'),
+        ) ??
+        todoController.tasks.firstWhereOrNull((t) => !t.archive) ??
+        todoController.tasks.first;
+
+    try {
+      await todoController.addTodo(
+        task: targetTask,
+        title: widget.title,
+        description: widget.description ?? '',
+        time: widget.startTime,
+        pinned: false,
+        priority: Priority.none,
+        tags: [],
+      );
+
+      // Persist the action status in the message cardContent JSON
+      await isar.writeTxn(() async {
+        final data = jsonDecode(widget.message.cardContent ?? '{}');
+        data['isActionDone'] = true;
+        widget.message.cardContent = jsonEncode(data);
+        await isar.chatMessages.put(widget.message);
+      });
+
+      if (mounted) {
+        setState(() {
+          _isAdded = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error adding todo from EventCard: $e');
     }
   }
 
@@ -185,7 +247,7 @@ class _EventCardState extends State<EventCard> {
       width: double.infinity,
       height: 48,
       child: FilledButton.icon(
-        onPressed: widget.onConfirm,
+        onPressed: _isAdded ? null : _handleAddTodo,
         icon: const Icon(Icons.check, size: 18),
         label: Text(
           'confirm_add'.tr,
@@ -227,8 +289,8 @@ class EventCardTestApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: Text('event_card_preview'.tr), centerTitle: true),
         backgroundColor: Colors.grey[100],
-        body: const SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               EventCard(
@@ -236,6 +298,12 @@ class EventCardTestApp extends StatelessWidget {
                 startTime: "2024-03-15T10:00:00.000Z",
                 endTime: "2024-03-15T11:30:00.000Z",
                 description: "讨论下周开发计划与任务分配",
+                message: ChatMessage(
+                  text: '',
+                  createdAt: DateTime.now(),
+                  sender: SenderType.bot,
+                  type: MessageType.cardEvent,
+                ),
               ),
             ],
           ),

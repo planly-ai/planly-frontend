@@ -43,7 +43,7 @@ class ChatBubble extends StatelessWidget {
 
   Widget _buildEventCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
-    return EventCard.fromJson(data);
+    return EventCard.fromJson(data, message: message);
   }
 
   Widget _buildTaskCard() {
