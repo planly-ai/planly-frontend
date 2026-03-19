@@ -12,6 +12,8 @@ import 'package:file_selector/file_selector.dart';
 import 'package:dio/dio.dart' as dio_lib;
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/services/api/planly_api_client.dart';
+import 'package:planly_ai/app/services/chat_service.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatbotController extends GetxController {
   // Observables
@@ -34,6 +36,7 @@ class ChatbotController extends GetxController {
   // Services
   final AsrService _asrService = AsrService();
   final AudioRecordingService _audioService = AudioRecordingService();
+  final ChatService _chatService = ChatService();
 
   // Voice Recording State
   var isRecording = false.obs;
@@ -73,16 +76,9 @@ class ChatbotController extends GetxController {
   Future<bool> createNewSession() async {
     String? sessionId;
     try {
-      final dio = PlanlyApiClient.instance.dio;
-      final url = '${AppConstants.planlyBaseUrl}/api/v1/sessions/create';
-      debugPrint('[Session] Creating session at: $url');
+      final response = await _chatService.createSession();
 
-      final response = await dio.post(
-        url,
-      );
-      
       debugPrint('[Session] Response status: ${response.statusCode}');
-      debugPrint('[Session] Response data type: ${response.data.runtimeType}');
       debugPrint('[Session] Response data: ${response.data}');
 
       var responseData = response.data;
@@ -94,11 +90,15 @@ class ChatbotController extends GetxController {
         }
       }
 
-      if (response.statusCode == 200 && responseData is Map && responseData['code'] == 200) {
+      if (response.statusCode == 200 &&
+          responseData is Map &&
+          responseData['code'] == 200) {
         sessionId = responseData['data'];
         debugPrint('[Session] Created session ID: $sessionId');
       } else {
-        debugPrint('[Session] Failed to create session. Status: ${response.statusCode}, Data: $responseData');
+        debugPrint(
+          '[Session] Failed to create session. Status: ${response.statusCode}, Data: $responseData',
+        );
         showSnackBar('session_creation_failed'.tr, isError: true);
         return false;
       }
@@ -168,7 +168,7 @@ class ChatbotController extends GetxController {
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 600),
           curve: Curves.easeOut,
         );
       }
@@ -192,13 +192,31 @@ class ChatbotController extends GetxController {
     final session = await isar.chatSessions.get(currentSessionId.value!);
     if (session == null) return;
 
+    MessageType msgType = MessageType.text;
+    if (hasAttachment) {
+      final fileName = uploadedFileName.value?.toLowerCase() ?? '';
+      if (fileName.endsWith('.jpg') ||
+          fileName.endsWith('.jpeg') ||
+          fileName.endsWith('.png') ||
+          fileName.endsWith('.gif') ||
+          fileName.endsWith('.webp')) {
+        msgType = MessageType.image;
+      } else {
+        msgType = MessageType.file;
+      }
+    }
+
     final userMsg = ChatMessage(
       text: text,
       createdAt: DateTime.now(),
       sender: SenderType.user,
-      type: hasAttachment ? MessageType.image : MessageType.text,
+      type: msgType,
       attachmentPath: uploadedUrl.value,
+      attachmentName: uploadedFileName.value,
+      ossId: uploadedOssId.value,
     );
+
+    final currentOssId = uploadedOssId.value;
 
     // Reset upload state
     selectedFile.value = null;
@@ -228,7 +246,221 @@ class ChatbotController extends GetxController {
     _scrollToBottom();
     loadSessions();
 
-    await _simulateAiResponse();
+    await _handleBotResponse(text, currentOssId, session.sessionId!);
+  }
+
+  Future<void> _handleBotResponse(
+    String text,
+    String? ossId,
+    String sessionId,
+  ) async {
+    isTyping.value = true;
+    _scrollToBottom();
+
+    ChatMessage? currentBotMsg;
+
+    try {
+      // 1. Establish SSE connection first
+      final streamResponse = await _chatService.getChatStream(sessionId);
+
+      // 2. Send the chat message trigger
+      final response = await _chatService.chat(
+        message: text,
+        ossIds: ossId != null ? [ossId] : null,
+        sessionId: sessionId,
+      );
+
+      if (response.statusCode != 200 || response.data['code'] != 200) {
+        debugPrint(
+          '[Chat] Failed to send message. Status: ${response.statusCode}, Data: ${response.data}',
+        );
+        showSnackBar('error'.tr, isError: true);
+        isTyping.value = false;
+        return;
+      }
+
+      // 3. Listen to the stream
+      final stream = streamResponse.data!.stream;
+
+      String accumulationBuffer = '';
+      String currentPrefix = '';
+
+      Future<void> processCurrentBuffer() async {
+        if (currentPrefix.isEmpty || accumulationBuffer.isEmpty) return;
+
+        final dataStr = accumulationBuffer.trim();
+        debugPrint('[Chat] Processing $currentPrefix buffer: $dataStr');
+
+        if (currentPrefix == 'message') {
+          try {
+            final data = jsonDecode(dataStr);
+            final content = data['content'] ?? '';
+
+            final botMsg = currentBotMsg;
+            if (botMsg == null) {
+              final newMsg = ChatMessage(
+                text: content,
+                createdAt: DateTime.now(),
+                sender: SenderType.bot,
+                type: MessageType.text,
+              );
+              currentBotMsg = newMsg;
+
+              final session = await isar.chatSessions.get(
+                currentSessionId.value!,
+              );
+              if (session != null) {
+                await isar.writeTxn(() async {
+                  await isar.chatMessages.put(newMsg);
+                  session.messages.add(newMsg);
+                  await session.messages.save();
+                  session.updatedAt = DateTime.now();
+                  await isar.chatSessions.put(session);
+                });
+                messages.add(newMsg);
+              }
+            } else {
+              // Update existing message
+              botMsg.text += content;
+              messages.refresh(); // Trigger GetX update
+            }
+            _scrollToBottom();
+          } catch (e) {
+            debugPrint('[Chat] Error parsing message JSON: $e');
+          }
+        } else if (currentPrefix == 'card') {
+          debugPrint('[Chat] Processing card event: $dataStr');
+          try {
+            final data = jsonDecode(dataStr);
+            final typeStr = (data['type'] ?? '').toString().toUpperCase();
+            
+            MessageType msgType = MessageType.text; // Default or fallback
+            if (typeStr == 'EVENT') {
+              msgType = MessageType.cardEvent;
+            } else if (typeStr == 'TASK') {
+              msgType = MessageType.cardTask;
+            } else if (typeStr == 'ALERT') {
+              msgType = MessageType.cardAlert;
+            } else if (typeStr == 'GRAPH') {
+              msgType = MessageType.cardGraph;
+            } else if (typeStr == 'SCHEDULE') {
+              msgType = MessageType.cardSchedule;
+            } else if (typeStr == 'EVENT_LIST') {
+              msgType = MessageType.cardEventList;
+            }
+
+            final cardMsg = ChatMessage(
+              text: '', // Cards might not have display text
+              createdAt: DateTime.now(),
+              sender: SenderType.bot,
+              type: msgType,
+              cardContent: dataStr,
+            );
+
+            final session = await isar.chatSessions.get(currentSessionId.value!);
+            if (session != null) {
+              await isar.writeTxn(() async {
+                await isar.chatMessages.put(cardMsg);
+                session.messages.add(cardMsg);
+                await session.messages.save();
+                session.updatedAt = DateTime.now();
+                await isar.chatSessions.put(session);
+              });
+              messages.add(cardMsg);
+              _scrollToBottom();
+            }
+          } catch (e) {
+            debugPrint('[Chat] Error parsing card JSON: $e');
+          }
+        }
+ else if (currentPrefix == 'connected') {
+          debugPrint('[Chat] SSE Connected successfully: $dataStr');
+        } else if (currentPrefix == 'end') {
+          debugPrint('[Chat] SSE Stream ended: $dataStr');
+          isTyping.value = false;
+        }
+
+        accumulationBuffer = '';
+        currentPrefix = '';
+      }
+
+      final timestampRegex = RegExp(r'^\d{2}:\d{2}:\d{2}$');
+
+      await for (final chunk
+          in stream
+              .cast<List<int>>()
+              .transform(utf8.decoder)
+              .transform(const LineSplitter())) {
+        final trimmedChunk = chunk.trim();
+        if (trimmedChunk.isEmpty) {
+          // SSE events are separated by blank lines
+          await processCurrentBuffer();
+          continue;
+        }
+
+        debugPrint('[Chat] Received SSE chunk: $chunk');
+
+        if (trimmedChunk.startsWith('event:')) {
+          await processCurrentBuffer();
+          currentPrefix = trimmedChunk.substring(6).trim();
+        } else if (trimmedChunk.startsWith('data:')) {
+          final dataValue = trimmedChunk.substring(5).trim();
+          accumulationBuffer += dataValue;
+          // If the server doesn't use empty lines to separate, we might need a different flush strategy.
+          // For now, let's also flush if it's JSON and we have a prefix.
+          if (dataValue.endsWith('}') && currentPrefix.isNotEmpty) {
+            await processCurrentBuffer();
+          }
+        } else if (trimmedChunk.startsWith('connected')) {
+          await processCurrentBuffer();
+          currentPrefix = 'connected';
+          accumulationBuffer = chunk.substring(9);
+        } else if (trimmedChunk.startsWith('card')) {
+          await processCurrentBuffer();
+          currentPrefix = 'card';
+          accumulationBuffer = chunk.substring(4);
+        } else if (trimmedChunk.startsWith('message')) {
+          await processCurrentBuffer();
+          currentPrefix = 'message';
+          accumulationBuffer = chunk.substring(7);
+        } else if (trimmedChunk.startsWith('end')) {
+          await processCurrentBuffer();
+          currentPrefix = 'end';
+          accumulationBuffer = chunk.substring(3);
+        } else if (timestampRegex.hasMatch(trimmedChunk)) {
+          await processCurrentBuffer();
+        } else if (currentPrefix.isNotEmpty) {
+          accumulationBuffer += chunk;
+        }
+
+        // If end event was processed, stop the loop
+        if (!isTyping.value &&
+            currentPrefix == '' &&
+            accumulationBuffer == '') {
+          break;
+        }
+      }
+
+      // Final flush
+      await processCurrentBuffer();
+
+      // After stream ends, ensure the final text is saved to Isar
+      final finalMsg = currentBotMsg;
+      if (finalMsg != null) {
+        await isar.writeTxn(() async {
+          await isar.chatMessages.put(finalMsg);
+        });
+      }
+    } catch (e) {
+      debugPrint('[Chat] Exception in SSE handling: $e');
+      if (e is dio_lib.DioException) {
+        debugPrint('[Chat] Dio error: ${e.response?.data}');
+      }
+      showSnackBar('error'.tr, isError: true);
+    } finally {
+      isTyping.value = false;
+      _scrollToBottom();
+    }
   }
 
   Future<void> pickAndUploadFile() async {
@@ -242,11 +474,27 @@ class ChatbotController extends GetxController {
       return;
     }
 
+    await _uploadFile(file);
+  }
+
+  Future<void> takePhoto() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+
+    if (photo == null) {
+      debugPrint('[Upload] User cancelled camera');
+      return;
+    }
+
+    await _uploadFile(photo);
+  }
+
+  Future<void> _uploadFile(XFile file) async {
     debugPrint('[Upload] Selected file: ${file.name}, path: ${file.path}');
 
     final length = await file.length();
     debugPrint('[Upload] File size: $length bytes');
-    
+
     if (length > 50 * 1024 * 1024) {
       debugPrint('[Upload] File too large, rejecting');
       showSnackBar('file_too_large'.tr, isError: true);
@@ -285,7 +533,9 @@ class ChatbotController extends GetxController {
         uploadedFileName.value = data['fileName'];
         uploadedOssId.value = data['ossId'];
       } else {
-        debugPrint('[Upload] Upload failed with code: ${response.data['code']}, msg: ${response.data['msg']}');
+        debugPrint(
+          '[Upload] Upload failed with code: ${response.data['code']}, msg: ${response.data['msg']}',
+        );
         showSnackBar('upload_failed'.tr, isError: true);
         removeSelectedFile();
       }
@@ -295,7 +545,9 @@ class ChatbotController extends GetxController {
         debugPrint('[Upload] DioException type: ${e.type}');
         debugPrint('[Upload] DioException message: ${e.message}');
         debugPrint('[Upload] DioException response: ${e.response?.data}');
-        debugPrint('[Upload] DioException status code: ${e.response?.statusCode}');
+        debugPrint(
+          '[Upload] DioException status code: ${e.response?.statusCode}',
+        );
       }
       if (e is dio_lib.DioException &&
           e.type != dio_lib.DioExceptionType.cancel) {
@@ -314,64 +566,6 @@ class ChatbotController extends GetxController {
     uploadedFileName.value = null;
     uploadedOssId.value = null;
     isUploading.value = false;
-  }
-
-  Future<void> _simulateAiResponse() async {
-    isTyping.value = true;
-    _scrollToBottom();
-
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 1500));
-
-    final session = await isar.chatSessions.get(currentSessionId.value!);
-    if (session == null) {
-      isTyping.value = false;
-      return;
-    }
-
-    // 一次性发送所有 4 种卡片用于预览
-    final messages = [
-      ChatMessage(
-        text: "这是您的日程安排，请确认",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.scheduleConfirmation,
-      ),
-      ChatMessage(
-        text: "这是您今天的专注时长统计",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.focusDuration,
-      ),
-      ChatMessage(
-        text: "这是为您拆解的任务清单",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.scheduleBreakdown,
-      ),
-      ChatMessage(
-        text: "这是您今天的时间轴安排",
-        createdAt: DateTime.now(),
-        sender: SenderType.bot,
-        type: MessageType.timelineSchedule,
-      ),
-    ];
-
-    await isar.writeTxn(() async {
-      for (final msg in messages) {
-        await isar.chatMessages.put(msg);
-        session.messages.add(msg);
-        await session.messages.save();
-      }
-
-      session.updatedAt = DateTime.now();
-      await isar.chatSessions.put(session);
-    });
-
-    messages.forEach((msg) => this.messages.add(msg));
-    isTyping.value = false;
-    _scrollToBottom();
-    loadSessions();
   }
 
   void startRecording(double startDy) async {

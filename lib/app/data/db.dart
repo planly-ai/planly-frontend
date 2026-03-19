@@ -176,6 +176,11 @@ class ChatMessage {
 
   // Optional: file path for images or audio
   String? attachmentPath;
+  String? attachmentName;
+  String? ossId;
+
+  // Optional: raw JSON data for cards
+  String? cardContent;
 
   final session = IsarLink<ChatSession>();
 
@@ -186,6 +191,9 @@ class ChatMessage {
     required this.sender,
     this.type = MessageType.text,
     this.attachmentPath,
+    this.attachmentName,
+    this.ossId,
+    this.cardContent,
   });
 }
 
@@ -194,9 +202,45 @@ enum SenderType { user, bot }
 enum MessageType {
   text,
   image,
+  file,
   voice,
   scheduleConfirmation,
   focusDuration,
   scheduleBreakdown,
   timelineSchedule,
+  cardEvent,
+  cardTask,
+  cardSchedule,
+  cardAlert,
+  cardGraph,
+  cardEventList,
+}
+
+@collection
+class DailyReview {
+  Id id = Isar.autoIncrement;
+  @Index(unique: true)
+  String? serverId;
+  String? userId;
+  @Index()
+  String reviewDate; // format: "yyyy-MM-dd"
+  String summary;
+  String achievements;
+  String nextSteps;
+  String mood;
+  int score;
+  DateTime createdAt;
+
+  DailyReview({
+    this.id = Isar.autoIncrement,
+    this.serverId,
+    this.userId,
+    required this.reviewDate,
+    required this.summary,
+    required this.achievements,
+    required this.nextSteps,
+    required this.mood,
+    required this.score,
+    required this.createdAt,
+  });
 }

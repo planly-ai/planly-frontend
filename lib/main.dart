@@ -29,6 +29,9 @@ import 'package:planly_ai/app/ui/todos/widgets/todos_action.dart';
 import 'platform/platform_features.dart'
     if (dart.library.io) 'platform/platform_features_mobile.dart'
     hide DynamicColorBuilder;
+import 'app/constants/debug_config.dart' show DebugConfig;
+import 'app/data/sample_chat_session.dart'
+    show createSampleChatSessionWithAllCards, removeSampleChatSessions;
 
 FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
 
@@ -43,21 +46,8 @@ RxString firstDay = 'monday'.obs;
 Locale locale = const Locale('en', 'US');
 
 final List<Map<String, dynamic>> appLanguages = [
-  {'name': 'العربية', 'locale': const Locale('ar', 'AR')},
-  {'name': 'Deutsch', 'locale': const Locale('de', 'DE')},
   {'name': 'English', 'locale': const Locale('en', 'US')},
-  {'name': 'Español', 'locale': const Locale('es', 'ES')},
-  {'name': 'Français', 'locale': const Locale('fr', 'FR')},
-  {'name': 'Italiano', 'locale': const Locale('it', 'IT')},
-  {'name': '한국어', 'locale': const Locale('ko', 'KR')},
-  {'name': 'فارسی', 'locale': const Locale('fa', 'IR')},
-  {'name': 'Polski', 'locale': const Locale('pl', 'PL')},
-  {'name': 'Русский', 'locale': const Locale('ru', 'RU')},
-  {'name': 'Tiếng việt', 'locale': const Locale('vi', 'VN')},
-  {'name': 'Türkçe', 'locale': const Locale('tr', 'TR')},
   {'name': '中文(简体)', 'locale': const Locale('zh', 'CN')},
-  {'name': '中文(繁體)', 'locale': const Locale('zh', 'TW')},
-  {'name': 'Português', 'locale': const Locale('pt', 'PT')},
 ];
 
 List<String> allScreens = [];
@@ -82,6 +72,16 @@ Future<void> initializeApp() async {
   await initializeTimeZone();
   await initializeNotifications();
   await IsarController.openDB();
+
+  // 示例数据：创建包含所有类型卡片的聊天会话
+  // 开关位置：lib/app/constants/debug_config.dart -> createSampleChatSession
+  if (DebugConfig.createSampleChatSession) {
+    if (DebugConfig.autoRemoveOldSampleSessions) {
+      await removeSampleChatSessions();
+    }
+    await createSampleChatSessionWithAllCards();
+  }
+
   await initSettings();
 
   Future.microtask(() => AutoBackupService.checkAndPerformAutoBackup());

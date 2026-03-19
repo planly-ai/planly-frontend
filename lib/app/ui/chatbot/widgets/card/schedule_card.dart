@@ -1,24 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
-class TimelineScheduleCard extends StatelessWidget {
-  final String date;
-  final int busyHours;
-  final int freeHours;
-  final List<Map<String, dynamic>> events;
+class ScheduleCard extends StatelessWidget {
+  final String title;
+  final String timeDescription;
+  final List<ScheduleEventData> eventList;
 
-  const TimelineScheduleCard({
+  const ScheduleCard({
     super.key,
-    required this.date,
-    required this.busyHours,
-    required this.freeHours,
-    required this.events,
+    required this.title,
+    required this.timeDescription,
+    required this.eventList,
   });
+
+  factory ScheduleCard.fromJson(Map<String, dynamic> json) {
+    final list = json['eventList'] as List? ?? [];
+    return ScheduleCard(
+      title: json['title'] ?? '',
+      timeDescription: json['timeDescription'] ?? '',
+      eventList: list.map((e) => ScheduleEventData.fromJson(e)).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // Calculate busy hours
+    double totalBusyMinutes = 0;
+    for (var event in eventList) {
+      try {
+        final start = DateTime.parse(event.startTime);
+        final end = DateTime.parse(event.endTime);
+        totalBusyMinutes += end.difference(start).inMinutes;
+      } catch (_) {}
+    }
+    int busyHours = (totalBusyMinutes / 60).round();
+    int freeHours = 14 - busyHours; // Assume a 14-hour workday (8am - 10pm)
+    if (freeHours < 0) freeHours = 0;
+
     return Card(
       elevation: AppConstants.elevationLow,
       margin: EdgeInsets.all(ResponsiveUtils.getResponsiveCardMargin(context)),
@@ -31,21 +55,21 @@ class TimelineScheduleCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Integrated Header: Icon + Title (StatsCard Style)
             _buildIntegratedHeader(context),
-
             const SizedBox(height: AppConstants.spacingL),
-
-            // Statistics Section
-            _buildStatistics(context),
+            Text(
+              timeDescription,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
             const SizedBox(height: AppConstants.spacingL),
-
-            // Segmented Timeline Bar
+            _buildStatistics(context, busyHours, freeHours),
+            const SizedBox(height: AppConstants.spacingL),
             _buildSegmentedTimeline(context),
             const SizedBox(height: AppConstants.spacingXL),
-
-            // Event List
-            ...events.map((event) => _buildEventItem(context, event)),
+            ...eventList.map((event) => _buildEventItem(context, event)),
           ],
         ),
       ),
@@ -55,7 +79,7 @@ class TimelineScheduleCard extends StatelessWidget {
   Widget _buildIntegratedHeader(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final color = colorScheme.primary; // Timeline primary color
+    final color = colorScheme.primary;
 
     return Row(
       children: [
@@ -77,19 +101,18 @@ class TimelineScheduleCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'timeline_title'.tr,
-                style: theme.textTheme.headlineMedium?.copyWith(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 16),
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  letterSpacing: -0.4,
+                  color: colorScheme.onSurface,
+                  letterSpacing: -0.3,
                 ),
               ),
               Text(
-                date,
+                'timeline_title'.tr,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-                  fontWeight: FontWeight.w400,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -100,7 +123,7 @@ class TimelineScheduleCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatistics(BuildContext context) {
+  Widget _buildStatistics(BuildContext context, int busyHours, int freeHours) {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
@@ -108,7 +131,7 @@ class TimelineScheduleCard extends StatelessWidget {
           context,
           label: 'timeline_busy'.tr,
           value: '$busyHours',
-          unit: '小时',
+          unit: 'unit_hour'.tr,
           color: colorScheme.primary,
           bgColor: colorScheme.primary.withValues(alpha: 0.12),
         ),
@@ -117,7 +140,7 @@ class TimelineScheduleCard extends StatelessWidget {
           context,
           label: 'timeline_free'.tr,
           value: '$freeHours',
-          unit: '小时',
+          unit: 'unit_hour'.tr,
           color: colorScheme.onSurfaceVariant,
           bgColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         ),
@@ -151,8 +174,7 @@ class TimelineScheduleCard extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                 color: color,
                 fontWeight: FontWeight.w600,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                letterSpacing: -0.2,
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
               ),
             ),
             const SizedBox(height: 4),
@@ -163,25 +185,24 @@ class TimelineScheduleCard extends StatelessWidget {
                 Text(
                   value,
                   style: theme.textTheme.headlineLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                     color: color,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      16,
+                      24,
                     ),
-                    letterSpacing: -0.4,
                   ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   unit,
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                     color: color,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
                       12,
                     ),
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -196,7 +217,6 @@ class TimelineScheduleCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final primary = colorScheme.primary;
 
-    // Derived from primary theme with varying opacities
     final List<Color?> segments = [
       null,
       primary,
@@ -258,48 +278,41 @@ class TimelineScheduleCard extends StatelessWidget {
     );
   }
 
-  Widget _buildEventItem(BuildContext context, Map<String, dynamic> event) {
+  Widget _buildEventItem(BuildContext context, ScheduleEventData event) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    String tag;
-    Color color;
-    switch (event['tag']) {
-      case '会议':
-        tag = 'tag_meeting'.tr;
-        color = colorScheme.primary;
-        break;
-      case '专注':
-        tag = 'tag_focus'.tr;
-        color = colorScheme.primary.withValues(alpha: 0.8);
-        break;
-      case '忙碌':
-        tag = 'tag_busy'.tr;
-        color = colorScheme.primary.withValues(alpha: 0.6);
-        break;
-      default:
-        tag = event['tag'] as String;
-        color = colorScheme.primary;
+    String timeRange = '';
+    try {
+      final start = DateTime.parse(event.startTime).toLocal();
+      final end = DateTime.parse(event.endTime).toLocal();
+      timeRange =
+          '${DateFormat('HH:mm').format(start)} - ${DateFormat('HH:mm').format(end)}';
+    } catch (_) {
+      timeRange = '${event.startTime} - ${event.endTime}';
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingM),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
+      constraints: const BoxConstraints(minHeight: 48),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppConstants.spacingS),
             decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(
+                AppConstants.borderRadiusSmall,
+              ),
             ),
             child: Icon(
-              event['icon'] as IconData,
-              color: Colors.white,
+              Icons.event_available,
+              color: colorScheme.onSurfaceVariant,
               size: AppConstants.iconSizeMedium,
             ),
           ),
@@ -309,10 +322,10 @@ class TimelineScheduleCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  event['title'] as String,
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  event.title,
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: colorScheme.onSurface,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
                       14,
@@ -321,32 +334,16 @@ class TimelineScheduleCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  event['time'] as String,
+                  timeRange,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: ResponsiveUtils.getResponsiveFontSize(
                       context,
-                      12,
+                      13,
                     ),
-                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              tag,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 12),
-              ),
             ),
           ),
         ],
@@ -355,13 +352,33 @@ class TimelineScheduleCard extends StatelessWidget {
   }
 }
 
-// Preview main function for testing
-void main() {
-  runApp(const TimelineScheduleTestApp());
+class ScheduleEventData {
+  final String title;
+  final String startTime;
+  final String endTime;
+
+  ScheduleEventData({
+    required this.title,
+    required this.startTime,
+    required this.endTime,
+  });
+
+  factory ScheduleEventData.fromJson(Map<String, dynamic> json) {
+    return ScheduleEventData(
+      title: json['title'] ?? '',
+      startTime: json['startTime'] ?? '',
+      endTime: json['endTime'] ?? '',
+    );
+  }
 }
 
-class TimelineScheduleTestApp extends StatelessWidget {
-  const TimelineScheduleTestApp({super.key});
+// Preview main function for testing
+void main() {
+  runApp(const ScheduleCardTestApp());
+}
+
+class ScheduleCardTestApp extends StatelessWidget {
+  const ScheduleCardTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -373,47 +390,29 @@ class TimelineScheduleTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: const Text('时间轴进度卡片展示'), centerTitle: true),
+        appBar: AppBar(
+          title: Text('schedule_card_preview'.tr),
+          centerTitle: true,
+        ),
         backgroundColor: Colors.grey[100],
-        body: const SingleChildScrollView(
-          padding: EdgeInsets.all(16.0),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              TimelineScheduleCard(
-                date: "2026年3月10日 星期二",
-                busyHours: 7,
-                freeHours: 7,
-                events: [
-                  {
-                    "title": "团队站会",
-                    "time": "09:00 - 10:00",
-                    "tag": "会议",
-                    "icon": Icons.groups,
-                  },
-                  {
-                    "title": "深度工作时间",
-                    "time": "10:00 - 12:00",
-                    "tag": "专注",
-                    "icon": Icons.menu_book,
-                  },
-                  {
-                    "title": "处理邮件和消息",
-                    "time": "14:00 - 15:00",
-                    "tag": "忙碌",
-                    "icon": Icons.business_center,
-                  },
-                  {
-                    "title": "客户需求评审",
-                    "time": "15:00 - 17:00",
-                    "tag": "会议",
-                    "icon": Icons.groups,
-                  },
-                  {
-                    "title": "项目复盘会",
-                    "time": "19:00 - 20:00",
-                    "tag": "会议",
-                    "icon": Icons.groups,
-                  },
+              ScheduleCard(
+                title: "高效工作日规划",
+                timeDescription: "今天的主要目标是攻克核心模块，注意劳逸结合",
+                eventList: [
+                  ScheduleEventData(
+                    title: "深度工作 - 核心功能开发",
+                    startTime: "2024-03-15T09:30:00.000Z",
+                    endTime: "2024-03-15T11:30:00.000Z",
+                  ),
+                  ScheduleEventData(
+                    title: "午休与阅读",
+                    startTime: "2024-03-15T12:00:00.000Z",
+                    endTime: "2024-03-15T13:30:00.000Z",
+                  ),
                 ],
               ),
             ],

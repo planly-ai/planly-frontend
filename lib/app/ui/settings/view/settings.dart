@@ -338,14 +338,11 @@ class _SettingsPageState extends State<SettingsPage> {
       icon: IconsaxPlusBold.people,
       children: [
         SettingsTile(
-          leading: const Icon(LineAwesomeIcons.discord),
-          title: 'Discord',
-          onTap: () => _urlLauncher('https://discord.gg/JMMa9aHh8f'),
-        ),
-        SettingsTile(
-          leading: const Icon(LineAwesomeIcons.telegram),
-          title: 'Telegram',
-          onTap: () => _urlLauncher('https://t.me/darkmoonightX'),
+          leading: const Icon(LineAwesomeIcons.alipay),
+          title: 'DingTalk',
+          onTap: () => _urlLauncher(
+            'https://h5.dingtalk.com/invite-page/index.html?corpId=ding6f76b9daba159c35ee0f45d8e4f7c288&inviteCode=4zBLcAHILz7iA3T&dtaction=os&cid=&origin=9999&originMeta=contact-orgManage-add&scene=contactOrgManage-copyLink&deptId=-1&org_name=%E7%8E%B0%E6%97%B6AI%E5%9B%A2%E9%98%9F',
+          ),
         ),
       ],
     );
@@ -382,8 +379,7 @@ class _SettingsPageState extends State<SettingsPage> {
         SettingsTile(
           leading: const Icon(LineAwesomeIcons.github),
           title: '${'project'.tr} GitHub',
-          onTap: () =>
-              _urlLauncher('https://github.com/darkmoonight/Planly.ai'),
+          onTap: () => _urlLauncher('https://github.com/planly-ai'),
         ),
         SettingsTile(
           leading: const Icon(IconsaxPlusLinear.code_circle),

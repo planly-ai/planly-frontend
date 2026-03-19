@@ -89,7 +89,7 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "DARK NIGHT" "\0"
+            VALUE "CompanyName", "Planly.ai" "\0"
             VALUE "FileDescription", "Planly.ai" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "Planly.ai" "\0"

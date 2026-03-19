@@ -1,4 +1,4 @@
-package com.yoshi.todark
+package ai.planly.todo
 
 import android.app.Activity
 import android.content.Intent

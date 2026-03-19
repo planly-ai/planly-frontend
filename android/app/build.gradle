@@ -11,7 +11,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.yoshi.todark"
+    namespace = "ai.planly.todo"
     compileSdk = 36
     ndkVersion = '29.0.14206865'
 
@@ -37,7 +37,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.yoshi.todark"
+        applicationId = "ai.planly.todo"
         minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
