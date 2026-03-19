@@ -40,8 +40,7 @@
 - Material You theming • AMOLED theme • Light/Dark/System modes • Edge-to-edge UI
 
 **🌍 Localization**
-- 15 languages: English, Русский, 中文, العربية, فارسی, Español, Français, Deutsch, Italiano, Türkçe, Tiếng Việt, 한국어, Português, Polski
-
+- 2 languages: English, 简体中文
 ---
 
 ## 📸 Screenshots
