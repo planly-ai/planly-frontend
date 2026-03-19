@@ -309,5 +309,13 @@ class EnUs {
     'graph_card_preview': 'GRAPH Card Preview',
     'schedule_card_preview': 'SCHEDULE Card Preview',
     'task_card_preview': 'TASK Card Preview',
+    'dailyReview': 'Daily Review',
+    'noDailyReview': 'No daily review generated yet. Click the button to generate.',
+    'regenerate': 'Regenerate',
+    'reviewSummary': 'Summary',
+    'achievements': 'Achievements',
+    'nextSteps': 'Next Steps',
+    'mood': 'Mood',
+    'score': 'Score',
   };
 }

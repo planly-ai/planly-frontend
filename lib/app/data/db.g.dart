@@ -9529,3 +9529,2058 @@ extension ChatMessageQueryProperty
     });
   }
 }
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+extension GetDailyReviewCollection on Isar {
+  IsarCollection<DailyReview> get dailyReviews => this.collection();
+}
+
+const DailyReviewSchema = CollectionSchema(
+  name: r'DailyReview',
+  id: -2225113496655212545,
+  properties: {
+    r'achievements': PropertySchema(
+      id: 0,
+      name: r'achievements',
+      type: IsarType.string,
+    ),
+    r'createdAt': PropertySchema(
+      id: 1,
+      name: r'createdAt',
+      type: IsarType.dateTime,
+    ),
+    r'mood': PropertySchema(id: 2, name: r'mood', type: IsarType.string),
+    r'nextSteps': PropertySchema(
+      id: 3,
+      name: r'nextSteps',
+      type: IsarType.string,
+    ),
+    r'reviewDate': PropertySchema(
+      id: 4,
+      name: r'reviewDate',
+      type: IsarType.string,
+    ),
+    r'score': PropertySchema(id: 5, name: r'score', type: IsarType.long),
+    r'serverId': PropertySchema(
+      id: 6,
+      name: r'serverId',
+      type: IsarType.string,
+    ),
+    r'summary': PropertySchema(id: 7, name: r'summary', type: IsarType.string),
+    r'userId': PropertySchema(id: 8, name: r'userId', type: IsarType.string),
+  },
+
+  estimateSize: _dailyReviewEstimateSize,
+  serialize: _dailyReviewSerialize,
+  deserialize: _dailyReviewDeserialize,
+  deserializeProp: _dailyReviewDeserializeProp,
+  idName: r'id',
+  indexes: {
+    r'serverId': IndexSchema(
+      id: -7950187970872907662,
+      name: r'serverId',
+      unique: true,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'serverId',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+      ],
+    ),
+    r'reviewDate': IndexSchema(
+      id: -4677418855940269689,
+      name: r'reviewDate',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'reviewDate',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+      ],
+    ),
+  },
+  links: {},
+  embeddedSchemas: {},
+
+  getId: _dailyReviewGetId,
+  getLinks: _dailyReviewGetLinks,
+  attach: _dailyReviewAttach,
+  version: '3.3.0',
+);
+
+int _dailyReviewEstimateSize(
+  DailyReview object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.achievements.length * 3;
+  bytesCount += 3 + object.mood.length * 3;
+  bytesCount += 3 + object.nextSteps.length * 3;
+  bytesCount += 3 + object.reviewDate.length * 3;
+  {
+    final value = object.serverId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.summary.length * 3;
+  {
+    final value = object.userId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  return bytesCount;
+}
+
+void _dailyReviewSerialize(
+  DailyReview object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeString(offsets[0], object.achievements);
+  writer.writeDateTime(offsets[1], object.createdAt);
+  writer.writeString(offsets[2], object.mood);
+  writer.writeString(offsets[3], object.nextSteps);
+  writer.writeString(offsets[4], object.reviewDate);
+  writer.writeLong(offsets[5], object.score);
+  writer.writeString(offsets[6], object.serverId);
+  writer.writeString(offsets[7], object.summary);
+  writer.writeString(offsets[8], object.userId);
+}
+
+DailyReview _dailyReviewDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = DailyReview(
+    achievements: reader.readString(offsets[0]),
+    createdAt: reader.readDateTime(offsets[1]),
+    id: id,
+    mood: reader.readString(offsets[2]),
+    nextSteps: reader.readString(offsets[3]),
+    reviewDate: reader.readString(offsets[4]),
+    score: reader.readLong(offsets[5]),
+    serverId: reader.readStringOrNull(offsets[6]),
+    summary: reader.readString(offsets[7]),
+    userId: reader.readStringOrNull(offsets[8]),
+  );
+  return object;
+}
+
+P _dailyReviewDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readString(offset)) as P;
+    case 1:
+      return (reader.readDateTime(offset)) as P;
+    case 2:
+      return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readString(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+Id _dailyReviewGetId(DailyReview object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _dailyReviewGetLinks(DailyReview object) {
+  return [];
+}
+
+void _dailyReviewAttach(
+  IsarCollection<dynamic> col,
+  Id id,
+  DailyReview object,
+) {
+  object.id = id;
+}
+
+extension DailyReviewByIndex on IsarCollection<DailyReview> {
+  Future<DailyReview?> getByServerId(String? serverId) {
+    return getByIndex(r'serverId', [serverId]);
+  }
+
+  DailyReview? getByServerIdSync(String? serverId) {
+    return getByIndexSync(r'serverId', [serverId]);
+  }
+
+  Future<bool> deleteByServerId(String? serverId) {
+    return deleteByIndex(r'serverId', [serverId]);
+  }
+
+  bool deleteByServerIdSync(String? serverId) {
+    return deleteByIndexSync(r'serverId', [serverId]);
+  }
+
+  Future<List<DailyReview?>> getAllByServerId(List<String?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return getAllByIndex(r'serverId', values);
+  }
+
+  List<DailyReview?> getAllByServerIdSync(List<String?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'serverId', values);
+  }
+
+  Future<int> deleteAllByServerId(List<String?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'serverId', values);
+  }
+
+  int deleteAllByServerIdSync(List<String?> serverIdValues) {
+    final values = serverIdValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'serverId', values);
+  }
+
+  Future<Id> putByServerId(DailyReview object) {
+    return putByIndex(r'serverId', object);
+  }
+
+  Id putByServerIdSync(DailyReview object, {bool saveLinks = true}) {
+    return putByIndexSync(r'serverId', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByServerId(List<DailyReview> objects) {
+    return putAllByIndex(r'serverId', objects);
+  }
+
+  List<Id> putAllByServerIdSync(
+    List<DailyReview> objects, {
+    bool saveLinks = true,
+  }) {
+    return putAllByIndexSync(r'serverId', objects, saveLinks: saveLinks);
+  }
+}
+
+extension DailyReviewQueryWhereSort
+    on QueryBuilder<DailyReview, DailyReview, QWhere> {
+  QueryBuilder<DailyReview, DailyReview, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension DailyReviewQueryWhere
+    on QueryBuilder<DailyReview, DailyReview, QWhereClause> {
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> idEqualTo(Id id) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> idNotEqualTo(
+    Id id,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> idGreaterThan(
+    Id id, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> idLessThan(
+    Id id, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> serverIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'serverId', value: [null]),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause>
+  serverIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'serverId',
+          lower: [null],
+          includeLower: false,
+          upper: [],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> serverIdEqualTo(
+    String? serverId,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'serverId', value: [serverId]),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> serverIdNotEqualTo(
+    String? serverId,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'serverId',
+                lower: [],
+                upper: [serverId],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'serverId',
+                lower: [serverId],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'serverId',
+                lower: [serverId],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'serverId',
+                lower: [],
+                upper: [serverId],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause> reviewDateEqualTo(
+    String reviewDate,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'reviewDate', value: [reviewDate]),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterWhereClause>
+  reviewDateNotEqualTo(String reviewDate) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'reviewDate',
+                lower: [],
+                upper: [reviewDate],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'reviewDate',
+                lower: [reviewDate],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'reviewDate',
+                lower: [reviewDate],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'reviewDate',
+                lower: [],
+                upper: [reviewDate],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+}
+
+extension DailyReviewQueryFilter
+    on QueryBuilder<DailyReview, DailyReview, QFilterCondition> {
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'achievements',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'achievements',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'achievements',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'achievements',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'achievements',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'achievements',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'achievements',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'achievements',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'achievements', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  achievementsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'achievements', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  createdAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'createdAt', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  createdAtGreaterThan(DateTime value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'createdAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  createdAtLessThan(DateTime value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'createdAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  createdAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'createdAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> idEqualTo(
+    Id value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> idGreaterThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'mood',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'mood',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'mood',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'mood',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'mood',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'mood',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'mood',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'mood',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> moodIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'mood', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  moodIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'mood', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'nextSteps',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'nextSteps',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'nextSteps',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'nextSteps',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'nextSteps',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'nextSteps',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'nextSteps',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'nextSteps',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'nextSteps', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  nextStepsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'nextSteps', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'reviewDate',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'reviewDate',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'reviewDate',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'reviewDate',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'reviewDate',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'reviewDate',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'reviewDate',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'reviewDate',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'reviewDate', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  reviewDateIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'reviewDate', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> scoreEqualTo(
+    int value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'score', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  scoreGreaterThan(int value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'score',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> scoreLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'score',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> scoreBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'score',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'serverId'),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'serverId'),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> serverIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'serverId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'serverId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'serverId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> serverIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'serverId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'serverId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'serverId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'serverId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> serverIdMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'serverId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'serverId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  serverIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'serverId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> summaryEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'summary',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  summaryGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'summary',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> summaryLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'summary',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> summaryBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'summary',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  summaryStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'summary',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> summaryEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'summary',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> summaryContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'summary',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> summaryMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'summary',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  summaryIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'summary', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  summaryIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'summary', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> userIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'userId'),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  userIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'userId'),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> userIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  userIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> userIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> userIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'userId',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  userIdStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> userIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> userIdContains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'userId',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition> userIdMatches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'userId',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  userIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'userId', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterFilterCondition>
+  userIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'userId', value: ''),
+      );
+    });
+  }
+}
+
+extension DailyReviewQueryObject
+    on QueryBuilder<DailyReview, DailyReview, QFilterCondition> {}
+
+extension DailyReviewQueryLinks
+    on QueryBuilder<DailyReview, DailyReview, QFilterCondition> {}
+
+extension DailyReviewQuerySortBy
+    on QueryBuilder<DailyReview, DailyReview, QSortBy> {
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByAchievements() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achievements', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy>
+  sortByAchievementsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achievements', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByMood() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mood', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByMoodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mood', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByNextSteps() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nextSteps', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByNextStepsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nextSteps', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByReviewDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reviewDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByReviewDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reviewDate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByScore() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'score', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByScoreDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'score', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByServerId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByServerIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortBySummary() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'summary', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortBySummaryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'summary', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> sortByUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.desc);
+    });
+  }
+}
+
+extension DailyReviewQuerySortThenBy
+    on QueryBuilder<DailyReview, DailyReview, QSortThenBy> {
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByAchievements() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achievements', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy>
+  thenByAchievementsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'achievements', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByMood() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mood', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByMoodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mood', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByNextSteps() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nextSteps', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByNextStepsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'nextSteps', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByReviewDate() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reviewDate', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByReviewDateDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'reviewDate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByScore() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'score', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByScoreDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'score', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByServerId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByServerIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'serverId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenBySummary() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'summary', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenBySummaryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'summary', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByUserId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QAfterSortBy> thenByUserIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userId', Sort.desc);
+    });
+  }
+}
+
+extension DailyReviewQueryWhereDistinct
+    on QueryBuilder<DailyReview, DailyReview, QDistinct> {
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByAchievements({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'achievements', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByMood({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'mood', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByNextSteps({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'nextSteps', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByReviewDate({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'reviewDate', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByScore() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'score');
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByServerId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'serverId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctBySummary({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'summary', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DailyReview, DailyReview, QDistinct> distinctByUserId({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'userId', caseSensitive: caseSensitive);
+    });
+  }
+}
+
+extension DailyReviewQueryProperty
+    on QueryBuilder<DailyReview, DailyReview, QQueryProperty> {
+  QueryBuilder<DailyReview, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<DailyReview, String, QQueryOperations> achievementsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'achievements');
+    });
+  }
+
+  QueryBuilder<DailyReview, DateTime, QQueryOperations> createdAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<DailyReview, String, QQueryOperations> moodProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'mood');
+    });
+  }
+
+  QueryBuilder<DailyReview, String, QQueryOperations> nextStepsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'nextSteps');
+    });
+  }
+
+  QueryBuilder<DailyReview, String, QQueryOperations> reviewDateProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'reviewDate');
+    });
+  }
+
+  QueryBuilder<DailyReview, int, QQueryOperations> scoreProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'score');
+    });
+  }
+
+  QueryBuilder<DailyReview, String?, QQueryOperations> serverIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'serverId');
+    });
+  }
+
+  QueryBuilder<DailyReview, String, QQueryOperations> summaryProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'summary');
+    });
+  }
+
+  QueryBuilder<DailyReview, String?, QQueryOperations> userIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'userId');
+    });
+  }
+}

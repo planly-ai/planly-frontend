@@ -215,3 +215,32 @@ enum MessageType {
   cardGraph,
   cardEventList,
 }
+
+@collection
+class DailyReview {
+  Id id = Isar.autoIncrement;
+  @Index(unique: true)
+  String? serverId;
+  String? userId;
+  @Index()
+  String reviewDate; // format: "yyyy-MM-dd"
+  String summary;
+  String achievements;
+  String nextSteps;
+  String mood;
+  int score;
+  DateTime createdAt;
+
+  DailyReview({
+    this.id = Isar.autoIncrement,
+    this.serverId,
+    this.userId,
+    required this.reviewDate,
+    required this.summary,
+    required this.achievements,
+    required this.nextSteps,
+    required this.mood,
+    required this.score,
+    required this.createdAt,
+  });
+}

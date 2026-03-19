@@ -10,6 +10,7 @@ import 'package:planly_ai/app/ui/statistics/widgets/hourly_progress_chart.dart';
 import 'package:planly_ai/app/ui/statistics/widgets/stats_card.dart';
 import 'package:planly_ai/app/ui/statistics/widgets/streak_widget.dart';
 import 'package:planly_ai/app/ui/statistics/widgets/weekly_progress_chart.dart';
+import 'package:planly_ai/app/ui/statistics/widgets/daily_review_card.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 
 class StatisticsPage extends StatefulWidget {
@@ -113,6 +114,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 currentStreak: data.currentStreak,
                 longestStreak: data.longestStreak,
               ),
+              const SizedBox(height: AppConstants.spacingM),
+              const DailyReviewCard(),
               const SizedBox(height: AppConstants.spacingM),
               WeeklyProgressChart(weeklyData: data.weeklyProgress),
               const SizedBox(height: AppConstants.spacingM),

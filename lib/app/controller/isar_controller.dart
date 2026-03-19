@@ -35,6 +35,7 @@ class IsarController {
           SettingsSchema,
           ChatSessionSchema,
           ChatMessageSchema,
+          DailyReviewSchema,
         ],
         directory: dir.path,
         inspector: true,

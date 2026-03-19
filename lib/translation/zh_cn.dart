@@ -301,5 +301,13 @@ class ZhCN {
     'graph_card_preview': 'GRAPH 卡片展示',
     'schedule_card_preview': 'SCHEDULE 卡片展示',
     'task_card_preview': 'TASK 卡片展示',
+    'dailyReview': '每日复盘',
+    'noDailyReview': '尚未生成日报，请点击右上角按钮来生成',
+    'regenerate': '重新生成',
+    'reviewSummary': '今日总结',
+    'achievements': '主要成就',
+    'nextSteps': '明日计划',
+    'mood': '心情',
+    'score': '评分',
   };
 }
