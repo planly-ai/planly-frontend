@@ -192,6 +192,13 @@ class TodoService {
     if (timeString.isEmpty) return null;
 
     try {
+      // First try ISO8601 (which EventCard and many other sources use)
+      final isoDate = DateTime.tryParse(timeString);
+      if (isoDate != null) {
+        return isoDate.toLocal();
+      }
+
+      // Fallback to localized format parsing
       return timeformat.value == '12'
           ? DateFormat.yMMMEd(locale.languageCode).add_jm().parse(timeString)
           : DateFormat.yMMMEd(locale.languageCode).add_Hm().parse(timeString);

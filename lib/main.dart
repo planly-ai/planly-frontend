@@ -32,6 +32,7 @@ import 'platform/platform_features.dart'
 import 'app/constants/debug_config.dart' show DebugConfig;
 import 'app/data/sample_chat_session.dart'
     show createSampleChatSessionWithAllCards, removeSampleChatSessions;
+import 'app/data/sample_todo_data.dart' show createSampleTodoData;
 
 FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
 
@@ -80,6 +81,12 @@ Future<void> initializeApp() async {
       await removeSampleChatSessions();
     }
     await createSampleChatSessionWithAllCards();
+  }
+
+  // Todo 示例数据
+  // 开关位置：lib/app/constants/debug_config.dart -> createSampleTodoData
+  if (DebugConfig.createSampleTodoData) {
+    await createSampleTodoData();
   }
 
   await initSettings();

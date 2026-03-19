@@ -16,4 +16,13 @@ class DebugConfig {
   /// 是否自动删除旧的示例会话
   /// 启用后会在创建新示例数据前先清理旧的示例数据
   static const bool autoRemoveOldSampleSessions = false;
+
+  // ==================== Todo 示例数据 ====================
+
+  /// 是否启动时自动创建示例日程数据
+  /// 按照运行日期生成前后两周的时间段中的大学生日常日程
+  static const bool createSampleTodoData = false;
+
+  /// 是否自动删除旧的示例日程数据
+  static const bool autoRemoveOldSampleTodos = false;
 }
