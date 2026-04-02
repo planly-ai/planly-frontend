@@ -213,7 +213,7 @@ class _FormCardState extends State<FormCard> {
               color: colorScheme.onSurface,
               letterSpacing: -0.3,
             ),
-            maxLines: 2,
+            maxLines: 3, // Increased from 2 for better visibility of long titles
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -236,13 +236,16 @@ class _FormCardState extends State<FormCard> {
 
     // 字段标签
     final labelWidget = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          field.label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-            fontWeight: FontWeight.w500,
-            color: colorScheme.onSurface,
+        Flexible(
+          child: Text(
+            field.label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSurface,
+            ),
           ),
         ),
         if (field.required) ...[
@@ -426,15 +429,17 @@ class _FormCardState extends State<FormCard> {
                       : colorScheme.onSurfaceVariant.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                 ),
                 const SizedBox(width: AppConstants.spacingXS),
-                Text(
-                  option.label,
-                  style: TextStyle(
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                    color: isSelected
-                        ? (_isSubmitted
-                            ? colorScheme.onSurfaceVariant
-                            : colorScheme.onPrimaryContainer)
-                        : colorScheme.onSurface.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
+                Flexible(
+                  child: Text(
+                    option.label,
+                    style: TextStyle(
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                      color: isSelected
+                          ? (_isSubmitted
+                              ? colorScheme.onSurfaceVariant
+                              : colorScheme.onPrimaryContainer)
+                          : colorScheme.onSurface.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
+                    ),
                   ),
                 ),
               ],
@@ -494,15 +499,17 @@ class _FormCardState extends State<FormCard> {
                       : colorScheme.onSurfaceVariant.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                 ),
                 const SizedBox(width: AppConstants.spacingXS),
-                Text(
-                  option.label,
-                  style: TextStyle(
-                    fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-                    color: isSelected
-                        ? (_isSubmitted
-                            ? colorScheme.onSurfaceVariant
-                            : colorScheme.onPrimaryContainer)
-                        : colorScheme.onSurface.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
+                Flexible(
+                  child: Text(
+                    option.label,
+                    style: TextStyle(
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+                      color: isSelected
+                          ? (_isSubmitted
+                              ? colorScheme.onSurfaceVariant
+                              : colorScheme.onPrimaryContainer)
+                          : colorScheme.onSurface.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
+                    ),
                   ),
                 ),
               ],
