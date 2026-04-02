@@ -315,5 +315,6 @@ class ZhCN {
     'form_cannot_be_empty': '不能为空',
     'form_please_select': '请选择',
     'form_please_select_datetime': '请选择日期时间',
+    'form_submitted': '已提交',
   };
 }

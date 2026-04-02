@@ -8025,6 +8025,7 @@ const _ChatMessagetypeEnumValueMap = {
   'cardAlert': 11,
   'cardGraph': 12,
   'cardEventList': 13,
+  'cardForm': 14,
 };
 const _ChatMessagetypeValueEnumMap = {
   0: MessageType.text,
@@ -8041,6 +8042,7 @@ const _ChatMessagetypeValueEnumMap = {
   11: MessageType.cardAlert,
   12: MessageType.cardGraph,
   13: MessageType.cardEventList,
+  14: MessageType.cardForm,
 };
 
 Id _chatMessageGetId(ChatMessage object) {

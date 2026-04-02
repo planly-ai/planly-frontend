@@ -177,6 +177,43 @@ Future<void> createSampleChatSessionWithAllCards() async {
     await isar.chatMessages.put(eventListCardMsg);
     session.messages.add(eventListCardMsg);
 
+    // 7.5 FORM card - Exercise questionnaire
+    final formCardMsg = ChatMessage(
+      text: '',
+      createdAt: DateTime.now().add(const Duration(seconds: 65)),
+      sender: SenderType.bot,
+      type: MessageType.cardForm,
+      cardContent: jsonEncode({
+        'data': {
+          'title': '运动习惯调查',
+          'description': '请填写以下信息，以便为您制定更准确的计划',
+          'submitText': '提交',
+          'fields': [
+            {
+              'key': 'frequency',
+              'label': '每周运动次数',
+              'type': 'INPUT',
+              'required': true,
+              'placeholder': '例如：3',
+            },
+            {
+              'key': 'activity',
+              'label': '主要运动类型',
+              'type': 'DROPDOWN',
+              'required': true,
+              'options': [
+                {'label': '跑步', 'value': 'running'},
+                {'label': '游泳', 'value': 'swimming'},
+                {'label': '健身', 'value': 'gym'},
+              ],
+            },
+          ],
+        },
+      }),
+    );
+    await isar.chatMessages.put(formCardMsg);
+    session.messages.add(formCardMsg);
+
     // 8. Closing message
     final endMsg = ChatMessage(
       text:

@@ -13,6 +13,7 @@ import 'package:planly_ai/app/ui/chatbot/widgets/card/schedule_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/task_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/form_card.dart';
 import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
+import 'package:planly_ai/main.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
@@ -82,14 +83,37 @@ class ChatBubble extends StatelessWidget {
     return FormCard.fromJson(data, onSubmit: (formData) => _handleFormSubmit(formData, controller));
   }
 
-  void _handleFormSubmit(Map<String, dynamic> formData, ChatbotController controller) {
+  void _handleFormSubmit(Map<String, dynamic> formData, ChatbotController controller) async {
     // 将表单数据格式化为消息发送给后端
     // 流程：FORM -> 用户提交 -> AI 继续 -> GOAL/TASK
     debugPrint('[FormCard] Form submitted: $formData');
-    
+
+    // 1. 持久化表单状态到当前消息
+    try {
+      final cardData = jsonDecode(message.cardContent ?? '{}');
+      final dataMap = cardData['data'] as Map<String, dynamic>? ?? {};
+
+      dataMap['isSubmitted'] = true;
+      dataMap['values'] = formData;
+      cardData['data'] = dataMap;
+
+      message.cardContent = jsonEncode(cardData);
+
+      // 保存到数据库
+      await isar.writeTxn(() async {
+        await isar.chatMessages.put(message);
+      });
+
+      // 刷新控制器以更新 UI
+      controller.messages.refresh();
+    } catch (e) {
+      debugPrint('[ChatBubble] Error persisting form state: $e');
+    }
+
+    // 2. 发送消息给 AI
     // 将表单数据转换为 JSON 字符串作为消息发送
     final formDataJson = const JsonEncoder.withIndent('  ').convert(formData);
-    
+
     // 调用控制器的 sendMessage 方法
     // 注意：这里需要临时设置 textController 的值然后发送
     controller.textController.text = '表单已提交：$formDataJson';

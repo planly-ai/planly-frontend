@@ -80,12 +80,16 @@ class FormCardData {
   final String description;
   final String submitText;
   final List<FormField> fields;
+  final bool isSubmitted;
+  final Map<String, dynamic>? values;
 
   FormCardData({
     required this.title,
     required this.description,
     required this.submitText,
     required this.fields,
+    this.isSubmitted = false,
+    this.values,
   });
 
   factory FormCardData.fromJson(Map<String, dynamic> json) {
@@ -98,6 +102,8 @@ class FormCardData {
       description: json['description'] ?? '',
       submitText: json['submitText'] ?? '提交',
       fields: fields,
+      isSubmitted: json['isSubmitted'] ?? false,
+      values: json['values'] != null ? Map<String, dynamic>.from(json['values']) : null,
     );
   }
 }
@@ -114,7 +120,8 @@ class FormCard extends StatefulWidget {
   });
 
   factory FormCard.fromJson(Map<String, dynamic> json, {Function(Map<String, dynamic>)? onSubmit}) {
-    final data = json['data'] as Map<String, dynamic>? ?? {};
+    // 兼容两种结构：一种是包含 data 键的完整卡片 JSON，一种是直接的表单数据 JSON
+    final data = json.containsKey('data') ? (json['data'] as Map<String, dynamic>? ?? {}) : json;
     final formData = FormCardData.fromJson(data);
     return FormCard(
       formData: formData,
@@ -129,6 +136,16 @@ class FormCard extends StatefulWidget {
 class _FormCardState extends State<FormCard> {
   final _formKey = GlobalKey<FormState>();
   final _fieldValues = <String, dynamic>{};
+  bool _isSubmitted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSubmitted = widget.formData.isSubmitted;
+    if (widget.formData.values != null) {
+      _fieldValues.addAll(widget.formData.values!);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -279,12 +296,18 @@ class _FormCardState extends State<FormCard> {
 
   Widget _buildInputField(BuildContext context, FormField field) {
     return TextFormField(
+      initialValue: _fieldValues[field.key]?.toString(),
+      enabled: !_isSubmitted,
       decoration: InputDecoration(
         hintText: field.placeholder,
         hintStyle: TextStyle(
           fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
           color: Theme.of(context).colorScheme.outline,
         ),
+        filled: _isSubmitted,
+        fillColor: _isSubmitted
+            ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         ),
@@ -295,6 +318,7 @@ class _FormCardState extends State<FormCard> {
       ),
       style: TextStyle(
         fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+        color: _isSubmitted ? Theme.of(context).colorScheme.onSurfaceVariant : null,
       ),
       validator: (value) {
         if (field.required && (value == null || value.isEmpty)) {
@@ -310,12 +334,18 @@ class _FormCardState extends State<FormCard> {
 
   Widget _buildTextareaField(BuildContext context, FormField field) {
     return TextFormField(
+      initialValue: _fieldValues[field.key]?.toString(),
+      enabled: !_isSubmitted,
       decoration: InputDecoration(
         hintText: field.placeholder,
         hintStyle: TextStyle(
           fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
           color: Theme.of(context).colorScheme.outline,
         ),
+        filled: _isSubmitted,
+        fillColor: _isSubmitted
+            ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         ),
@@ -326,6 +356,7 @@ class _FormCardState extends State<FormCard> {
       ),
       style: TextStyle(
         fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+        color: _isSubmitted ? Theme.of(context).colorScheme.onSurfaceVariant : null,
       ),
       maxLines: 4,
       minLines: 3,
@@ -351,16 +382,18 @@ class _FormCardState extends State<FormCard> {
       children: (field.options ?? []).map((option) {
         final isSelected = currentValue.contains(option.value);
         return InkWell(
-          onTap: () {
-            setState(() {
-              if (isSelected) {
-                currentValue.remove(option.value);
-              } else {
-                currentValue.add(option.value);
-              }
-              _fieldValues[field.key] = currentValue;
-            });
-          },
+          onTap: _isSubmitted
+              ? null
+              : () {
+                  setState(() {
+                    if (isSelected) {
+                      currentValue.remove(option.value);
+                    } else {
+                      currentValue.add(option.value);
+                    }
+                    _fieldValues[field.key] = currentValue;
+                  });
+                },
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -369,12 +402,14 @@ class _FormCardState extends State<FormCard> {
             ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? colorScheme.primaryContainer
+                  ? (_isSubmitted
+                      ? colorScheme.surfaceContainerHighest
+                      : colorScheme.primaryContainer)
                   : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
               border: Border.all(
                 color: isSelected
-                    ? colorScheme.primary
+                    ? (_isSubmitted ? colorScheme.outline : colorScheme.primary)
                     : colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
@@ -385,8 +420,10 @@ class _FormCardState extends State<FormCard> {
                   isSelected ? Icons.check_box : Icons.check_box_outline_blank,
                   size: AppConstants.iconSizeSmall,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                      ? (_isSubmitted
+                          ? colorScheme.outline
+                          : colorScheme.primary)
+                      : colorScheme.onSurfaceVariant.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                 ),
                 const SizedBox(width: AppConstants.spacingXS),
                 Text(
@@ -394,8 +431,10 @@ class _FormCardState extends State<FormCard> {
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                     color: isSelected
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurface,
+                        ? (_isSubmitted
+                            ? colorScheme.onSurfaceVariant
+                            : colorScheme.onPrimaryContainer)
+                        : colorScheme.onSurface.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                   ),
                 ),
               ],
@@ -416,11 +455,13 @@ class _FormCardState extends State<FormCard> {
       children: (field.options ?? []).map((option) {
         final isSelected = currentValue == option.value;
         return InkWell(
-          onTap: () {
-            setState(() {
-              _fieldValues[field.key] = option.value;
-            });
-          },
+          onTap: _isSubmitted
+              ? null
+              : () {
+                  setState(() {
+                    _fieldValues[field.key] = option.value;
+                  });
+                },
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
           child: Container(
             padding: const EdgeInsets.symmetric(
@@ -429,12 +470,14 @@ class _FormCardState extends State<FormCard> {
             ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? colorScheme.primaryContainer
+                  ? (_isSubmitted
+                      ? colorScheme.surfaceContainerHighest
+                      : colorScheme.primaryContainer)
                   : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
               border: Border.all(
                 color: isSelected
-                    ? colorScheme.primary
+                    ? (_isSubmitted ? colorScheme.outline : colorScheme.primary)
                     : colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
@@ -445,8 +488,10 @@ class _FormCardState extends State<FormCard> {
                   isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
                   size: AppConstants.iconSizeSmall,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                      ? (_isSubmitted
+                          ? colorScheme.outline
+                          : colorScheme.primary)
+                      : colorScheme.onSurfaceVariant.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                 ),
                 const SizedBox(width: AppConstants.spacingXS),
                 Text(
@@ -454,8 +499,10 @@ class _FormCardState extends State<FormCard> {
                   style: TextStyle(
                     fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                     color: isSelected
-                        ? colorScheme.onPrimaryContainer
-                        : colorScheme.onSurface,
+                        ? (_isSubmitted
+                            ? colorScheme.onSurfaceVariant
+                            : colorScheme.onPrimaryContainer)
+                        : colorScheme.onSurface.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                   ),
                 ),
               ],
@@ -473,6 +520,10 @@ class _FormCardState extends State<FormCard> {
     return DropdownButtonFormField<String>(
       initialValue: currentValue,
       decoration: InputDecoration(
+        filled: _isSubmitted,
+        fillColor: _isSubmitted
+            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+            : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         ),
@@ -485,7 +536,7 @@ class _FormCardState extends State<FormCard> {
         field.placeholder ?? 'form_please_select'.tr,
         style: TextStyle(
           fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-          color: colorScheme.outline,
+          color: colorScheme.outline.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
         ),
       ),
       items: (field.options ?? []).map((option) {
@@ -495,15 +546,18 @@ class _FormCardState extends State<FormCard> {
             option.label,
             style: TextStyle(
               fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+              color: _isSubmitted ? colorScheme.onSurfaceVariant : null,
             ),
           ),
         );
       }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _fieldValues[field.key] = value;
-        });
-      },
+      onChanged: _isSubmitted
+          ? null
+          : (value) {
+              setState(() {
+                _fieldValues[field.key] = value;
+              });
+            },
       validator: (value) {
         if (field.required && value == null) {
           return '${field.label}不能为空';
@@ -518,44 +572,49 @@ class _FormCardState extends State<FormCard> {
     final currentValue = _fieldValues[field.key] as String?;
 
     return InkWell(
-      onTap: () async {
-        final picked = await showDatePicker(
-          context: context,
-          initialDate: currentValue != null
-              ? DateTime.tryParse(currentValue) ?? DateTime.now()
-              : DateTime.now(),
-          firstDate: DateTime(1900),
-          lastDate: DateTime(2100),
-        );
+      onTap: _isSubmitted
+          ? null
+          : () async {
+              final picked = await showDatePicker(
+                context: context,
+                initialDate: currentValue != null
+                    ? DateTime.tryParse(currentValue) ?? DateTime.now()
+                    : DateTime.now(),
+                firstDate: DateTime(1900),
+                lastDate: DateTime(2100),
+              );
 
-        if (picked != null && context.mounted) {
-          final timePicked = await showTimePicker(
-            context: context,
-            initialTime: TimeOfDay.now(),
-          );
+              if (picked != null && context.mounted) {
+                final timePicked = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.now(),
+                );
 
-          if (timePicked != null && context.mounted) {
-            final dateTime = DateTime(
-              picked.year,
-              picked.month,
-              picked.day,
-              timePicked.hour,
-              timePicked.minute,
-            );
-            // ISO 8601 格式
-            final isoString = dateTime.toIso8601String().split('.').first;
-            setState(() {
-              _fieldValues[field.key] = isoString;
-            });
-          }
-        }
-      },
+                if (timePicked != null && context.mounted) {
+                  final dateTime = DateTime(
+                    picked.year,
+                    picked.month,
+                    picked.day,
+                    timePicked.hour,
+                    timePicked.minute,
+                  );
+                  // ISO 8601 格式
+                  final isoString = dateTime.toIso8601String().split('.').first;
+                  setState(() {
+                    _fieldValues[field.key] = isoString;
+                  });
+                }
+              }
+            },
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: AppConstants.spacingM,
           vertical: AppConstants.spacingS,
         ),
         decoration: BoxDecoration(
+          color: _isSubmitted
+              ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+              : null,
           border: Border.all(
             color: colorScheme.outline.withValues(alpha: 0.3),
           ),
@@ -566,7 +625,7 @@ class _FormCardState extends State<FormCard> {
             Icon(
               Icons.calendar_today,
               size: AppConstants.iconSizeSmall,
-              color: colorScheme.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
             ),
             const SizedBox(width: AppConstants.spacingM),
             Expanded(
@@ -575,8 +634,8 @@ class _FormCardState extends State<FormCard> {
                 style: TextStyle(
                   fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
                   color: currentValue != null
-                      ? colorScheme.onSurface
-                      : colorScheme.outline,
+                      ? (_isSubmitted ? colorScheme.onSurfaceVariant : colorScheme.onSurface)
+                      : colorScheme.outline.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                 ),
               ),
             ),
@@ -593,17 +652,17 @@ class _FormCardState extends State<FormCard> {
       width: double.infinity,
       height: 48,
       child: FilledButton.icon(
-        onPressed: _handleSubmit,
-        icon: const Icon(Icons.send, size: 18),
+        onPressed: _isSubmitted ? null : _handleSubmit,
+        icon: Icon(_isSubmitted ? Icons.check_circle : Icons.send, size: 18),
         label: Text(
-          widget.formData.submitText,
+          _isSubmitted ? 'form_submitted'.tr : widget.formData.submitText,
           style: TextStyle(
             fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
             fontWeight: FontWeight.w600,
           ),
         ),
         style: FilledButton.styleFrom(
-          backgroundColor: colorScheme.primary,
+          backgroundColor: _isSubmitted ? colorScheme.outline : colorScheme.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
           ),
@@ -618,6 +677,10 @@ class _FormCardState extends State<FormCard> {
 
       // 调用外部回调
       widget.onSubmit?.call(_fieldValues);
+
+      setState(() {
+        _isSubmitted = true;
+      });
     }
   }
 }
