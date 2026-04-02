@@ -49,7 +49,7 @@ class AppConstants {
   static const debounceDelay = Duration(milliseconds: 150);
 
   // Auth Constants
-  static const String planlyBaseUrl = 'http://47.101.220.93:8080';
+  static const String planlyBaseUrl = 'http://dev-api.planly.demo.heimeng.cc';
   static const String clientId = '1079cedf0c34d40832491c39d08085e9';
   static const String grantType = 'password';
   static const String userType = 'sys_user';

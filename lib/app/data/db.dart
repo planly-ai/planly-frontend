@@ -214,6 +214,7 @@ enum MessageType {
   cardAlert,
   cardGraph,
   cardEventList,
+  cardForm,
 }
 
 @collection

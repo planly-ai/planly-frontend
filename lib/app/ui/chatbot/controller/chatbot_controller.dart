@@ -333,9 +333,20 @@ class ChatbotController extends GetxController {
           try {
             final data = jsonDecode(dataStr);
             final typeStr = (data['type'] ?? '').toString().toUpperCase();
-            
+            final cardType = (data['cardType'] ?? '').toString().toUpperCase();
+
             MessageType msgType = MessageType.text; // Default or fallback
-            if (typeStr == 'EVENT') {
+            
+            // 优先使用 cardType 字段（FORM/GOAL/TASK）
+            if (cardType == 'FORM') {
+              msgType = MessageType.cardForm;
+            } else if (cardType == 'GOAL') {
+              msgType = MessageType.cardTask; // GOAL 和 TASK 共用 task 类型
+            } else if (cardType == 'TASK') {
+              msgType = MessageType.cardTask;
+            }
+            // 兼容旧的 type 字段
+            else if (typeStr == 'EVENT') {
               msgType = MessageType.cardEvent;
             } else if (typeStr == 'TASK') {
               msgType = MessageType.cardTask;

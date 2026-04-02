@@ -309,5 +309,11 @@ class ZhCN {
     'nextSteps': '明日计划',
     'mood': '心情',
     'score': '评分',
+    'form_card_preview': 'FORM 卡片展示',
+    'form_submit': '提交',
+    'form_required': '*',
+    'form_cannot_be_empty': '不能为空',
+    'form_please_select': '请选择',
+    'form_please_select_datetime': '请选择日期时间',
   };
 }

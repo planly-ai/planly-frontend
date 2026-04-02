@@ -11,6 +11,8 @@ import 'package:planly_ai/app/ui/chatbot/widgets/card/event_list_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/graph_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/schedule_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/task_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/form_card.dart';
+import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
@@ -36,6 +38,8 @@ class ChatBubble extends StatelessWidget {
         return _buildCardWithAvatar(context, colorScheme, _buildScheduleCard());
       case MessageType.cardEventList:
         return _buildCardWithAvatar(context, colorScheme, _buildEventListCard());
+      case MessageType.cardForm:
+        return _buildCardWithAvatar(context, colorScheme, _buildFormCard());
       default:
         return _buildTextBubble(context, isUser, colorScheme, theme);
     }
@@ -69,6 +73,27 @@ class ChatBubble extends StatelessWidget {
   Widget _buildEventListCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
     return EventListCard.fromJson(data);
+  }
+
+  Widget _buildFormCard() {
+    final data = jsonDecode(message.cardContent ?? '{}');
+    // 获取控制器实例用于提交表单
+    final controller = Get.find<ChatbotController>();
+    return FormCard.fromJson(data, onSubmit: (formData) => _handleFormSubmit(formData, controller));
+  }
+
+  void _handleFormSubmit(Map<String, dynamic> formData, ChatbotController controller) {
+    // 将表单数据格式化为消息发送给后端
+    // 流程：FORM -> 用户提交 -> AI 继续 -> GOAL/TASK
+    debugPrint('[FormCard] Form submitted: $formData');
+    
+    // 将表单数据转换为 JSON 字符串作为消息发送
+    final formDataJson = const JsonEncoder.withIndent('  ').convert(formData);
+    
+    // 调用控制器的 sendMessage 方法
+    // 注意：这里需要临时设置 textController 的值然后发送
+    controller.textController.text = '表单已提交：$formDataJson';
+    controller.sendMessage();
   }
 
   Widget _buildCardWithAvatar(
