@@ -298,21 +298,49 @@ class _FormCardState extends State<FormCard> {
   }
 
   Widget _buildInputField(BuildContext context, FormField field) {
+    if (_isSubmitted) {
+      final value = _fieldValues[field.key]?.toString() ?? '';
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingM,
+          vertical: AppConstants.spacingS,
+        ),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
+        ),
+        child: Text(
+          value.isEmpty ? '-' : value,
+          style: TextStyle(
+            fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+    }
+
     return TextFormField(
       initialValue: _fieldValues[field.key]?.toString(),
-      enabled: !_isSubmitted,
+      enabled: true,
       decoration: InputDecoration(
         hintText: field.placeholder,
         hintStyle: TextStyle(
           fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
           color: Theme.of(context).colorScheme.outline,
         ),
-        filled: _isSubmitted,
-        fillColor: _isSubmitted
-            ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-            : null,
+        hintMaxLines: 3,
+        filled: false,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppConstants.spacingM,
@@ -321,7 +349,6 @@ class _FormCardState extends State<FormCard> {
       ),
       style: TextStyle(
         fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
-        color: _isSubmitted ? Theme.of(context).colorScheme.onSurfaceVariant : null,
       ),
       validator: (value) {
         if (field.required && (value == null || value.isEmpty)) {
@@ -345,12 +372,41 @@ class _FormCardState extends State<FormCard> {
           fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
           color: Theme.of(context).colorScheme.outline,
         ),
+        hintMaxLines: 3,
         filled: _isSubmitted,
         fillColor: _isSubmitted
             ? Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: _isSubmitted
+                ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)
+                : Theme.of(context).colorScheme.outline,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: _isSubmitted
+                ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)
+                : Theme.of(context).colorScheme.outline,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: _isSubmitted
+                ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)
+                : Theme.of(context).colorScheme.primary,
+            width: _isSubmitted ? 1.0 : 2.0,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppConstants.spacingM,
@@ -411,9 +467,9 @@ class _FormCardState extends State<FormCard> {
                   : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
               border: Border.all(
-                color: isSelected
-                    ? (_isSubmitted ? colorScheme.outline : colorScheme.primary)
-                    : colorScheme.outline.withValues(alpha: 0.3),
+                color: _isSubmitted
+                    ? colorScheme.outline.withValues(alpha: 0.15)
+                    : (isSelected ? colorScheme.primary : colorScheme.outline),
               ),
             ),
             child: Row(
@@ -481,9 +537,9 @@ class _FormCardState extends State<FormCard> {
                   : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
               border: Border.all(
-                color: isSelected
-                    ? (_isSubmitted ? colorScheme.outline : colorScheme.primary)
-                    : colorScheme.outline.withValues(alpha: 0.3),
+                color: _isSubmitted
+                    ? colorScheme.outline.withValues(alpha: 0.15)
+                    : (isSelected ? colorScheme.primary : colorScheme.outline),
               ),
             ),
             child: Row(
@@ -525,6 +581,7 @@ class _FormCardState extends State<FormCard> {
     final currentValue = _fieldValues[field.key] as String?;
 
     return DropdownButtonFormField<String>(
+      isExpanded: true,
       initialValue: currentValue,
       decoration: InputDecoration(
         filled: _isSubmitted,
@@ -533,6 +590,34 @@ class _FormCardState extends State<FormCard> {
             : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: _isSubmitted
+                ? colorScheme.outline.withValues(alpha: 0.15)
+                : colorScheme.outline,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: _isSubmitted
+                ? colorScheme.outline.withValues(alpha: 0.15)
+                : colorScheme.outline,
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: colorScheme.outline.withValues(alpha: 0.15),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          borderSide: BorderSide(
+            color: _isSubmitted
+                ? colorScheme.outline.withValues(alpha: 0.15)
+                : colorScheme.primary,
+            width: _isSubmitted ? 1.0 : 2.0,
+          ),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppConstants.spacingM,
@@ -545,6 +630,8 @@ class _FormCardState extends State<FormCard> {
           fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
           color: colorScheme.outline.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
       items: (field.options ?? []).map((option) {
         return DropdownMenuItem(
@@ -555,6 +642,8 @@ class _FormCardState extends State<FormCard> {
               fontSize: ResponsiveUtils.getResponsiveFontSize(context, 14),
               color: _isSubmitted ? colorScheme.onSurfaceVariant : null,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         );
       }).toList(),
@@ -614,6 +703,7 @@ class _FormCardState extends State<FormCard> {
               }
             },
       child: Container(
+        width: double.infinity,
         padding: const EdgeInsets.symmetric(
           horizontal: AppConstants.spacingM,
           vertical: AppConstants.spacingS,
@@ -623,7 +713,9 @@ class _FormCardState extends State<FormCard> {
               ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
               : null,
           border: Border.all(
-            color: colorScheme.outline.withValues(alpha: 0.3),
+            color: _isSubmitted
+                ? colorScheme.outline.withValues(alpha: 0.15)
+                : colorScheme.outline,
           ),
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
         ),
@@ -644,6 +736,8 @@ class _FormCardState extends State<FormCard> {
                       ? (_isSubmitted ? colorScheme.onSurfaceVariant : colorScheme.onSurface)
                       : colorScheme.outline.withValues(alpha: _isSubmitted ? 0.5 : 1.0),
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -660,7 +754,7 @@ class _FormCardState extends State<FormCard> {
       height: 48,
       child: FilledButton.icon(
         onPressed: _isSubmitted ? null : _handleSubmit,
-        icon: Icon(_isSubmitted ? Icons.check_circle : Icons.send, size: 18),
+        icon: Icon(_isSubmitted ? Icons.check : Icons.send, size: 18),
         label: Text(
           _isSubmitted ? 'form_submitted'.tr : widget.formData.submitText,
           style: TextStyle(
@@ -669,9 +763,11 @@ class _FormCardState extends State<FormCard> {
           ),
         ),
         style: FilledButton.styleFrom(
-          backgroundColor: _isSubmitted ? colorScheme.outline : colorScheme.primary,
+          backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusMedium,
+            ),
           ),
         ),
       ),
