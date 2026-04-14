@@ -83,6 +83,7 @@ class Todos {
   Id id;
   String name;
   String description;
+  String? subtask;
   DateTime? todoStartTime;
   DateTime? todoCompletedTime;
   DateTime createdTime;
@@ -110,6 +111,7 @@ class Todos {
     this.id = Isar.autoIncrement,
     required this.name,
     this.description = '',
+    this.subtask,
     this.todoStartTime,
     this.todoCompletedTime,
     this.todoCompletionTime,

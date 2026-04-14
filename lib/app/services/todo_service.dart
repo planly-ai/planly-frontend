@@ -23,6 +23,7 @@ class TodoService {
     required Tasks task,
     required String title,
     required String description,
+    String? subtask,
     required String startTimeString,
     required String timeString,
     required bool pinned,
@@ -44,9 +45,14 @@ class TodoService {
       throw ArgumentError('Invalid startTime or endTime');
     }
 
+    final normalizedSubtask = subtask?.trim();
+
     final todo = await _todoRepo.create(
       name: title,
       description: description,
+      subtask: (normalizedSubtask == null || normalizedSubtask.isEmpty)
+          ? null
+          : normalizedSubtask,
       startTime: startDate,
       completedTime: date,
       fix: pinned,
@@ -69,6 +75,7 @@ class TodoService {
     required Tasks task,
     required String title,
     required String description,
+    String? subtask,
     String startTimeString = '',
     required String timeString,
     required bool pinned,
@@ -78,10 +85,15 @@ class TodoService {
     final startDate = _parseDate(startTimeString);
     final date = _parseDate(timeString);
 
+    final normalizedSubtask = subtask?.trim();
+
     await _todoRepo.updateFields(
       todo: todo,
       name: title,
       description: description,
+      subtask: (normalizedSubtask == null || normalizedSubtask.isEmpty)
+          ? null
+          : normalizedSubtask,
       startTime: startDate,
       completedTime: date,
       fix: pinned,

@@ -131,6 +131,8 @@ class ZhCN {
     'tags': '标签',
     'ready': '完成',
     'subTask': '子任务',
+    'subtask': '子步骤',
+    'noSubtask': '未分组',
     'selectTodoParent': '选择一个待办事项',
     'sortByNameAsc': '按名称（升序）',
     'sortByNameDesc': '按名称（降序）',

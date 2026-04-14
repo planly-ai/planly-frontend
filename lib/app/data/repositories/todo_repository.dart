@@ -10,6 +10,7 @@ class TodoRepository {
   Future<Todos> create({
     required String name,
     required String description,
+    String? subtask,
     required DateTime? startTime,
     required DateTime? completedTime,
     required bool fix,
@@ -21,6 +22,7 @@ class TodoRepository {
     final todo = Todos(
       name: name,
       description: description,
+      subtask: subtask,
       todoStartTime: startTime,
       todoCompletedTime: completedTime,
       fix: fix,
@@ -115,6 +117,7 @@ class TodoRepository {
     required Todos todo,
     required String name,
     required String description,
+    String? subtask,
     required DateTime? startTime,
     required DateTime? completedTime,
     required bool fix,
@@ -125,6 +128,7 @@ class TodoRepository {
     await _isar.writeTxn(() async {
       todo.name = name;
       todo.description = description;
+      todo.subtask = subtask;
       todo.todoStartTime = startTime;
       todo.todoCompletedTime = completedTime;
       todo.fix = fix;

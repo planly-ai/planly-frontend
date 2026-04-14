@@ -136,6 +136,8 @@ class EnUs {
     'tags': 'Tags',
     'ready': 'Done',
     'subTask': 'Subtasks',
+    'subtask': 'Subtask',
+    'noSubtask': 'General',
     'selectTodoParent': 'Choose a Todo',
     'sortByNameAsc': 'By Name (Ascending)',
     'sortByNameDesc': 'By Name (Descending)',

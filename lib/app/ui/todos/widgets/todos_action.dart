@@ -46,11 +46,13 @@ class _TodosActionState extends State<TodosAction>
   late final TextEditingController _categoryController;
   late final TextEditingController _titleController;
   late final TextEditingController _descController;
+  late final TextEditingController _subtaskController;
   late final TextEditingController _startTimeController;
   late final TextEditingController _timeController;
   late final TextEditingController _tagsController;
 
   late final FocusNode _categoryFocusNode;
+  late final FocusNode _subtaskFocusNode;
   late final FocusNode _tagsFocusNode;
 
   late final ScrollController _scrollController;
@@ -101,10 +103,12 @@ class _TodosActionState extends State<TodosAction>
     _categoryController = TextEditingController();
     _titleController = TextEditingController();
     _descController = TextEditingController();
+    _subtaskController = TextEditingController();
     _startTimeController = TextEditingController();
     _timeController = TextEditingController();
     _tagsController = TextEditingController();
     _categoryFocusNode = FocusNode();
+    _subtaskFocusNode = FocusNode();
     _tagsFocusNode = FocusNode();
     _scrollController = ScrollController();
   }
@@ -115,6 +119,7 @@ class _TodosActionState extends State<TodosAction>
       _categoryController.text = widget.todo!.task.value?.title ?? '';
       _titleController.text = widget.todo!.name;
       _descController.text = widget.todo!.description;
+      _subtaskController.text = widget.todo!.subtask ?? '';
       _startTimeController.text = _formatDateTime(widget.todo!.todoStartTime);
       _timeController.text = _formatDateTime(widget.todo!.todoCompletedTime);
       _todoPinned = widget.todo!.fix;
@@ -127,6 +132,7 @@ class _TodosActionState extends State<TodosAction>
     _editingController = _EditingController(
       _titleController.text,
       _descController.text,
+      _subtaskController.text,
       _startTimeController.text,
       _timeController.text,
       _todoPinned,
@@ -251,10 +257,12 @@ class _TodosActionState extends State<TodosAction>
     _categoryController.dispose();
     _titleController.dispose();
     _descController.dispose();
+    _subtaskController.dispose();
     _startTimeController.dispose();
     _timeController.dispose();
     _tagsController.dispose();
     _categoryFocusNode.dispose();
+    _subtaskFocusNode.dispose();
     _tagsFocusNode.dispose();
     _editingController.dispose();
     _animationController.dispose();
@@ -294,6 +302,7 @@ class _TodosActionState extends State<TodosAction>
   void _clearControllers() {
     _titleController.clear();
     _descController.clear();
+    _subtaskController.clear();
     _startTimeController.clear();
     _timeController.clear();
     _categoryController.clear();
@@ -331,6 +340,7 @@ class _TodosActionState extends State<TodosAction>
       task: _selectedTask!,
       title: _titleController.text,
       description: _descController.text,
+      subtask: _subtaskController.text,
       startTime: _startTimeController.text,
       time: _timeController.text,
       pinned: _todoPinned,
@@ -345,6 +355,7 @@ class _TodosActionState extends State<TodosAction>
         task: _selectedTask!,
         title: _titleController.text,
         description: _descController.text,
+        subtask: _subtaskController.text,
         startTime: _startTimeController.text,
         time: _timeController.text,
         pinned: _todoPinned,
@@ -356,6 +367,7 @@ class _TodosActionState extends State<TodosAction>
         task: widget.task!,
         title: _titleController.text,
         description: _descController.text,
+        subtask: _subtaskController.text,
         startTime: _startTimeController.text,
         time: _timeController.text,
         pinned: _todoPinned,
@@ -566,6 +578,8 @@ class _TodosActionState extends State<TodosAction>
                       SizedBox(height: padding * 1.5),
                     ],
                     _buildBasicInfoSection(context, padding),
+                    SizedBox(height: padding * 1.5),
+                    _buildSubtaskSection(context, padding),
                     SizedBox(height: padding * 1.5),
                     _buildTagsSection(context, padding),
                     SizedBox(height: padding * 1.5),
@@ -785,6 +799,136 @@ class _TodosActionState extends State<TodosAction>
         ),
       ],
     );
+  }
+
+  Widget _buildSubtaskSection(BuildContext context, double padding) {
+    if (!widget.category && widget.task == null && widget.todo == null) {
+      return const SizedBox.shrink();
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return RawAutocomplete<String>(
+      focusNode: _subtaskFocusNode,
+      textEditingController: _subtaskController,
+      optionsBuilder: _buildSubtaskOptions,
+      onSelected: (value) {
+        _subtaskController.text = value;
+        if (widget.edit) {
+          _editingController.subtask.value = value;
+        }
+      },
+      optionsViewBuilder:
+          (
+            BuildContext context,
+            AutocompleteOnSelected<String> onSelected,
+            Iterable<String> options,
+          ) {
+            final list = options.toList();
+            if (list.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(top: AppConstants.spacingXS),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Material(
+                  borderRadius: BorderRadius.circular(
+                    AppConstants.borderRadiusLarge,
+                  ),
+                  elevation: AppConstants.elevationHigh,
+                  shadowColor: colorScheme.shadow.withValues(alpha: 0.2),
+                  color: colorScheme.surfaceContainerHigh,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppConstants.spacingXS,
+                      ),
+                      shrinkWrap: true,
+                      itemCount: list.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final option = list[index];
+                        return InkWell(
+                          onTap: () => onSelected(option),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppConstants.spacingL,
+                              vertical: AppConstants.spacingS,
+                            ),
+                            child: Text(
+                              option,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+      fieldViewBuilder:
+          (
+            BuildContext context,
+            TextEditingController fieldTextEditingController,
+            FocusNode fieldFocusNode,
+            VoidCallback onFieldSubmitted,
+          ) {
+            return MyTextForm(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              controller: fieldTextEditingController,
+              focusNode: fieldFocusNode,
+              labelText: 'subtask'.tr,
+              type: TextInputType.text,
+              icon: Icon(
+                IconsaxPlusLinear.task_square,
+                color: colorScheme.primary,
+              ),
+              onChanged: (value) {
+                if (widget.edit) {
+                  _editingController.subtask.value = value;
+                }
+              },
+            );
+          },
+    );
+  }
+
+  Future<Iterable<String>> _buildSubtaskOptions(
+    TextEditingValue textEditingValue,
+  ) async {
+    Tasks? task;
+    if (widget.category) {
+      task = _selectedTask;
+    } else if (widget.task != null) {
+      task = widget.task;
+    } else if (widget.todo != null) {
+      task = widget.todo!.task.value;
+    }
+
+    if (task == null) return const <String>[];
+    final taskId = task.id;
+
+    final todos = await isar.todos
+        .filter()
+        .task((q) => q.idEqualTo(taskId))
+        .findAll();
+    final query = textEditingValue.text.trim().toLowerCase();
+
+    final names =
+        todos
+            .map((t) => (t.subtask ?? '').trim())
+            .where((name) => name.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
+    if (query.isEmpty) return names;
+    return names.where((name) => name.toLowerCase().contains(query));
   }
 
   Widget _buildTagsSection(BuildContext context, double padding) {
@@ -1341,6 +1485,7 @@ class _EditingController extends ChangeNotifier {
   _EditingController(
     this._initialTitle,
     this._initialDesc,
+    this._initialSubtask,
     this._initialStartTime,
     this._initialTime,
     this._initialPinned,
@@ -1353,6 +1498,7 @@ class _EditingController extends ChangeNotifier {
 
   final String _initialTitle;
   final String _initialDesc;
+  final String _initialSubtask;
   final String _initialStartTime;
   final String _initialTime;
   final bool _initialPinned;
@@ -1362,6 +1508,7 @@ class _EditingController extends ChangeNotifier {
 
   final ValueNotifier<String> title = ValueNotifier<String>('');
   final ValueNotifier<String> description = ValueNotifier<String>('');
+  final ValueNotifier<String> subtask = ValueNotifier<String>('');
   final ValueNotifier<String> startTime = ValueNotifier<String>('');
   final ValueNotifier<String> time = ValueNotifier<String>('');
   final ValueNotifier<bool> pinned = ValueNotifier<bool>(false);
@@ -1377,6 +1524,7 @@ class _EditingController extends ChangeNotifier {
   void _initializeListeners() {
     title.value = _initialTitle;
     description.value = _initialDesc;
+    subtask.value = _initialSubtask;
     startTime.value = _initialStartTime;
     time.value = _initialTime;
     pinned.value = _initialPinned;
@@ -1386,6 +1534,7 @@ class _EditingController extends ChangeNotifier {
 
     title.addListener(_updateCanCompose);
     description.addListener(_updateCanCompose);
+    subtask.addListener(_updateCanCompose);
     startTime.addListener(_updateCanCompose);
     time.addListener(_updateCanCompose);
     pinned.addListener(_updateCanCompose);
@@ -1398,6 +1547,7 @@ class _EditingController extends ChangeNotifier {
     final hasChanges =
         title.value != _initialTitle ||
         description.value != _initialDesc ||
+        subtask.value != _initialSubtask ||
         startTime.value != _initialStartTime ||
         time.value != _initialTime ||
         pinned.value != _initialPinned ||
@@ -1412,6 +1562,7 @@ class _EditingController extends ChangeNotifier {
   void dispose() {
     title.removeListener(_updateCanCompose);
     description.removeListener(_updateCanCompose);
+    subtask.removeListener(_updateCanCompose);
     startTime.removeListener(_updateCanCompose);
     time.removeListener(_updateCanCompose);
     pinned.removeListener(_updateCanCompose);
@@ -1421,6 +1572,7 @@ class _EditingController extends ChangeNotifier {
 
     title.dispose();
     description.dispose();
+    subtask.dispose();
     startTime.dispose();
     time.dispose();
     pinned.dispose();
