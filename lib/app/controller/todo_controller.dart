@@ -149,10 +149,16 @@ class TodoController extends GetxController {
 
   // ==================== Tasks CRUD ====================
 
-  Future<void> addTask(String title, String description, Color color) async {
+  Future<void> addTask(
+    String title,
+    String description,
+    TaskCategory category,
+    Color color,
+  ) async {
     await _taskService.createTask(
       title: title,
       description: description,
+      category: category,
       color: color,
       currentTaskCount: tasks.length,
     );
@@ -162,12 +168,14 @@ class TodoController extends GetxController {
     Tasks task,
     String title,
     String description,
+    TaskCategory category,
     Color color,
   ) async {
     await _taskService.updateTask(
       task: task,
       title: title,
       description: description,
+      category: category,
       color: color,
     );
   }
@@ -367,11 +375,13 @@ class TodoController extends GetxController {
   List<Tasks> getFilteredTasks({
     required bool archived,
     String searchQuery = '',
+    TaskCategory? category,
   }) {
     return _taskService.filterTasks(
       tasks: tasks,
       archived: archived,
       searchQuery: searchQuery,
+      category: category,
     );
   }
 

@@ -17,10 +17,12 @@ class TasksList extends StatefulWidget {
     super.key,
     required this.archived,
     required this.searchTask,
+    this.category,
   });
 
   final bool archived;
   final String searchTask;
+  final TaskCategory? category;
 
   @override
   State<TasksList> createState() => _TasksListState();
@@ -44,6 +46,7 @@ class _TasksListState extends State<TasksList>
       final tasks = _todoController.getFilteredTasks(
         archived: widget.archived,
         searchQuery: widget.searchTask,
+        category: widget.category,
       );
 
       if (tasks.isEmpty) {

@@ -3901,24 +3901,30 @@ const TasksSchema = CollectionSchema(
   id: 5694065972011835967,
   properties: {
     r'archive': PropertySchema(id: 0, name: r'archive', type: IsarType.bool),
-    r'description': PropertySchema(
+    r'category': PropertySchema(
       id: 1,
+      name: r'category',
+      type: IsarType.byte,
+      enumMap: _TaskscategoryEnumValueMap,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
-    r'index': PropertySchema(id: 2, name: r'index', type: IsarType.long),
+    r'index': PropertySchema(id: 3, name: r'index', type: IsarType.long),
     r'sortOption': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'sortOption',
       type: IsarType.byte,
       enumMap: _TaskssortOptionEnumValueMap,
     ),
     r'taskColor': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'taskColor',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 5, name: r'title', type: IsarType.string),
+    r'title': PropertySchema(id: 6, name: r'title', type: IsarType.string),
   },
 
   estimateSize: _tasksEstimateSize,
@@ -3962,11 +3968,12 @@ void _tasksSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeBool(offsets[0], object.archive);
-  writer.writeString(offsets[1], object.description);
-  writer.writeLong(offsets[2], object.index);
-  writer.writeByte(offsets[3], object.sortOption.index);
-  writer.writeLong(offsets[4], object.taskColor);
-  writer.writeString(offsets[5], object.title);
+  writer.writeByte(offsets[1], object.category.index);
+  writer.writeString(offsets[2], object.description);
+  writer.writeLong(offsets[3], object.index);
+  writer.writeByte(offsets[4], object.sortOption.index);
+  writer.writeLong(offsets[5], object.taskColor);
+  writer.writeString(offsets[6], object.title);
 }
 
 Tasks _tasksDeserialize(
@@ -3977,14 +3984,17 @@ Tasks _tasksDeserialize(
 ) {
   final object = Tasks(
     archive: reader.readBoolOrNull(offsets[0]) ?? false,
-    description: reader.readStringOrNull(offsets[1]) ?? '',
+    category:
+        _TaskscategoryValueEnumMap[reader.readByteOrNull(offsets[1])] ??
+        TaskCategory.uncategorized,
+    description: reader.readStringOrNull(offsets[2]) ?? '',
     id: id,
-    index: reader.readLongOrNull(offsets[2]),
+    index: reader.readLongOrNull(offsets[3]),
     sortOption:
-        _TaskssortOptionValueEnumMap[reader.readByteOrNull(offsets[3])] ??
+        _TaskssortOptionValueEnumMap[reader.readByteOrNull(offsets[4])] ??
         SortOption.none,
-    taskColor: reader.readLong(offsets[4]),
-    title: reader.readString(offsets[5]),
+    taskColor: reader.readLong(offsets[5]),
+    title: reader.readString(offsets[6]),
   );
   return object;
 }
@@ -3999,22 +4009,52 @@ P _tasksDeserializeProp<P>(
     case 0:
       return (reader.readBoolOrNull(offset) ?? false) as P;
     case 1:
-      return (reader.readStringOrNull(offset) ?? '') as P;
+      return (_TaskscategoryValueEnumMap[reader.readByteOrNull(offset)] ??
+              TaskCategory.uncategorized)
+          as P;
     case 2:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset) ?? '') as P;
     case 3:
+      return (reader.readLongOrNull(offset)) as P;
+    case 4:
       return (_TaskssortOptionValueEnumMap[reader.readByteOrNull(offset)] ??
               SortOption.none)
           as P;
-    case 4:
-      return (reader.readLong(offset)) as P;
     case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
+const _TaskscategoryEnumValueMap = {
+  'uncategorized': 0,
+  'workPlanning': 1,
+  'studyLearning': 2,
+  'personalLife': 3,
+  'healthCare': 4,
+  'fitnessTraining': 5,
+  'financeBudget': 6,
+  'errandsAdmin': 7,
+  'familyCare': 8,
+  'socialEvents': 9,
+  'travelPlans': 10,
+};
+const _TaskscategoryValueEnumMap = {
+  0: TaskCategory.uncategorized,
+  1: TaskCategory.workPlanning,
+  2: TaskCategory.studyLearning,
+  3: TaskCategory.personalLife,
+  4: TaskCategory.healthCare,
+  5: TaskCategory.fitnessTraining,
+  6: TaskCategory.financeBudget,
+  7: TaskCategory.errandsAdmin,
+  8: TaskCategory.familyCare,
+  9: TaskCategory.socialEvents,
+  10: TaskCategory.travelPlans,
+};
 const _TaskssortOptionEnumValueMap = {
   'none': 0,
   'alphaAsc': 1,
@@ -4136,6 +4176,65 @@ extension TasksQueryFilter on QueryBuilder<Tasks, Tasks, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(
         FilterCondition.equalTo(property: r'archive', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> categoryEqualTo(
+    TaskCategory value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'category', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> categoryGreaterThan(
+    TaskCategory value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'category',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> categoryLessThan(
+    TaskCategory value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'category',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> categoryBetween(
+    TaskCategory lower,
+    TaskCategory upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'category',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
       );
     });
   }
@@ -4761,6 +4860,18 @@ extension TasksQuerySortBy on QueryBuilder<Tasks, Tasks, QSortBy> {
     });
   }
 
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.desc);
+    });
+  }
+
   QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -4832,6 +4943,18 @@ extension TasksQuerySortThenBy on QueryBuilder<Tasks, Tasks, QSortThenBy> {
   QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByArchiveDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'archive', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByCategoryDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'category', Sort.desc);
     });
   }
 
@@ -4915,6 +5038,12 @@ extension TasksQueryWhereDistinct on QueryBuilder<Tasks, Tasks, QDistinct> {
     });
   }
 
+  QueryBuilder<Tasks, Tasks, QDistinct> distinctByCategory() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'category');
+    });
+  }
+
   QueryBuilder<Tasks, Tasks, QDistinct> distinctByDescription({
     bool caseSensitive = true,
   }) {
@@ -4960,6 +5089,12 @@ extension TasksQueryProperty on QueryBuilder<Tasks, Tasks, QQueryProperty> {
   QueryBuilder<Tasks, bool, QQueryOperations> archiveProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'archive');
+    });
+  }
+
+  QueryBuilder<Tasks, TaskCategory, QQueryOperations> categoryProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'category');
     });
   }
 

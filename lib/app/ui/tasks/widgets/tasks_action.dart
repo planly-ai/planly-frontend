@@ -40,10 +40,16 @@ class _TasksActionState extends State<TasksAction>
   late final ValueNotifier<Color> _colorNotifier;
   late final TextEditingController _titleController;
   late final TextEditingController _descController;
+  late final TextEditingController _categoryController;
+  late final FocusNode _categoryFocusNode;
+  late TaskCategory _selectedCategory;
   late final _EditingController _editingController;
   late final AnimationController _animationController;
   late final Animation<double> _fadeAnimation;
   late final Animation<Offset> _slideAnimation;
+  static final List<TaskCategory> _selectableCategories = TaskCategory.values
+      .where((category) => category != TaskCategory.uncategorized)
+      .toList();
 
   @override
   void initState() {
@@ -59,6 +65,15 @@ class _TasksActionState extends State<TasksAction>
     _colorNotifier = ValueNotifier(
       widget.edit ? Color(widget.task!.taskColor) : const Color(0xFF2196F3),
     );
+    _selectedCategory = widget.edit
+        ? widget.task!.category
+        : TaskCategory.uncategorized;
+    _categoryController = TextEditingController(
+      text: _selectedCategory == TaskCategory.uncategorized
+          ? ''
+          : _categoryLabel(_selectedCategory),
+    );
+    _categoryFocusNode = FocusNode();
   }
 
   void _initializeEditMode() {
@@ -70,6 +85,7 @@ class _TasksActionState extends State<TasksAction>
     _editingController = _EditingController(
       _titleController.text,
       _descController.text,
+      _selectedCategory,
       _colorNotifier.value,
     );
   }
@@ -104,6 +120,8 @@ class _TasksActionState extends State<TasksAction>
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
+    _categoryController.dispose();
+    _categoryFocusNode.dispose();
     _colorNotifier.dispose();
     _editingController.dispose();
     _animationController.dispose();
@@ -152,6 +170,7 @@ class _TasksActionState extends State<TasksAction>
       widget.task!,
       _titleController.text,
       _descController.text,
+      _selectedCategory,
       _colorNotifier.value,
     );
     widget.updateTaskName?.call();
@@ -161,6 +180,7 @@ class _TasksActionState extends State<TasksAction>
     _todoController.addTask(
       _titleController.text,
       _descController.text,
+      _selectedCategory,
       _colorNotifier.value,
     );
     _titleController.clear();
@@ -360,6 +380,8 @@ class _TasksActionState extends State<TasksAction>
                   children: [
                     _buildTitleInput(),
                     SizedBox(height: padding * 1.2),
+                    _buildCategorySelect(),
+                    SizedBox(height: padding * 1.2),
                     _buildDescriptionInput(),
                     SizedBox(height: padding * 1.5),
                     _buildColorPicker(),
@@ -407,6 +429,174 @@ class _TasksActionState extends State<TasksAction>
       icon: Icon(IconsaxPlusLinear.note_text, color: colorScheme.primary),
       maxLine: null,
       onChanged: (value) => _editingController.description.value = value,
+    );
+  }
+
+  Widget _buildCategorySelect() {
+    return RawAutocomplete<TaskCategory>(
+      focusNode: _categoryFocusNode,
+      textEditingController: _categoryController,
+      fieldViewBuilder: _buildCategoryFieldView,
+      optionsBuilder: _buildCategoryOptions,
+      onSelected: _onCategorySelected,
+      displayStringForOption: _categoryLabel,
+      optionsViewBuilder: _buildCategoryOptionsView,
+    );
+  }
+
+  String _categoryLabel(TaskCategory category) => category.labelKey.tr;
+
+  TaskCategory? _matchCategoryByLabel(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return null;
+
+    for (final category in _selectableCategories) {
+      if (_categoryLabel(category).toLowerCase() == trimmed.toLowerCase()) {
+        return category;
+      }
+    }
+    return null;
+  }
+
+  Widget _buildCategoryFieldView(
+    BuildContext context,
+    TextEditingController fieldTextEditingController,
+    FocusNode fieldFocusNode,
+    VoidCallback onFieldSubmitted,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return MyTextForm(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      controller: fieldTextEditingController,
+      focusNode: fieldFocusNode,
+      labelText: 'categoryFilter'.tr,
+      type: TextInputType.text,
+      icon: Icon(IconsaxPlusLinear.folder_2, color: colorScheme.primary),
+      onChanged: (value) {
+        setState(() {
+          if (value.trim().isEmpty) {
+            _selectedCategory = TaskCategory.uncategorized;
+            _editingController.category.value = _selectedCategory;
+            return;
+          }
+
+          final matched = _matchCategoryByLabel(value);
+          if (matched != null) {
+            _selectedCategory = matched;
+            _editingController.category.value = matched;
+          }
+        });
+      },
+      iconButton: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (fieldTextEditingController.text.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                IconsaxPlusLinear.close_square,
+                size: AppConstants.iconSizeSmall,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              onPressed: () {
+                setState(() {
+                  _selectedCategory = TaskCategory.uncategorized;
+                  _editingController.category.value = _selectedCategory;
+                  fieldTextEditingController.clear();
+                });
+                fieldFocusNode.requestFocus();
+              },
+            ),
+          IconButton(
+            icon: Icon(
+              fieldFocusNode.hasFocus
+                  ? IconsaxPlusLinear.arrow_up_1
+                  : IconsaxPlusLinear.arrow_down,
+              size: AppConstants.iconSizeSmall,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            onPressed: () {
+              if (fieldFocusNode.hasFocus) {
+                fieldFocusNode.unfocus();
+              } else {
+                fieldFocusNode.requestFocus();
+              }
+              setState(() {});
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Iterable<TaskCategory> _buildCategoryOptions(
+    TextEditingValue textEditingValue,
+  ) {
+    final query = textEditingValue.text.trim().toLowerCase();
+    if (query.isEmpty) {
+      return _selectableCategories;
+    }
+    return _selectableCategories.where((category) {
+      return _categoryLabel(category).toLowerCase().contains(query);
+    });
+  }
+
+  void _onCategorySelected(TaskCategory selection) {
+    setState(() {
+      _selectedCategory = selection;
+      _categoryController.text = _categoryLabel(selection);
+      _editingController.category.value = selection;
+    });
+    _categoryFocusNode.unfocus();
+  }
+
+  Widget _buildCategoryOptionsView(
+    BuildContext context,
+    AutocompleteOnSelected<TaskCategory> onSelected,
+    Iterable<TaskCategory> options,
+  ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppConstants.spacingXS),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Material(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+          elevation: AppConstants.elevationHigh,
+          shadowColor: colorScheme.shadow.withValues(alpha: 0.2),
+          color: colorScheme.surfaceContainerHigh,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 250),
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                vertical: AppConstants.spacingXS,
+              ),
+              shrinkWrap: true,
+              itemCount: options.length,
+              itemBuilder: (BuildContext context, int index) {
+                final TaskCategory category = options.elementAt(index);
+                return InkWell(
+                  onTap: () => onSelected(category),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppConstants.spacingL,
+                      vertical: AppConstants.spacingM,
+                    ),
+                    child: Text(
+                      _categoryLabel(category),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -758,6 +948,7 @@ class _EditingController extends ChangeNotifier {
   _EditingController(
     this.initialTitle,
     this.initialDescription,
+    this.initialCategory,
     this.initialColor,
   ) {
     _initializeListeners();
@@ -765,10 +956,12 @@ class _EditingController extends ChangeNotifier {
 
   final String? initialTitle;
   final String? initialDescription;
+  final TaskCategory initialCategory;
   final Color? initialColor;
 
   final title = ValueNotifier<String?>(null);
   final description = ValueNotifier<String?>(null);
+  final category = ValueNotifier<TaskCategory>(TaskCategory.uncategorized);
   final color = ValueNotifier<Color?>(null);
   final _canCompose = ValueNotifier<bool>(false);
 
@@ -777,10 +970,12 @@ class _EditingController extends ChangeNotifier {
   void _initializeListeners() {
     title.value = initialTitle;
     description.value = initialDescription;
+    category.value = initialCategory;
     color.value = initialColor;
 
     title.addListener(_updateCanCompose);
     description.addListener(_updateCanCompose);
+    category.addListener(_updateCanCompose);
     color.addListener(_updateCanCompose);
   }
 
@@ -788,6 +983,7 @@ class _EditingController extends ChangeNotifier {
     _canCompose.value =
         title.value != initialTitle ||
         description.value != initialDescription ||
+        category.value != initialCategory ||
         color.value != initialColor;
   }
 
@@ -795,9 +991,11 @@ class _EditingController extends ChangeNotifier {
   void dispose() {
     title.removeListener(_updateCanCompose);
     description.removeListener(_updateCanCompose);
+    category.removeListener(_updateCanCompose);
     color.removeListener(_updateCanCompose);
     title.dispose();
     description.dispose();
+    category.dispose();
     color.dispose();
     _canCompose.dispose();
     super.dispose();
