@@ -90,7 +90,7 @@ class TodoService {
       task: task,
     );
 
-    if (date != null) {
+    if (startDate != null) {
       await _notificationService.reschedule(todo);
     } else {
       await _notificationService.cancel(todo.id);
@@ -102,11 +102,11 @@ class TodoService {
   Future<void> updateTodoStatus(Todos todo) async {
     await _todoRepo.update(todo);
 
-    final completedTime = todo.todoCompletedTime;
+    final startTime = todo.todoStartTime;
 
     if (todo.status == TodoStatus.done || todo.status == TodoStatus.cancelled) {
       await _notificationService.cancel(todo.id);
-    } else if (completedTime != null) {
+    } else if (startTime != null) {
       await _notificationService.scheduleForTodo(todo);
     } else {
       await _notificationService.cancel(todo.id);
@@ -123,7 +123,7 @@ class TodoService {
     } else {
       for (final id in allIds) {
         final todoItem = await _todoRepo.getById(id);
-        if (todoItem != null && todoItem.todoCompletedTime != null) {
+        if (todoItem != null && todoItem.todoStartTime != null) {
           await _notificationService.scheduleForTodo(todoItem);
         }
       }
@@ -288,12 +288,12 @@ class TodoService {
 
   int countForCalendar(DateTime date, List<Todos> allTodos) {
     return allTodos.where((todo) {
-      final completedTime = todo.todoCompletedTime;
+      final startTime = todo.todoStartTime;
       return todo.status == TodoStatus.active &&
-          completedTime != null &&
+          startTime != null &&
           todo.task.value?.archive == false &&
           todo.parent.value == null &&
-          _isSameDay(date, completedTime);
+          _isSameDay(date, startTime);
     }).length;
   }
 
@@ -350,7 +350,7 @@ class TodoService {
       if (isRootMode) {
         return todo.parent.value == null;
       } else if (selectedDay != null) {
-        final time = todo.todoCompletedTime;
+        final time = todo.todoStartTime;
         if (todo.task.value?.archive == true || time == null) return false;
 
         final startOfDay = DateTime(

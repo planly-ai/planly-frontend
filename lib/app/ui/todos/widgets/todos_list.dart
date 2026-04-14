@@ -191,7 +191,7 @@ class _TodosListState extends State<TodosList>
   List<Todos> _getCalendarTodos() {
     return _todoController.todos.where((todo) {
       final notArchived = todo.task.value?.archive == false;
-      final hasTime = todo.todoCompletedTime != null;
+      final hasTime = todo.todoStartTime != null;
       final inSelectedDay = hasTime && _isWithinSelectedDay(todo);
       final matchesStatus =
           widget.statusFilter == null || todo.status == widget.statusFilter;
@@ -201,7 +201,7 @@ class _TodosListState extends State<TodosList>
 
   bool _isWithinSelectedDay(Todos todo) {
     final selectedDate = widget.selectedDay!;
-    final completedDate = todo.todoCompletedTime!;
+    final startDate = todo.todoStartTime!;
 
     final startOfDay = DateTime(
       selectedDate.year,
@@ -221,14 +221,16 @@ class _TodosListState extends State<TodosList>
       59,
     );
 
-    return completedDate.isAfter(startOfDay) &&
-        completedDate.isBefore(endOfDay);
+    return startDate.isAfter(startOfDay) && startDate.isBefore(endOfDay);
   }
 
   void _sortTodos(List<Todos> todos) {
     final opt = widget.sortOption ?? SortOption.none;
+    final effectiveOpt = widget.calendar && opt == SortOption.none
+        ? SortOption.dateNotifAsc
+        : opt;
 
-    if (opt == SortOption.random) {
+    if (effectiveOpt == SortOption.random) {
       for (var todo in todos) {
         _randomScores.putIfAbsent(todo.id, () => Random().nextDouble());
       }
@@ -239,7 +241,7 @@ class _TodosListState extends State<TodosList>
         return a.fix ? -1 : 1;
       }
 
-      switch (opt) {
+      switch (effectiveOpt) {
         case SortOption.alphaAsc:
           return _compareName(a, b);
         case SortOption.alphaDesc:
@@ -276,8 +278,8 @@ class _TodosListState extends State<TodosList>
   }
 
   int _compareDateNotif(Todos a, Todos b, {bool ascending = true}) {
-    final da = a.todoCompletedTime;
-    final db = b.todoCompletedTime;
+    final da = a.todoStartTime;
+    final db = b.todoStartTime;
 
     if (da == null && db == null) return 0;
     if (da == null) return 1;

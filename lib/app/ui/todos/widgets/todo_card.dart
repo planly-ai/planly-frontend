@@ -224,7 +224,7 @@ class _TodoCardState extends State<TodoCard>
   }
 
   void _handleCheckboxChange(bool val) {
-    final date = widget.todo.todoCompletedTime;
+    final date = widget.todo.todoStartTime;
 
     if (val) {
       flutterLocalNotificationsPlugin?.cancel(id: widget.todo.id);
@@ -233,7 +233,7 @@ class _TodoCardState extends State<TodoCard>
         widget.todo.id,
         widget.todo.name,
         widget.todo.description,
-        widget.todo.todoCompletedTime,
+        widget.todo.todoStartTime,
       );
     }
 
@@ -267,7 +267,7 @@ class _TodoCardState extends State<TodoCard>
           : null;
     });
 
-    final date = widget.todo.todoCompletedTime;
+    final date = widget.todo.todoStartTime;
 
     if (newStatus == TodoStatus.done || newStatus == TodoStatus.cancelled) {
       flutterLocalNotificationsPlugin?.cancel(id: widget.todo.id);
@@ -276,7 +276,7 @@ class _TodoCardState extends State<TodoCard>
         widget.todo.id,
         widget.todo.name,
         widget.todo.description,
-        widget.todo.todoCompletedTime,
+        widget.todo.todoStartTime,
       );
     }
 
@@ -567,13 +567,38 @@ class _TodoCardState extends State<TodoCard>
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (widget.todo.fix) _buildFixedIcon(colorScheme),
-          if (widget.calendar) _buildCalendarTime(colorScheme),
+          if (widget.calendar) _buildCalendarTimeRange(colorScheme),
         ],
       ),
     );
   }
 
-  Widget _buildCalendarTime(ColorScheme colorScheme) {
+  Widget _buildCalendarTimeRange(ColorScheme colorScheme) {
+    final start = widget.todo.todoStartTime;
+    final end = widget.todo.todoCompletedTime;
+    if (start == null && end == null) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (start != null)
+          _buildCalendarTimeChip(
+            colorScheme: colorScheme,
+            value: _formatCalendarTime(start),
+          ),
+        if (end != null)
+          _buildCalendarTimeChip(
+            colorScheme: colorScheme,
+            value: _formatCalendarTime(end),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCalendarTimeChip({
+    required ColorScheme colorScheme,
+    required String value,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 5),
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
@@ -582,7 +607,7 @@ class _TodoCardState extends State<TodoCard>
         borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
-        _formatCalendarTime(widget.todo.todoCompletedTime!),
+        value,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: colorScheme.onTertiaryContainer,
           fontSize: ResponsiveUtils.getResponsiveFontSize(context, 10),
