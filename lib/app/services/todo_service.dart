@@ -23,30 +23,40 @@ class TodoService {
     required Tasks task,
     required String title,
     required String description,
+    required String startTimeString,
     required String timeString,
     required bool pinned,
     required Priority priority,
     required List<String> tags,
     required int currentTodoCount,
-    Todos? parent,
   }) async {
+    if (startTimeString.trim().isEmpty || timeString.trim().isEmpty) {
+      showSnackBar('startEndTimeRequired'.tr);
+      throw ArgumentError(
+        'startTime and endTime are required when creating todo',
+      );
+    }
+
+    final startDate = _parseDate(startTimeString);
     final date = _parseDate(timeString);
+    if (startDate == null || date == null) {
+      showSnackBar('startEndTimeRequired'.tr);
+      throw ArgumentError('Invalid startTime or endTime');
+    }
 
     final todo = await _todoRepo.create(
       name: title,
       description: description,
+      startTime: startDate,
       completedTime: date,
       fix: pinned,
       priority: priority,
       tags: tags,
       index: currentTodoCount,
       task: task,
-      parent: parent,
     );
 
-    if (date != null) {
-      await _notificationService.scheduleForTodo(todo);
-    }
+    await _notificationService.scheduleForTodo(todo);
 
     showSnackBar('todoCreate'.tr);
     return todo;
@@ -59,17 +69,20 @@ class TodoService {
     required Tasks task,
     required String title,
     required String description,
+    String startTimeString = '',
     required String timeString,
     required bool pinned,
     required Priority priority,
     required List<String> tags,
   }) async {
+    final startDate = _parseDate(startTimeString);
     final date = _parseDate(timeString);
 
     await _todoRepo.updateFields(
       todo: todo,
       name: title,
       description: description,
+      startTime: startDate,
       completedTime: date,
       fix: pinned,
       priority: priority,
@@ -144,6 +157,10 @@ class TodoService {
     required Todos? newParent,
   }) async {
     if (rootTodos.isEmpty) return;
+    if (newParent != null) {
+      showSnackBar('subtasksNotSupported'.tr);
+      return;
+    }
 
     final rootTodosCopy = List<Todos>.from(rootTodos);
     final allIds = <int>{};

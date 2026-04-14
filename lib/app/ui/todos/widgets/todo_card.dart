@@ -4,7 +4,6 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/controller/todo_controller.dart';
-import 'package:planly_ai/app/ui/todos/view/todo_todos.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/navigation_helper.dart';
 import 'package:planly_ai/app/utils/notification.dart';
@@ -68,35 +67,7 @@ class _TodoCardState extends State<TodoCard>
 
   void _handleTapDown(TapDownDetails details) {
     _animationController.forward();
-
-    final box = context.findRenderObject() as RenderBox?;
-    if (box == null) return;
-
-    final local = details.localPosition;
-    final width = box.size.width;
-    const rightZoneFraction = 0.15;
-    final rightZoneStart = width * (1 - rightZoneFraction);
-
-    _tappedRightSide = local.dx >= rightZoneStart;
-
-    if (_tappedRightSide) {
-      Get.key.currentState!.push(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              TodosTodo(key: ValueKey(widget.todo.id), todo: widget.todo),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 1),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
-          },
-          transitionDuration: const Duration(milliseconds: 240),
-        ),
-      );
-    }
+    _tappedRightSide = false;
   }
 
   void _handleTapUp(TapUpDetails details) {
@@ -597,7 +568,6 @@ class _TodoCardState extends State<TodoCard>
         children: [
           if (widget.todo.fix) _buildFixedIcon(colorScheme),
           if (widget.calendar) _buildCalendarTime(colorScheme),
-          _buildTrailingText(colorScheme),
         ],
       ),
     );
@@ -640,34 +610,6 @@ class _TodoCardState extends State<TodoCard>
         IconsaxPlusBold.attach_square,
         size: 14,
         color: colorScheme.onSecondaryContainer,
-      ),
-    );
-  }
-
-  Widget _buildTrailingText(ColorScheme colorScheme) {
-    final hasNoSubtasks = widget.createdTodos == 0;
-    final allComplete =
-        widget.createdTodos > 0 && widget.completedTodos == widget.createdTodos;
-    final shouldDim = hasNoSubtasks || allComplete;
-
-    return AnimatedContainer(
-      duration: AppConstants.shortAnimation,
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-      decoration: BoxDecoration(
-        color: shouldDim
-            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-            : colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(7),
-      ),
-      child: Text(
-        '${widget.completedTodos}/${widget.createdTodos}',
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: shouldDim
-              ? colorScheme.onSurface.withValues(alpha: 0.4)
-              : colorScheme.onSurface,
-          fontSize: ResponsiveUtils.getResponsiveFontSize(context, 11),
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }

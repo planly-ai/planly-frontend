@@ -10,17 +10,18 @@ class TodoRepository {
   Future<Todos> create({
     required String name,
     required String description,
+    required DateTime? startTime,
     required DateTime? completedTime,
     required bool fix,
     required Priority priority,
     required List<String> tags,
     required int index,
     required Tasks task,
-    Todos? parent,
   }) async {
     final todo = Todos(
       name: name,
       description: description,
+      todoStartTime: startTime,
       todoCompletedTime: completedTime,
       fix: fix,
       createdTime: DateTime.now(),
@@ -29,16 +30,9 @@ class TodoRepository {
       index: index,
     )..task.value = task;
 
-    if (parent != null) {
-      todo.parent.value = parent;
-    }
-
     await _isar.writeTxn(() async {
       await _isar.todos.put(todo);
       await todo.task.save();
-      if (parent != null) {
-        await todo.parent.save();
-      }
     });
 
     return todo;
@@ -121,6 +115,7 @@ class TodoRepository {
     required Todos todo,
     required String name,
     required String description,
+    required DateTime? startTime,
     required DateTime? completedTime,
     required bool fix,
     required Priority priority,
@@ -130,6 +125,7 @@ class TodoRepository {
     await _isar.writeTxn(() async {
       todo.name = name;
       todo.description = description;
+      todo.todoStartTime = startTime;
       todo.todoCompletedTime = completedTime;
       todo.fix = fix;
       todo.priority = priority;

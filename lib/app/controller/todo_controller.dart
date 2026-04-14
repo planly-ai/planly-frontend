@@ -236,22 +236,22 @@ class TodoController extends GetxController {
     required Tasks task,
     required String title,
     required String description,
+    required String startTime,
     required String time,
     required bool pinned,
     required Priority priority,
     required List<String> tags,
-    Todos? parent,
   }) async {
     final todo = await _todoService.createTodo(
       task: task,
       title: title,
       description: description,
+      startTimeString: startTime,
       timeString: time,
       pinned: pinned,
       priority: priority,
       tags: tags,
       currentTodoCount: todos.length,
-      parent: parent,
     );
     return todo;
   }
@@ -261,6 +261,7 @@ class TodoController extends GetxController {
     required Tasks task,
     required String title,
     required String description,
+    String startTime = '',
     required String time,
     required bool pinned,
     required Priority priority,
@@ -271,6 +272,7 @@ class TodoController extends GetxController {
       task: task,
       title: title,
       description: description,
+      startTimeString: startTime,
       timeString: time,
       pinned: pinned,
       priority: priority,

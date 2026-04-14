@@ -5048,6 +5048,11 @@ const TodosSchema = CollectionSchema(
       name: r'todoCompletionTime',
       type: IsarType.dateTime,
     ),
+    r'todoStartTime': PropertySchema(
+      id: 12,
+      name: r'todoStartTime',
+      type: IsarType.dateTime,
+    ),
   },
 
   estimateSize: _todosEstimateSize,
@@ -5121,6 +5126,7 @@ void _todosSerialize(
   writer.writeStringList(offsets[9], object.tags);
   writer.writeDateTime(offsets[10], object.todoCompletedTime);
   writer.writeDateTime(offsets[11], object.todoCompletionTime);
+  writer.writeDateTime(offsets[12], object.todoStartTime);
 }
 
 Todos _todosDeserialize(
@@ -5146,6 +5152,7 @@ Todos _todosDeserialize(
     tags: reader.readStringList(offsets[9]) ?? const [],
     todoCompletedTime: reader.readDateTimeOrNull(offsets[10]),
     todoCompletionTime: reader.readDateTimeOrNull(offsets[11]),
+    todoStartTime: reader.readDateTimeOrNull(offsets[12]),
   );
   object.childrenSortOption =
       _TodoschildrenSortOptionValueEnumMap[reader.readByteOrNull(offsets[0])] ??
@@ -5191,6 +5198,8 @@ P _todosDeserializeProp<P>(
     case 10:
       return (reader.readDateTimeOrNull(offset)) as P;
     case 11:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 12:
       return (reader.readDateTimeOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -6354,6 +6363,81 @@ extension TodosQueryFilter on QueryBuilder<Todos, Todos, QFilterCondition> {
       );
     });
   }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> todoStartTimeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'todoStartTime'),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> todoStartTimeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'todoStartTime'),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> todoStartTimeEqualTo(
+    DateTime? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'todoStartTime', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> todoStartTimeGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'todoStartTime',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> todoStartTimeLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'todoStartTime',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> todoStartTimeBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'todoStartTime',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
 }
 
 extension TodosQueryObject on QueryBuilder<Todos, Todos, QFilterCondition> {}
@@ -6581,6 +6665,18 @@ extension TodosQuerySortBy on QueryBuilder<Todos, Todos, QSortBy> {
       return query.addSortBy(r'todoCompletionTime', Sort.desc);
     });
   }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> sortByTodoStartTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'todoStartTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> sortByTodoStartTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'todoStartTime', Sort.desc);
+    });
+  }
 }
 
 extension TodosQuerySortThenBy on QueryBuilder<Todos, Todos, QSortThenBy> {
@@ -6727,6 +6823,18 @@ extension TodosQuerySortThenBy on QueryBuilder<Todos, Todos, QSortThenBy> {
       return query.addSortBy(r'todoCompletionTime', Sort.desc);
     });
   }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> thenByTodoStartTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'todoStartTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> thenByTodoStartTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'todoStartTime', Sort.desc);
+    });
+  }
 }
 
 extension TodosQueryWhereDistinct on QueryBuilder<Todos, Todos, QDistinct> {
@@ -6803,6 +6911,12 @@ extension TodosQueryWhereDistinct on QueryBuilder<Todos, Todos, QDistinct> {
   QueryBuilder<Todos, Todos, QDistinct> distinctByTodoCompletionTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'todoCompletionTime');
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QDistinct> distinctByTodoStartTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'todoStartTime');
     });
   }
 }
@@ -6885,6 +6999,12 @@ extension TodosQueryProperty on QueryBuilder<Todos, Todos, QQueryProperty> {
   todoCompletionTimeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'todoCompletionTime');
+    });
+  }
+
+  QueryBuilder<Todos, DateTime?, QQueryOperations> todoStartTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'todoStartTime');
     });
   }
 }

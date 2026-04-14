@@ -83,6 +83,7 @@ class Todos {
   Id id;
   String name;
   String description;
+  DateTime? todoStartTime;
   DateTime? todoCompletedTime;
   DateTime createdTime;
   DateTime? todoCompletionTime;
@@ -109,6 +110,7 @@ class Todos {
     this.id = Isar.autoIncrement,
     required this.name,
     this.description = '',
+    this.todoStartTime,
     this.todoCompletedTime,
     this.todoCompletionTime,
     required this.createdTime,
