@@ -317,5 +317,12 @@ class EnUs {
     'nextSteps': 'Next Steps',
     'mood': 'Mood',
     'score': 'Score',
+    'form_card_preview': 'FORM Card Preview',
+    'form_submit': 'Submit',
+    'form_required': '*',
+    'form_cannot_be_empty': 'cannot be empty',
+    'form_please_select': 'Please select',
+    'form_please_select_datetime': 'Select date and time',
+    'form_submitted': 'Submitted',
   };
 }
