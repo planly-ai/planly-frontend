@@ -58,14 +58,18 @@ class TaskCard extends StatelessWidget {
             ],
             _buildDetailRow(
               context,
-              icon: Icons.category_outlined,
-              label: 'task_type_label'.trParams({'type': taskEnum ?? 'unclassified'.tr}),
+              icon: Icons.task_outlined,
+              label: 'task_type_label'.trParams({
+                'type': taskEnum ?? 'unclassified'.tr,
+              }),
             ),
             const SizedBox(height: AppConstants.spacingS),
             _buildDetailRow(
               context,
               icon: Icons.timer_outlined,
-              label: 'time_spent_label'.trParams({'minutes': spentTime.toString()}),
+              label: 'time_spent_label'.trParams({
+                'minutes': spentTime.toString(),
+              }),
             ),
             const SizedBox(height: AppConstants.spacingM),
             _buildProgressSection(context, isCompleted),
@@ -196,7 +200,9 @@ class TaskCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+            backgroundColor: colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.5,
+            ),
             valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
             minHeight: 10,
           ),
@@ -223,7 +229,9 @@ class TaskCard extends StatelessWidget {
         style: FilledButton.styleFrom(
           backgroundColor: colorScheme.primary,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+            borderRadius: BorderRadius.circular(
+              AppConstants.borderRadiusMedium,
+            ),
           ),
         ),
       ),

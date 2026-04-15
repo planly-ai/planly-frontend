@@ -212,7 +212,7 @@ Future<void> snoozeTodo(int todoId) async {
     );
 
     await isarInstance.writeTxn(() async {
-      todo.todoCompletedTime = DateTime.now().add(
+      todo.todoStartTime = DateTime.now().add(
         Duration(minutes: settings.snoozeDuration),
       );
       await isarInstance.todos.put(todo);

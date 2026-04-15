@@ -9,9 +9,9 @@ class NotificationService {
   // ==================== SCHEDULE ====================
 
   Future<void> scheduleForTodo(Todos todo) async {
-    final completedTime = todo.todoCompletedTime;
+    final startTime = todo.todoStartTime;
 
-    if (completedTime == null) {
+    if (startTime == null) {
       return;
     }
 
@@ -19,10 +19,9 @@ class NotificationService {
 
     try {
       final effectiveTime =
-          completedTime.isBefore(now) ||
-              completedTime.difference(now).inSeconds <= 0
+          startTime.isBefore(now) || startTime.difference(now).inSeconds <= 0
           ? now.add(const Duration(seconds: 1))
-          : completedTime;
+          : startTime;
 
       await _notificationShow.showNotification(
         todo.id,
@@ -39,7 +38,7 @@ class NotificationService {
     if (todos.isEmpty) return;
 
     final todosToSchedule = todos.where((todo) {
-      return todo.todoCompletedTime != null;
+      return todo.todoStartTime != null;
     }).toList();
 
     for (final todo in todosToSchedule) {
@@ -69,7 +68,7 @@ class NotificationService {
     if (todos.isEmpty) return;
 
     final idsToCancel = todos
-        .where((todo) => todo.todoCompletedTime != null)
+        .where((todo) => todo.todoStartTime != null)
         .map((todo) => todo.id)
         .toList();
 

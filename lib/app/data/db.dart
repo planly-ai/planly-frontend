@@ -53,12 +53,32 @@ enum SortOption {
 
 enum AutoBackupFrequency { daily, weekly, monthly }
 
+enum TaskCategory {
+  uncategorized(labelKey: 'taskCategoryUncategorized'),
+  workPlanning(labelKey: 'taskCategoryWorkPlanning'),
+  studyLearning(labelKey: 'taskCategoryStudyLearning'),
+  personalLife(labelKey: 'taskCategoryPersonalLife'),
+  healthCare(labelKey: 'taskCategoryHealthCare'),
+  fitnessTraining(labelKey: 'taskCategoryFitnessTraining'),
+  financeBudget(labelKey: 'taskCategoryFinanceBudget'),
+  errandsAdmin(labelKey: 'taskCategoryErrandsAdmin'),
+  familyCare(labelKey: 'taskCategoryFamilyCare'),
+  socialEvents(labelKey: 'taskCategorySocialEvents'),
+  travelPlans(labelKey: 'taskCategoryTravelPlans');
+
+  const TaskCategory({required this.labelKey});
+
+  final String labelKey;
+}
+
 @collection
 class Tasks {
   Id id;
   String title;
   String description;
   int taskColor;
+  @enumerated
+  TaskCategory category;
   bool archive;
   int? index;
   @enumerated
@@ -71,6 +91,7 @@ class Tasks {
     this.id = Isar.autoIncrement,
     required this.title,
     this.description = '',
+    this.category = TaskCategory.uncategorized,
     this.archive = false,
     required this.taskColor,
     this.index,
@@ -83,6 +104,8 @@ class Todos {
   Id id;
   String name;
   String description;
+  String? subtask;
+  DateTime? todoStartTime;
   DateTime? todoCompletedTime;
   DateTime createdTime;
   DateTime? todoCompletionTime;
@@ -109,6 +132,8 @@ class Todos {
     this.id = Isar.autoIncrement,
     required this.name,
     this.description = '',
+    this.subtask,
+    this.todoStartTime,
     this.todoCompletedTime,
     this.todoCompletionTime,
     required this.createdTime,

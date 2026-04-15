@@ -28,7 +28,10 @@ class EventCard extends StatefulWidget {
     this.onConfirm,
   });
 
-  factory EventCard.fromJson(Map<String, dynamic> json, {required ChatMessage message}) {
+  factory EventCard.fromJson(
+    Map<String, dynamic> json, {
+    required ChatMessage message,
+  }) {
     return EventCard(
       title: json['title'] ?? '',
       startTime: json['startTime'] ?? '',
@@ -68,7 +71,8 @@ class _EventCardState extends State<EventCard> {
 
     final todoController = Get.find<TodoController>();
 
-    final targetTask = todoController.tasks.firstWhereOrNull(
+    final targetTask =
+        todoController.tasks.firstWhereOrNull(
           (t) =>
               !t.archive &&
               (t.title.toLowerCase() == 'uncategorized' ||
@@ -83,7 +87,8 @@ class _EventCardState extends State<EventCard> {
         task: targetTask,
         title: widget.title,
         description: widget.description ?? '',
-        time: widget.startTime,
+        startTime: widget.startTime,
+        time: widget.endTime,
         pinned: false,
         priority: Priority.none,
         tags: [],

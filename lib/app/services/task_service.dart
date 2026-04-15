@@ -24,6 +24,7 @@ class TaskService {
   Future<Tasks?> createTask({
     required String title,
     required String description,
+    required TaskCategory category,
     required Color color,
     required int currentTaskCount,
   }) async {
@@ -35,6 +36,7 @@ class TaskService {
     final task = await _taskRepo.create(
       title: title,
       description: description,
+      category: category,
       color: color,
       index: currentTaskCount,
     );
@@ -49,12 +51,14 @@ class TaskService {
     required Tasks task,
     required String title,
     required String description,
+    required TaskCategory category,
     required Color color,
   }) async {
     await _taskRepo.updateFields(
       task: task,
       title: title,
       description: description,
+      category: category,
       color: color,
     );
 
@@ -176,11 +180,13 @@ class TaskService {
     required List<Tasks> tasks,
     required bool archived,
     String searchQuery = '',
+    TaskCategory? category,
   }) {
     final query = searchQuery.trim().toLowerCase();
 
     return tasks.where((task) {
       if (task.archive != archived) return false;
+      if (category != null && task.category != category) return false;
       if (query.isEmpty) return true;
 
       final titleMatch = task.title.toLowerCase().contains(query);

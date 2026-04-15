@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:reorderables/reorderables.dart';
+import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/controller/todo_controller.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/ui/todos/widgets/todo_card.dart';
@@ -81,7 +82,10 @@ class _TodosListState extends State<TodosList>
           SliverOverlapInjector(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
           ),
-          _buildReorderableList(todos),
+          if (_shouldGroupBySubtask())
+            _buildGroupedTaskList(todos)
+          else
+            _buildReorderableList(todos),
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       );
@@ -162,10 +166,9 @@ class _TodosListState extends State<TodosList>
   List<Todos> _getTaskTodos() {
     return _todoController.todos.where((todo) {
       final inSameTask = todo.task.value?.id == widget.task!.id;
-      final isRoot = todo.parent.value == null;
       final matchesStatus =
           widget.statusFilter == null || todo.status == widget.statusFilter;
-      return inSameTask && isRoot && matchesStatus;
+      return inSameTask && matchesStatus;
     }).toList();
   }
 
@@ -191,7 +194,7 @@ class _TodosListState extends State<TodosList>
   List<Todos> _getCalendarTodos() {
     return _todoController.todos.where((todo) {
       final notArchived = todo.task.value?.archive == false;
-      final hasTime = todo.todoCompletedTime != null;
+      final hasTime = todo.todoStartTime != null;
       final inSelectedDay = hasTime && _isWithinSelectedDay(todo);
       final matchesStatus =
           widget.statusFilter == null || todo.status == widget.statusFilter;
@@ -201,7 +204,7 @@ class _TodosListState extends State<TodosList>
 
   bool _isWithinSelectedDay(Todos todo) {
     final selectedDate = widget.selectedDay!;
-    final completedDate = todo.todoCompletedTime!;
+    final startDate = todo.todoStartTime!;
 
     final startOfDay = DateTime(
       selectedDate.year,
@@ -221,14 +224,16 @@ class _TodosListState extends State<TodosList>
       59,
     );
 
-    return completedDate.isAfter(startOfDay) &&
-        completedDate.isBefore(endOfDay);
+    return startDate.isAfter(startOfDay) && startDate.isBefore(endOfDay);
   }
 
   void _sortTodos(List<Todos> todos) {
     final opt = widget.sortOption ?? SortOption.none;
+    final effectiveOpt = widget.calendar && opt == SortOption.none
+        ? SortOption.dateNotifAsc
+        : opt;
 
-    if (opt == SortOption.random) {
+    if (effectiveOpt == SortOption.random) {
       for (var todo in todos) {
         _randomScores.putIfAbsent(todo.id, () => Random().nextDouble());
       }
@@ -239,7 +244,7 @@ class _TodosListState extends State<TodosList>
         return a.fix ? -1 : 1;
       }
 
-      switch (opt) {
+      switch (effectiveOpt) {
         case SortOption.alphaAsc:
           return _compareName(a, b);
         case SortOption.alphaDesc:
@@ -276,8 +281,8 @@ class _TodosListState extends State<TodosList>
   }
 
   int _compareDateNotif(Todos a, Todos b, {bool ascending = true}) {
-    final da = a.todoCompletedTime;
-    final db = b.todoCompletedTime;
+    final da = a.todoStartTime;
+    final db = b.todoStartTime;
 
     if (da == null && db == null) return 0;
     if (da == null) return 1;
@@ -295,6 +300,86 @@ class _TodosListState extends State<TodosList>
       ),
       onReorder: (oldIndex, newIndex) =>
           _handleReorder(todos, oldIndex, newIndex),
+    );
+  }
+
+  bool _shouldGroupBySubtask() {
+    return widget.task != null &&
+        widget.todo == null &&
+        !widget.allTodos &&
+        !widget.calendar;
+  }
+
+  Widget _buildGroupedTaskList(List<Todos> todos) {
+    final grouped = <String, List<Todos>>{};
+
+    for (final todo in todos) {
+      final groupName = (todo.subtask ?? '').trim();
+      final key = groupName.isEmpty ? '__no_subtask__' : groupName;
+      grouped.putIfAbsent(key, () => <Todos>[]).add(todo);
+    }
+
+    final items = <_GroupedItem>[];
+    grouped.forEach((key, value) {
+      items.add(_GroupedHeaderItem(key));
+      for (final todo in value) {
+        items.add(_GroupedTodoItem(todo));
+      }
+    });
+
+    return SliverList.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        if (item is _GroupedHeaderItem) {
+          final title = item.title == '__no_subtask__'
+              ? 'noSubtask'.tr
+              : item.title;
+          return _buildSubtaskHeader(title);
+        }
+        final todoItem = item as _GroupedTodoItem;
+        return _buildTodoCard(todoItem.todo);
+      },
+    );
+  }
+
+  Widget _buildSubtaskHeader(String title) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isMobile = ResponsiveUtils.isMobile(context);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        isMobile ? AppConstants.spacingS + 2 : AppConstants.spacingL,
+        AppConstants.spacingM,
+        isMobile ? AppConstants.spacingS + 2 : AppConstants.spacingL,
+        AppConstants.spacingXS,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Divider(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingM,
+            ),
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Divider(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -372,4 +457,16 @@ class _TodosListState extends State<TodosList>
       enableDrag: false,
     );
   }
+}
+
+sealed class _GroupedItem {}
+
+class _GroupedHeaderItem extends _GroupedItem {
+  _GroupedHeaderItem(this.title);
+  final String title;
+}
+
+class _GroupedTodoItem extends _GroupedItem {
+  _GroupedTodoItem(this.todo);
+  final Todos todo;
 }

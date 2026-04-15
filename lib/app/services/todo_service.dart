@@ -23,30 +23,46 @@ class TodoService {
     required Tasks task,
     required String title,
     required String description,
+    String? subtask,
+    required String startTimeString,
     required String timeString,
     required bool pinned,
     required Priority priority,
     required List<String> tags,
     required int currentTodoCount,
-    Todos? parent,
   }) async {
+    if (startTimeString.trim().isEmpty || timeString.trim().isEmpty) {
+      showSnackBar('startEndTimeRequired'.tr);
+      throw ArgumentError(
+        'startTime and endTime are required when creating todo',
+      );
+    }
+
+    final startDate = _parseDate(startTimeString);
     final date = _parseDate(timeString);
+    if (startDate == null || date == null) {
+      showSnackBar('startEndTimeRequired'.tr);
+      throw ArgumentError('Invalid startTime or endTime');
+    }
+
+    final normalizedSubtask = subtask?.trim();
 
     final todo = await _todoRepo.create(
       name: title,
       description: description,
+      subtask: (normalizedSubtask == null || normalizedSubtask.isEmpty)
+          ? null
+          : normalizedSubtask,
+      startTime: startDate,
       completedTime: date,
       fix: pinned,
       priority: priority,
       tags: tags,
       index: currentTodoCount,
       task: task,
-      parent: parent,
     );
 
-    if (date != null) {
-      await _notificationService.scheduleForTodo(todo);
-    }
+    await _notificationService.scheduleForTodo(todo);
 
     showSnackBar('todoCreate'.tr);
     return todo;
@@ -59,17 +75,26 @@ class TodoService {
     required Tasks task,
     required String title,
     required String description,
+    String? subtask,
+    String startTimeString = '',
     required String timeString,
     required bool pinned,
     required Priority priority,
     required List<String> tags,
   }) async {
+    final startDate = _parseDate(startTimeString);
     final date = _parseDate(timeString);
+
+    final normalizedSubtask = subtask?.trim();
 
     await _todoRepo.updateFields(
       todo: todo,
       name: title,
       description: description,
+      subtask: (normalizedSubtask == null || normalizedSubtask.isEmpty)
+          ? null
+          : normalizedSubtask,
+      startTime: startDate,
       completedTime: date,
       fix: pinned,
       priority: priority,
@@ -77,7 +102,7 @@ class TodoService {
       task: task,
     );
 
-    if (date != null) {
+    if (startDate != null) {
       await _notificationService.reschedule(todo);
     } else {
       await _notificationService.cancel(todo.id);
@@ -89,11 +114,11 @@ class TodoService {
   Future<void> updateTodoStatus(Todos todo) async {
     await _todoRepo.update(todo);
 
-    final completedTime = todo.todoCompletedTime;
+    final startTime = todo.todoStartTime;
 
     if (todo.status == TodoStatus.done || todo.status == TodoStatus.cancelled) {
       await _notificationService.cancel(todo.id);
-    } else if (completedTime != null) {
+    } else if (startTime != null) {
       await _notificationService.scheduleForTodo(todo);
     } else {
       await _notificationService.cancel(todo.id);
@@ -110,7 +135,7 @@ class TodoService {
     } else {
       for (final id in allIds) {
         final todoItem = await _todoRepo.getById(id);
-        if (todoItem != null && todoItem.todoCompletedTime != null) {
+        if (todoItem != null && todoItem.todoStartTime != null) {
           await _notificationService.scheduleForTodo(todoItem);
         }
       }
@@ -144,6 +169,10 @@ class TodoService {
     required Todos? newParent,
   }) async {
     if (rootTodos.isEmpty) return;
+    if (newParent != null) {
+      showSnackBar('subtasksNotSupported'.tr);
+      return;
+    }
 
     final rootTodosCopy = List<Todos>.from(rootTodos);
     final allIds = <int>{};
@@ -271,12 +300,12 @@ class TodoService {
 
   int countForCalendar(DateTime date, List<Todos> allTodos) {
     return allTodos.where((todo) {
-      final completedTime = todo.todoCompletedTime;
+      final startTime = todo.todoStartTime;
       return todo.status == TodoStatus.active &&
-          completedTime != null &&
+          startTime != null &&
           todo.task.value?.archive == false &&
           todo.parent.value == null &&
-          _isSameDay(date, completedTime);
+          _isSameDay(date, startTime);
     }).length;
   }
 
@@ -333,7 +362,7 @@ class TodoService {
       if (isRootMode) {
         return todo.parent.value == null;
       } else if (selectedDay != null) {
-        final time = todo.todoCompletedTime;
+        final time = todo.todoStartTime;
         if (todo.task.value?.archive == true || time == null) return false;
 
         final startOfDay = DateTime(

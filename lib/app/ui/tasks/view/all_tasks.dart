@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:planly_ai/app/controller/fab_controller.dart';
 import 'package:planly_ai/app/controller/todo_controller.dart';
+import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/ui/tasks/widgets/statistics.dart';
 import 'package:planly_ai/app/ui/tasks/widgets/task_list.dart';
 import 'package:planly_ai/app/ui/widgets/confirmation_dialog.dart';
@@ -22,12 +23,17 @@ class AllTasks extends StatefulWidget {
 
 class _AllTasksState extends State<AllTasks>
     with SingleTickerProviderStateMixin {
+  static const String _allCategoriesKey = '__all__';
+  static final List<TaskCategory> _filterCategories = TaskCategory.values
+      .where((category) => category != TaskCategory.uncategorized)
+      .toList();
   late final TodoController _todoController = Get.put(TodoController());
   late final FabController _fabController = Get.find<FabController>();
   late final TabController _tabController;
   late final TextEditingController _searchController;
 
   String _filter = '';
+  TaskCategory? _selectedCategory;
 
   @override
   void initState() {
@@ -200,16 +206,23 @@ class _AllTasksState extends State<AllTasks>
       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
       sliver: SliverPersistentHeader(
         delegate: MyDelegate(
-          child: TabBar(
-            tabAlignment: TabAlignment.start,
-            controller: _tabController,
-            isScrollable: true,
-            dividerColor: Colors.transparent,
-            splashFactory: NoSplash.splashFactory,
-            overlayColor: WidgetStateProperty.all(Colors.transparent),
-            tabs: [
-              Tab(text: 'active'.tr),
-              Tab(text: 'archived'.tr),
+          child: Row(
+            children: [
+              Expanded(
+                child: TabBar(
+                  tabAlignment: TabAlignment.start,
+                  controller: _tabController,
+                  isScrollable: true,
+                  dividerColor: Colors.transparent,
+                  splashFactory: NoSplash.splashFactory,
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
+                  tabs: [
+                    Tab(text: 'active'.tr),
+                    Tab(text: 'archived'.tr),
+                  ],
+                ),
+              ),
+              _buildCategoryFilter(context),
             ],
           ),
         ),
@@ -219,12 +232,127 @@ class _AllTasksState extends State<AllTasks>
     );
   }
 
+  Widget _buildCategoryFilter(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final selectedLabel = _selectedCategory == null
+        ? 'allCategories'.tr
+        : _selectedCategory!.labelKey.tr;
+
+    return PopupMenuButton<String>(
+      tooltip: 'categoryFilter'.tr,
+      color: colorScheme.surfaceContainerHigh,
+      elevation: AppConstants.elevationHigh,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+      ),
+      constraints: const BoxConstraints(minWidth: 220, maxWidth: 260),
+      onSelected: (value) {
+        setState(() {
+          if (value == _allCategoriesKey) {
+            _selectedCategory = null;
+            return;
+          }
+          _selectedCategory = TaskCategory.values.firstWhere(
+            (category) => category.name == value,
+            orElse: () => TaskCategory.uncategorized,
+          );
+          if (_selectedCategory == TaskCategory.uncategorized) {
+            _selectedCategory = null;
+          }
+        });
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem<String>(
+          value: _allCategoriesKey,
+          padding: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppConstants.spacingL,
+              vertical: AppConstants.spacingM,
+            ),
+            child: Text(
+              'allCategories'.tr,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+            ),
+          ),
+        ),
+        ..._filterCategories.map(
+          (category) => PopupMenuItem<String>(
+            value: category.name,
+            padding: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.spacingL,
+                vertical: AppConstants.spacingM,
+              ),
+              child: Text(
+                category.labelKey.tr,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
+            ),
+          ),
+        ),
+      ],
+      child: Container(
+        margin: const EdgeInsets.only(right: AppConstants.spacingS),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.spacingS,
+          vertical: AppConstants.spacingXS,
+        ),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.6),
+            width: AppConstants.borderWidthThin,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              IconsaxPlusLinear.folder_2,
+              size: AppConstants.iconSizeSmall,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            SizedBox(width: AppConstants.spacingXS),
+            Text(
+              selectedLabel,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: AppConstants.spacingXS),
+            Icon(
+              IconsaxPlusLinear.arrow_down,
+              size: AppConstants.iconSizeSmall,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildTabBarView() {
     return TabBarView(
       controller: _tabController,
       children: [
-        TasksList(archived: false, searchTask: _filter),
-        TasksList(archived: true, searchTask: _filter),
+        TasksList(
+          archived: false,
+          searchTask: _filter,
+          category: _selectedCategory,
+        ),
+        TasksList(
+          archived: true,
+          searchTask: _filter,
+          category: _selectedCategory,
+        ),
       ],
     );
   }
