@@ -1,0 +1,25 @@
+name: Allow Only Development To Main
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - ready_for_review
+
+jobs:
+  check-source-branch:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        run: |
+          if [ "${{ github.head_ref }}" != "development" ]; then
+            echo "Only pull requests from 'development' to 'main' are allowed."
+            echo "Current source branch: ${{ github.head_ref }}"
+            exit 1
+          fi
