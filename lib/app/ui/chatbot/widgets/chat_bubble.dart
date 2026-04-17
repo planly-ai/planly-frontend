@@ -17,8 +17,17 @@ import 'package:planly_ai/main.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
+  final bool showStreamingStatus;
+  final bool isReasoning;
+  final String reasoningText;
 
-  const ChatBubble({super.key, required this.message});
+  const ChatBubble({
+    super.key,
+    required this.message,
+    this.showStreamingStatus = false,
+    this.isReasoning = false,
+    this.reasoningText = '',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +47,11 @@ class ChatBubble extends StatelessWidget {
       case MessageType.cardSchedule:
         return _buildCardWithAvatar(context, colorScheme, _buildScheduleCard());
       case MessageType.cardEventList:
-        return _buildCardWithAvatar(context, colorScheme, _buildEventListCard());
+        return _buildCardWithAvatar(
+          context,
+          colorScheme,
+          _buildEventListCard(),
+        );
       case MessageType.cardForm:
         return _buildCardWithAvatar(context, colorScheme, _buildFormCard());
       default:
@@ -80,10 +93,16 @@ class ChatBubble extends StatelessWidget {
     final data = jsonDecode(message.cardContent ?? '{}');
     // 获取控制器实例用于提交表单
     final controller = Get.find<ChatbotController>();
-    return FormCard.fromJson(data, onSubmit: (formData) => _handleFormSubmit(formData, controller));
+    return FormCard.fromJson(
+      data,
+      onSubmit: (formData) => _handleFormSubmit(formData, controller),
+    );
   }
 
-  void _handleFormSubmit(Map<String, dynamic> formData, ChatbotController controller) async {
+  void _handleFormSubmit(
+    Map<String, dynamic> formData,
+    ChatbotController controller,
+  ) async {
     // 将表单数据格式化为消息发送给后端
     // 流程：FORM -> 用户提交 -> AI 继续 -> GOAL/TASK
     debugPrint('[FormCard] Form submitted: $formData');
@@ -197,6 +216,11 @@ class ChatBubble extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (!isUser &&
+                      (showStreamingStatus ||
+                          (message.reasoningContent?.trim().isNotEmpty ??
+                              false)))
+                    _buildStreamingStatus(theme, colorScheme),
                   if (message.attachmentPath != null)
                     _buildAttachment(
                       context,
@@ -263,6 +287,47 @@ class ChatBubble extends StatelessWidget {
               child: Icon(
                 Icons.person,
                 color: colorScheme.onSecondaryContainer,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStreamingStatus(ThemeData theme, ColorScheme colorScheme) {
+    final displayReasoningText = showStreamingStatus
+        ? reasoningText
+        : (message.reasoningContent ?? '');
+    final hasReasoning = displayReasoningText.trim().isNotEmpty;
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            showStreamingStatus
+                ? ((isReasoning || hasReasoning)
+                      ? 'Thinking...'
+                      : 'Generating...')
+                : 'Thought process',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (hasReasoning) ...[
+            const SizedBox(height: 4),
+            Text(
+              displayReasoningText,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurface.withValues(alpha: 0.85),
+                fontStyle: FontStyle.italic,
               ),
             ),
           ],

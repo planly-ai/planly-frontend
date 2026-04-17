@@ -206,6 +206,7 @@ class ChatMessage {
 
   // Optional: raw JSON data for cards
   String? cardContent;
+  String? reasoningContent;
 
   final session = IsarLink<ChatSession>();
 
@@ -219,6 +220,7 @@ class ChatMessage {
     this.attachmentName,
     this.ossId,
     this.cardContent,
+    this.reasoningContent,
   });
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/chat_bubble.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/chat_input_bar.dart';
@@ -186,7 +187,20 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   // Message bubbles
                   if (index < controller.messages.length) {
                     final msg = controller.messages[index];
-                    return ChatBubble(message: msg);
+                    final streamingId =
+                        controller.currentStreamingBotMessageId.value;
+                    final isStreamingMsg =
+                        streamingId != null &&
+                        msg.id == streamingId &&
+                        msg.sender == SenderType.bot &&
+                        msg.type == MessageType.text;
+
+                    return ChatBubble(
+                      message: msg,
+                      showStreamingStatus: isStreamingMsg,
+                      isReasoning: controller.isReasoning.value,
+                      reasoningText: controller.liveReasoningText.value,
+                    );
                   }
 
                   // ASR Recognition state (User side)
@@ -221,12 +235,22 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   }
 
                   // Bot Typing state
+                  final hasStreamingMessage =
+                      controller.currentStreamingBotMessageId.value != null;
+                  if (hasStreamingMessage) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final reasoningText = controller.liveReasoningText.value;
+                  final isReasoning = controller.isReasoning.value;
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 8,
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CircleAvatar(
                           backgroundColor: colorScheme.primaryContainer,
@@ -236,11 +260,42 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'Generating...'.tr,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontStyle: FontStyle.italic,
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.3,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  (isReasoning ||
+                                          reasoningText.trim().isNotEmpty)
+                                      ? 'Thinking...'
+                                      : 'Generating...',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurface,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (reasoningText.trim().isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    reasoningText,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: colorScheme.onSurface.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
                         ),
                       ],
