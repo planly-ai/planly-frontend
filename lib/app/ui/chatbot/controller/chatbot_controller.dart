@@ -298,7 +298,7 @@ class ChatbotController extends GetxController {
           sender: SenderType.bot,
           type: MessageType.text,
           reasoningContent: liveReasoningText.value.trim().isNotEmpty
-              ? liveReasoningText.value
+              ? liveReasoningText.value.trimRight()
               : null,
         );
         currentBotMsg = newMsg;
@@ -416,7 +416,8 @@ class ChatbotController extends GetxController {
             if (delta.isNotEmpty) {
               liveReasoningText.value += delta;
               if (currentBotMsg != null) {
-                currentBotMsg!.reasoningContent = liveReasoningText.value;
+                currentBotMsg!.reasoningContent = liveReasoningText.value
+                    .trimRight();
                 messages.refresh();
               }
               _scrollToBottom();
@@ -435,18 +436,28 @@ class ChatbotController extends GetxController {
           }
           if (currentBotMsg != null &&
               liveReasoningText.value.trim().isNotEmpty) {
-            currentBotMsg!.reasoningContent = liveReasoningText.value;
+            currentBotMsg!.reasoningContent = liveReasoningText.value
+                .trimRight();
             messages.refresh();
           }
           return;
         }
 
         if (eventName == 'message_start') {
+          // Fallback for backends that don't emit reasoning_done reliably:
+          // once normal answer starts, treat reasoning as completed.
+          if (isReasoning.value) {
+            isReasoning.value = false;
+          }
           await ensureCurrentBotMessage();
           return;
         }
 
         if (eventName == 'message_delta') {
+          // Same fallback as message_start.
+          if (isReasoning.value) {
+            isReasoning.value = false;
+          }
           try {
             final data = jsonDecode(dataStr);
             final delta = (data['delta'] ?? '').toString();
@@ -501,6 +512,11 @@ class ChatbotController extends GetxController {
         }
 
         if (line.startsWith('event:')) {
+          // Some servers may omit the blank line separator between events.
+          // Flush previous event when a new event header arrives.
+          if (currentEvent.isNotEmpty || currentDataLines.isNotEmpty) {
+            await flushSseEvent();
+          }
           currentEvent = line.substring(6).trim();
         } else if (line.startsWith('data:')) {
           final rawData = line.substring(5);
@@ -519,7 +535,7 @@ class ChatbotController extends GetxController {
       final finalMsg = currentBotMsg;
       if (finalMsg != null) {
         if (liveReasoningText.value.trim().isNotEmpty) {
-          finalMsg.reasoningContent = liveReasoningText.value;
+          finalMsg.reasoningContent = liveReasoningText.value.trimRight();
         }
         await isar.writeTxn(() async {
           await isar.chatMessages.put(finalMsg);

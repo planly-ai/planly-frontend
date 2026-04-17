@@ -154,7 +154,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
         children: [
           Expanded(
             child: Obx(() {
-              if (controller.messages.isEmpty) {
+              final currentMessages = controller.messages;
+              final isRecognizing = controller.isRecognizing.value;
+              final isTyping = controller.isTyping.value;
+              final streamingId = controller.currentStreamingBotMessageId.value;
+              final isReasoning = controller.isReasoning.value;
+              final reasoningText = controller.liveReasoningText.value;
+
+              if (currentMessages.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -180,15 +187,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 controller: controller.scrollController,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 itemCount:
-                    controller.messages.length +
-                    (controller.isRecognizing.value ? 1 : 0) +
-                    (controller.isTyping.value ? 1 : 0),
+                    currentMessages.length +
+                    (isRecognizing ? 1 : 0) +
+                    (isTyping ? 1 : 0),
                 itemBuilder: (context, index) {
                   // Message bubbles
-                  if (index < controller.messages.length) {
-                    final msg = controller.messages[index];
-                    final streamingId =
-                        controller.currentStreamingBotMessageId.value;
+                  if (index < currentMessages.length) {
+                    final msg = currentMessages[index];
                     final isStreamingMsg =
                         streamingId != null &&
                         msg.id == streamingId &&
@@ -198,14 +203,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
                     return ChatBubble(
                       message: msg,
                       showStreamingStatus: isStreamingMsg,
-                      isReasoning: controller.isReasoning.value,
-                      reasoningText: controller.liveReasoningText.value,
+                      isReasoning: isReasoning,
+                      reasoningText: reasoningText,
                     );
                   }
 
                   // ASR Recognition state (User side)
-                  if (controller.isRecognizing.value &&
-                      index == controller.messages.length) {
+                  if (isRecognizing && index == currentMessages.length) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -235,14 +239,10 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   }
 
                   // Bot Typing state
-                  final hasStreamingMessage =
-                      controller.currentStreamingBotMessageId.value != null;
+                  final hasStreamingMessage = streamingId != null;
                   if (hasStreamingMessage) {
                     return const SizedBox.shrink();
                   }
-
-                  final reasoningText = controller.liveReasoningText.value;
-                  final isReasoning = controller.isReasoning.value;
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(

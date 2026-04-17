@@ -300,38 +300,38 @@ class ChatBubble extends StatelessWidget {
         ? reasoningText
         : (message.reasoningContent ?? '');
     final hasReasoning = displayReasoningText.trim().isNotEmpty;
+    final panelBackground = colorScheme.primaryContainer.withValues(
+      alpha: 0.32,
+    );
+    final panelBorder = colorScheme.primary.withValues(alpha: 0.22);
+    final panelTitleColor = colorScheme.onPrimaryContainer;
+    final panelContentColor = colorScheme.onSurface;
+    final panelIconColor = colorScheme.onPrimaryContainer.withValues(
+      alpha: 0.82,
+    );
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
-      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
+        color: panelBackground,
+        border: Border.all(color: panelBorder),
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            showStreamingStatus
-                ? ((isReasoning || hasReasoning)
-                      ? 'Thinking...'
-                      : 'Generating...')
-                : 'Thought process',
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          if (hasReasoning) ...[
-            const SizedBox(height: 4),
-            Text(
-              displayReasoningText,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.85),
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ],
+      child: _ReasoningPanel(
+        title: showStreamingStatus
+            ? ((isReasoning || hasReasoning) ? 'Thinking' : 'Generating')
+            : 'Thought Process',
+        content: displayReasoningText,
+        isReasoningActive: showStreamingStatus && isReasoning,
+        titleStyle: theme.textTheme.labelMedium?.copyWith(
+          color: panelTitleColor,
+          fontWeight: FontWeight.w600,
+        ),
+        contentStyle: theme.textTheme.bodySmall?.copyWith(
+          color: panelContentColor.withValues(alpha: 0.92),
+          height: 1.35,
+        ),
+        iconColor: panelIconColor,
       ),
     );
   }
@@ -439,6 +439,124 @@ class ChatBubble extends StatelessWidget {
                 ],
               ),
             ),
+    );
+  }
+}
+
+class _ReasoningPanel extends StatefulWidget {
+  final String title;
+  final String content;
+  final bool isReasoningActive;
+  final TextStyle? titleStyle;
+  final TextStyle? contentStyle;
+  final Color iconColor;
+
+  const _ReasoningPanel({
+    required this.title,
+    required this.content,
+    required this.isReasoningActive,
+    required this.titleStyle,
+    required this.contentStyle,
+    required this.iconColor,
+  });
+
+  @override
+  State<_ReasoningPanel> createState() => _ReasoningPanelState();
+}
+
+class _ReasoningPanelState extends State<_ReasoningPanel> {
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.isReasoningActive;
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReasoningPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.isReasoningActive && widget.isReasoningActive) {
+      setState(() {
+        _expanded = true;
+      });
+    } else if (oldWidget.isReasoningActive && !widget.isReasoningActive) {
+      // Auto collapse once reasoning has finished.
+      setState(() {
+        _expanded = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final normalizedContent = widget.content.trimRight();
+    final hasContent = normalizedContent.trim().isNotEmpty;
+    final preview = hasContent
+        ? normalizedContent.trim().replaceAll('\n', ' ')
+        : '';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
+          onTap: hasContent
+              ? () {
+                  setState(() {
+                    _expanded = !_expanded;
+                  });
+                }
+              : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.psychology_alt_outlined,
+                  size: 16,
+                  color: widget.iconColor,
+                ),
+                const SizedBox(width: 6),
+                Expanded(child: Text(widget.title, style: widget.titleStyle)),
+                AnimatedRotation(
+                  turns: _expanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 18,
+                    color: widget.iconColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          child: _expanded && hasContent
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                  child: Text(normalizedContent, style: widget.contentStyle),
+                )
+              : (!widget.isReasoningActive && hasContent)
+              ? Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+                  child: Text(
+                    preview,
+                    style: widget.contentStyle?.copyWith(
+                      color: widget.contentStyle?.color?.withValues(
+                        alpha: 0.65,
+                      ),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+      ],
     );
   }
 }
