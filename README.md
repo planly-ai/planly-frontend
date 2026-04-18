@@ -94,6 +94,12 @@ This project is licensed under the [MIT License](./LICENSE).
 
 ---
 
+## 📖 Acknowledgement
+This project is based on [Zest](https://github.com/darkmoonight/Zest) by @darkmoonight.
+Major modifications have been made.
+
+---
+
 ## 👨‍💻 Contributors
 
 Thanks to all our amazing contributors!
