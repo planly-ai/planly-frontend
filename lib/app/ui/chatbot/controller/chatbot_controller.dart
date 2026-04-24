@@ -25,9 +25,8 @@ class ChatbotController extends GetxController {
   var scrollController = ScrollController();
   var isTyping = false.obs;
   var isRecognizing = false.obs;
-  var isReasoning = false.obs;
-  var liveReasoningText = ''.obs;
-  var currentStreamingBotMessageId = Rxn<int>();
+  var activeAgentBlockCount = 0.obs;
+  final activeAgentMessageIds = <int>{}.obs;
 
   // File Upload State
   var selectedFile = Rxn<XFile>();
@@ -258,12 +257,9 @@ class ChatbotController extends GetxController {
     String sessionId,
   ) async {
     isTyping.value = true;
-    isReasoning.value = false;
-    liveReasoningText.value = '';
-    currentStreamingBotMessageId.value = null;
+    activeAgentBlockCount.value = 0;
+    activeAgentMessageIds.clear();
     _scrollToBottom();
-
-    ChatMessage? currentBotMsg;
 
     try {
       // 1. Establish SSE connection first
@@ -287,107 +283,172 @@ class ChatbotController extends GetxController {
 
       // 3. Listen to the stream
       final stream = streamResponse.data!.stream;
+      final activeBlocks = <int, ChatMessage>{};
 
-      Future<ChatMessage?> ensureCurrentBotMessage() async {
-        final existing = currentBotMsg;
-        if (existing != null) return existing;
-
-        final newMsg = ChatMessage(
-          text: '',
-          createdAt: DateTime.now(),
-          sender: SenderType.bot,
-          type: MessageType.text,
-          reasoningContent: liveReasoningText.value.trim().isNotEmpty
-              ? liveReasoningText.value.trimRight()
-              : null,
-        );
-        currentBotMsg = newMsg;
-
+      Future<void> persistAgentMessage(ChatMessage message) async {
         final session = await isar.chatSessions.get(currentSessionId.value!);
-        if (session == null) return null;
+        if (session == null) return;
 
         await isar.writeTxn(() async {
-          await isar.chatMessages.put(newMsg);
-          session.messages.add(newMsg);
+          final isNew = message.id == Isar.autoIncrement;
+          await isar.chatMessages.put(message);
+          if (isNew) {
+            session.messages.add(message);
+          }
           await session.messages.save();
           session.updatedAt = DateTime.now();
           await isar.chatSessions.put(session);
         });
-        currentStreamingBotMessageId.value = newMsg.id;
-        messages.add(newMsg);
-        return newMsg;
-      }
 
-      Future<void> appendMessageDelta(String delta) async {
-        if (delta.isEmpty) return;
-        final botMsg = await ensureCurrentBotMessage();
-        if (botMsg == null) return;
-        botMsg.text += delta;
-        messages.refresh();
+        if (!messages.any((item) => item.id == message.id)) {
+          messages.add(message);
+        }
         _scrollToBottom();
       }
 
-      Future<void> setFinalMessageContent(String content) async {
-        final botMsg = await ensureCurrentBotMessage();
-        if (botMsg == null) return;
-        botMsg.text = content;
-        messages.refresh();
-        _scrollToBottom();
+      MessageType messageTypeForContentBlock(String type) {
+        switch (type) {
+          case 'reasoning':
+            return MessageType.reasoning;
+          case 'tool_call':
+            return MessageType.toolCall;
+          case 'text':
+          default:
+            return MessageType.text;
+        }
       }
 
-      Future<void> processCardEvent(String dataStr) async {
-        debugPrint('[Chat] Processing card event: $dataStr');
+      MessageType messageTypeForCardPayload(Map<String, dynamic> payload) {
+        final rawCardType = (payload['cardType'] ?? '').toString();
+        final rawType = (payload['type'] ?? '').toString();
+        final cardType = rawCardType.toUpperCase();
+        final typeStr = rawType.toUpperCase();
+
+        if (cardType == 'FORM') return MessageType.cardForm;
+        if (cardType == 'GOAL' ||
+            cardType == 'TASK' ||
+            cardType == 'TASK_PROPOSAL') {
+          return MessageType.cardTask;
+        }
+        if (cardType == 'EVENT' || cardType == 'EVENT_PROPOSAL') {
+          return MessageType.cardEvent;
+        }
+        if (cardType == 'ALERT') return MessageType.cardAlert;
+        if (cardType == 'GRAPH') return MessageType.cardGraph;
+        if (cardType == 'SCHEDULE') return MessageType.cardSchedule;
+        if (cardType == 'EVENT_LIST') return MessageType.cardEventList;
+
+        if (typeStr == 'EVENT') return MessageType.cardEvent;
+        if (typeStr == 'TASK') return MessageType.cardTask;
+        if (typeStr == 'ALERT') return MessageType.cardAlert;
+        if (typeStr == 'GRAPH') return MessageType.cardGraph;
+        if (typeStr == 'SCHEDULE') return MessageType.cardSchedule;
+        if (typeStr == 'EVENT_LIST') return MessageType.cardEventList;
+
+        return MessageType.text;
+      }
+
+      Future<void> processCardPayload(Map<String, dynamic> payload) async {
         try {
-          final data = jsonDecode(dataStr);
-          final typeStr = (data['type'] ?? '').toString().toUpperCase();
-          final cardType = (data['cardType'] ?? '').toString().toUpperCase();
-
-          MessageType msgType = MessageType.text;
-
-          // 优先使用 cardType 字段（FORM/GOAL/TASK）
-          if (cardType == 'FORM') {
-            msgType = MessageType.cardForm;
-          } else if (cardType == 'GOAL' || cardType == 'TASK') {
-            msgType = MessageType.cardTask;
-          }
-          // 兼容旧的 type 字段
-          else if (typeStr == 'EVENT') {
-            msgType = MessageType.cardEvent;
-          } else if (typeStr == 'TASK') {
-            msgType = MessageType.cardTask;
-          } else if (typeStr == 'ALERT') {
-            msgType = MessageType.cardAlert;
-          } else if (typeStr == 'GRAPH') {
-            msgType = MessageType.cardGraph;
-          } else if (typeStr == 'SCHEDULE') {
-            msgType = MessageType.cardSchedule;
-          } else if (typeStr == 'EVENT_LIST') {
-            msgType = MessageType.cardEventList;
-          }
+          final cardData = payload['data'] is Map<String, dynamic>
+              ? Map<String, dynamic>.from(payload['data'] as Map)
+              : payload;
+          final msgType = messageTypeForCardPayload(payload);
 
           final cardMsg = ChatMessage(
             text: '',
             createdAt: DateTime.now(),
             sender: SenderType.bot,
             type: msgType,
-            cardContent: dataStr,
+            cardContent: jsonEncode(cardData),
           );
 
-          final session = await isar.chatSessions.get(currentSessionId.value!);
-          if (session == null) return;
-
-          await isar.writeTxn(() async {
-            await isar.chatMessages.put(cardMsg);
-            session.messages.add(cardMsg);
-            await session.messages.save();
-            session.updatedAt = DateTime.now();
-            await isar.chatSessions.put(session);
-          });
-          messages.add(cardMsg);
-          _scrollToBottom();
+          await persistAgentMessage(cardMsg);
         } catch (e) {
           debugPrint('[Chat] Error parsing card JSON: $e');
         }
+      }
+
+      Future<void> processToolResult(String dataStr) async {
+        try {
+          final data = jsonDecode(dataStr);
+          final result = data is Map<String, dynamic> ? data['result'] : null;
+          final payload = result is Map<String, dynamic>
+              ? result['payload']
+              : null;
+          if (payload is Map<String, dynamic> &&
+              (payload['type'] ?? '').toString().toLowerCase() == 'card') {
+            await processCardPayload(payload);
+          }
+        } catch (e) {
+          debugPrint('[Chat] Error parsing tool result: $e');
+        }
+      }
+
+      Future<void> startContentBlock(Map<String, dynamic> data) async {
+        final index = data['index'];
+        final contentBlock = data['contentBlock'];
+        if (index is! int || contentBlock is! Map<String, dynamic>) return;
+
+        final blockType = (contentBlock['type'] ?? '').toString();
+        final msg = ChatMessage(
+          text: '',
+          createdAt: DateTime.now(),
+          sender: SenderType.bot,
+          type: messageTypeForContentBlock(blockType),
+          cardContent: blockType == 'tool_call'
+              ? jsonEncode(contentBlock)
+              : null,
+        );
+
+        activeBlocks[index] = msg;
+        activeAgentBlockCount.value = activeBlocks.length;
+        await persistAgentMessage(msg);
+        activeAgentMessageIds.add(msg.id);
+      }
+
+      Future<void> appendContentBlockDelta(Map<String, dynamic> data) async {
+        final index = data['index'];
+        final delta = data['delta'];
+        if (index is! int || delta is! Map<String, dynamic>) return;
+
+        final msg = activeBlocks[index];
+        if (msg == null) return;
+
+        final deltaType = (delta['type'] ?? '').toString();
+        if (deltaType == 'text_delta' || deltaType == 'reasoning_delta') {
+          msg.text += (delta['text'] ?? '').toString();
+        } else if (deltaType == 'tool_call_delta') {
+          msg.text += (delta['partialJson'] ?? '').toString();
+        }
+
+        messages.refresh();
+        _scrollToBottom();
+      }
+
+      Future<void> stopContentBlock(Map<String, dynamic> data) async {
+        final index = data['index'];
+        if (index is! int) return;
+
+        final msg = activeBlocks.remove(index);
+        activeAgentBlockCount.value = activeBlocks.length;
+        if (msg == null) return;
+        activeAgentMessageIds.remove(msg.id);
+
+        final contentBlock = data['contentBlock'];
+        if (contentBlock is Map<String, dynamic>) {
+          if (msg.type == MessageType.toolCall) {
+            msg.cardContent = jsonEncode(contentBlock);
+            msg.text = (contentBlock['arguments'] ?? msg.text).toString();
+          } else if (contentBlock['text'] != null) {
+            msg.text = contentBlock['text'].toString();
+          }
+        }
+
+        await isar.writeTxn(() async {
+          await isar.chatMessages.put(msg);
+        });
+        messages.refresh();
       }
 
       Future<void> processSseEvent({
@@ -397,94 +458,33 @@ class ChatbotController extends GetxController {
         if (eventName.isEmpty) return;
         debugPrint('[Chat] Processing event=$eventName data=$dataStr');
 
-        if (eventName == 'connected') {
+        if (eventName == 'connected' || eventName == 'turn_started') {
           return;
         }
 
-        if (eventName == 'reasoning_start') {
-          await ensureCurrentBotMessage();
-          isReasoning.value = true;
-          liveReasoningText.value = '';
+        if (eventName == 'content_block_start') {
+          await startContentBlock(jsonDecode(dataStr));
           return;
         }
 
-        if (eventName == 'reasoning_delta') {
-          await ensureCurrentBotMessage();
-          try {
-            final data = jsonDecode(dataStr);
-            final delta = (data['delta'] ?? '').toString();
-            if (delta.isNotEmpty) {
-              liveReasoningText.value += delta;
-              if (currentBotMsg != null) {
-                currentBotMsg!.reasoningContent = liveReasoningText.value
-                    .trimRight();
-                messages.refresh();
-              }
-              _scrollToBottom();
-            }
-          } catch (_) {}
+        if (eventName == 'content_block_delta') {
+          await appendContentBlockDelta(jsonDecode(dataStr));
           return;
         }
 
-        if (eventName == 'reasoning_done') {
-          isReasoning.value = false;
-          if (liveReasoningText.value.isEmpty) {
-            try {
-              final data = jsonDecode(dataStr);
-              liveReasoningText.value = (data['content'] ?? '').toString();
-            } catch (_) {}
-          }
-          if (currentBotMsg != null &&
-              liveReasoningText.value.trim().isNotEmpty) {
-            currentBotMsg!.reasoningContent = liveReasoningText.value
-                .trimRight();
-            messages.refresh();
-          }
+        if (eventName == 'content_block_stop') {
+          await stopContentBlock(jsonDecode(dataStr));
           return;
         }
 
-        if (eventName == 'message_start') {
-          // Fallback for backends that don't emit reasoning_done reliably:
-          // once normal answer starts, treat reasoning as completed.
-          if (isReasoning.value) {
-            isReasoning.value = false;
-          }
-          await ensureCurrentBotMessage();
+        if (eventName == 'tool_result') {
+          await processToolResult(dataStr);
           return;
         }
 
-        if (eventName == 'message_delta') {
-          // Same fallback as message_start.
-          if (isReasoning.value) {
-            isReasoning.value = false;
-          }
-          try {
-            final data = jsonDecode(dataStr);
-            final delta = (data['delta'] ?? '').toString();
-            await appendMessageDelta(delta);
-          } catch (_) {}
-          return;
-        }
-
-        if (eventName == 'message') {
-          try {
-            final data = jsonDecode(dataStr);
-            final content = (data['content'] ?? '').toString();
-            if (content.isNotEmpty) {
-              await setFinalMessageContent(content);
-            }
-          } catch (_) {}
-          return;
-        }
-
-        if (eventName == 'card') {
-          await processCardEvent(dataStr);
-          return;
-        }
-
-        if (eventName == 'end') {
-          isReasoning.value = false;
+        if (eventName == 'turn_finished') {
           isTyping.value = false;
+          return;
         }
       }
 
@@ -530,17 +530,6 @@ class ChatbotController extends GetxController {
       }
 
       await flushSseEvent();
-
-      // After stream ends, ensure the final text is saved to Isar
-      final finalMsg = currentBotMsg;
-      if (finalMsg != null) {
-        if (liveReasoningText.value.trim().isNotEmpty) {
-          finalMsg.reasoningContent = liveReasoningText.value.trimRight();
-        }
-        await isar.writeTxn(() async {
-          await isar.chatMessages.put(finalMsg);
-        });
-      }
     } catch (e) {
       debugPrint('[Chat] Exception in SSE handling: $e');
       if (e is dio_lib.DioException) {
@@ -549,9 +538,8 @@ class ChatbotController extends GetxController {
       showSnackBar('error'.tr, isError: true);
     } finally {
       isTyping.value = false;
-      isReasoning.value = false;
-      liveReasoningText.value = '';
-      currentStreamingBotMessageId.value = null;
+      activeAgentBlockCount.value = 0;
+      activeAgentMessageIds.clear();
       _scrollToBottom();
     }
   }

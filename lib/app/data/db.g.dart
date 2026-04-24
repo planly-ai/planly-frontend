@@ -8331,20 +8331,15 @@ const ChatMessageSchema = CollectionSchema(
       type: IsarType.dateTime,
     ),
     r'ossId': PropertySchema(id: 4, name: r'ossId', type: IsarType.string),
-    r'reasoningContent': PropertySchema(
-      id: 5,
-      name: r'reasoningContent',
-      type: IsarType.string,
-    ),
     r'sender': PropertySchema(
-      id: 6,
+      id: 5,
       name: r'sender',
       type: IsarType.byte,
       enumMap: _ChatMessagesenderEnumValueMap,
     ),
-    r'text': PropertySchema(id: 7, name: r'text', type: IsarType.string),
+    r'text': PropertySchema(id: 6, name: r'text', type: IsarType.string),
     r'type': PropertySchema(
-      id: 8,
+      id: 7,
       name: r'type',
       type: IsarType.byte,
       enumMap: _ChatMessagetypeEnumValueMap,
@@ -8403,12 +8398,6 @@ int _chatMessageEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
-  {
-    final value = object.reasoningContent;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
   bytesCount += 3 + object.text.length * 3;
   return bytesCount;
 }
@@ -8424,10 +8413,9 @@ void _chatMessageSerialize(
   writer.writeString(offsets[2], object.cardContent);
   writer.writeDateTime(offsets[3], object.createdAt);
   writer.writeString(offsets[4], object.ossId);
-  writer.writeString(offsets[5], object.reasoningContent);
-  writer.writeByte(offsets[6], object.sender.index);
-  writer.writeString(offsets[7], object.text);
-  writer.writeByte(offsets[8], object.type.index);
+  writer.writeByte(offsets[5], object.sender.index);
+  writer.writeString(offsets[6], object.text);
+  writer.writeByte(offsets[7], object.type.index);
 }
 
 ChatMessage _chatMessageDeserialize(
@@ -8443,13 +8431,12 @@ ChatMessage _chatMessageDeserialize(
     createdAt: reader.readDateTime(offsets[3]),
     id: id,
     ossId: reader.readStringOrNull(offsets[4]),
-    reasoningContent: reader.readStringOrNull(offsets[5]),
     sender:
-        _ChatMessagesenderValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+        _ChatMessagesenderValueEnumMap[reader.readByteOrNull(offsets[5])] ??
         SenderType.user,
-    text: reader.readString(offsets[7]),
+    text: reader.readString(offsets[6]),
     type:
-        _ChatMessagetypeValueEnumMap[reader.readByteOrNull(offsets[8])] ??
+        _ChatMessagetypeValueEnumMap[reader.readByteOrNull(offsets[7])] ??
         MessageType.text,
   );
   return object;
@@ -8473,14 +8460,12 @@ P _chatMessageDeserializeProp<P>(
     case 4:
       return (reader.readStringOrNull(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
-    case 6:
       return (_ChatMessagesenderValueEnumMap[reader.readByteOrNull(offset)] ??
               SenderType.user)
           as P;
-    case 7:
+    case 6:
       return (reader.readString(offset)) as P;
-    case 8:
+    case 7:
       return (_ChatMessagetypeValueEnumMap[reader.readByteOrNull(offset)] ??
               MessageType.text)
           as P;
@@ -8507,6 +8492,8 @@ const _ChatMessagetypeEnumValueMap = {
   'cardGraph': 12,
   'cardEventList': 13,
   'cardForm': 14,
+  'reasoning': 15,
+  'toolCall': 16,
 };
 const _ChatMessagetypeValueEnumMap = {
   0: MessageType.text,
@@ -8524,6 +8511,8 @@ const _ChatMessagetypeValueEnumMap = {
   12: MessageType.cardGraph,
   13: MessageType.cardEventList,
   14: MessageType.cardForm,
+  15: MessageType.reasoning,
+  16: MessageType.toolCall,
 };
 
 Id _chatMessageGetId(ChatMessage object) {
@@ -9388,165 +9377,6 @@ extension ChatMessageQueryFilter
     });
   }
 
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNull(property: r'reasoningContent'),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        const FilterCondition.isNotNull(property: r'reasoningContent'),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentEqualTo(String? value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(
-          property: r'reasoningContent',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(
-          include: include,
-          property: r'reasoningContent',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.lessThan(
-          include: include,
-          property: r'reasoningContent',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.between(
-          property: r'reasoningContent',
-          lower: lower,
-          includeLower: includeLower,
-          upper: upper,
-          includeUpper: includeUpper,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentStartsWith(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.startsWith(
-          property: r'reasoningContent',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentEndsWith(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.endsWith(
-          property: r'reasoningContent',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentContains(String value, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.contains(
-          property: r'reasoningContent',
-          value: value,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentMatches(String pattern, {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.matches(
-          property: r'reasoningContent',
-          wildcard: pattern,
-          caseSensitive: caseSensitive,
-        ),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.equalTo(property: r'reasoningContent', value: ''),
-      );
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition>
-  reasoningContentIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(
-        FilterCondition.greaterThan(property: r'reasoningContent', value: ''),
-      );
-    });
-  }
-
   QueryBuilder<ChatMessage, ChatMessage, QAfterFilterCondition> senderEqualTo(
     SenderType value,
   ) {
@@ -9896,20 +9726,6 @@ extension ChatMessageQuerySortBy
     });
   }
 
-  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy>
-  sortByReasoningContent() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'reasoningContent', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy>
-  sortByReasoningContentDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'reasoningContent', Sort.desc);
-    });
-  }
-
   QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy> sortBySender() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sender', Sort.asc);
@@ -10023,20 +9839,6 @@ extension ChatMessageQuerySortThenBy
     });
   }
 
-  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy>
-  thenByReasoningContent() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'reasoningContent', Sort.asc);
-    });
-  }
-
-  QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy>
-  thenByReasoningContentDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'reasoningContent', Sort.desc);
-    });
-  }
-
   QueryBuilder<ChatMessage, ChatMessage, QAfterSortBy> thenBySender() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sender', Sort.asc);
@@ -10120,17 +9922,6 @@ extension ChatMessageQueryWhereDistinct
     });
   }
 
-  QueryBuilder<ChatMessage, ChatMessage, QDistinct> distinctByReasoningContent({
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(
-        r'reasoningContent',
-        caseSensitive: caseSensitive,
-      );
-    });
-  }
-
   QueryBuilder<ChatMessage, ChatMessage, QDistinct> distinctBySender() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'sender');
@@ -10189,13 +9980,6 @@ extension ChatMessageQueryProperty
   QueryBuilder<ChatMessage, String?, QQueryOperations> ossIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'ossId');
-    });
-  }
-
-  QueryBuilder<ChatMessage, String?, QQueryOperations>
-  reasoningContentProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'reasoningContent');
     });
   }
 

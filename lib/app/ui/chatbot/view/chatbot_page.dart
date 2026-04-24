@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
-import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/chat_bubble.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/chat_input_bar.dart';
@@ -157,9 +156,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
               final currentMessages = controller.messages;
               final isRecognizing = controller.isRecognizing.value;
               final isTyping = controller.isTyping.value;
-              final streamingId = controller.currentStreamingBotMessageId.value;
-              final isReasoning = controller.isReasoning.value;
-              final reasoningText = controller.liveReasoningText.value;
+              final hasActiveAgentBlock =
+                  controller.activeAgentBlockCount.value > 0;
+              final activeAgentMessageIds = controller.activeAgentMessageIds;
 
               if (currentMessages.isEmpty) {
                 return Center(
@@ -189,22 +188,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 itemCount:
                     currentMessages.length +
                     (isRecognizing ? 1 : 0) +
-                    (isTyping ? 1 : 0),
+                    (isTyping && !hasActiveAgentBlock ? 1 : 0),
                 itemBuilder: (context, index) {
                   // Message bubbles
                   if (index < currentMessages.length) {
                     final msg = currentMessages[index];
-                    final isStreamingMsg =
-                        streamingId != null &&
-                        msg.id == streamingId &&
-                        msg.sender == SenderType.bot &&
-                        msg.type == MessageType.text;
-
                     return ChatBubble(
                       message: msg,
-                      showStreamingStatus: isStreamingMsg,
-                      isReasoning: isReasoning,
-                      reasoningText: reasoningText,
+                      isStreamingBlock: activeAgentMessageIds.contains(msg.id),
                     );
                   }
 
@@ -239,11 +230,6 @@ class _ChatbotPageState extends State<ChatbotPage> {
                   }
 
                   // Bot Typing state
-                  final hasStreamingMessage = streamingId != null;
-                  if (hasStreamingMessage) {
-                    return const SizedBox.shrink();
-                  }
-
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -273,27 +259,12 @@ class _ChatbotPageState extends State<ChatbotPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  (isReasoning ||
-                                          reasoningText.trim().isNotEmpty)
-                                      ? 'Thinking...'
-                                      : 'Generating...',
+                                  'Generating...',
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: colorScheme.onSurface,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                if (reasoningText.trim().isNotEmpty) ...[
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    reasoningText,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: colorScheme.onSurface.withValues(
-                                        alpha: 0.85,
-                                      ),
-                                      fontStyle: FontStyle.italic,
-                                    ),
-                                  ),
-                                ],
                               ],
                             ),
                           ),
