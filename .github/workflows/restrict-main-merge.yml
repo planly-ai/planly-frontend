@@ -2,8 +2,12 @@ name: Restrict merge to main
 
 on:
   pull_request:
-    branches:
-      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+      - closed
 
 jobs:
   check-branch:
@@ -11,8 +15,19 @@ jobs:
     steps:
       - name: Check source branch
         run: |
+          echo "Action: ${{ github.event.action }}"
           echo "Base branch: ${{ github.base_ref }}"
           echo "Head branch: ${{ github.head_ref }}"
+
+          if [ "${{ github.base_ref }}" != "main" ]; then
+            echo "This PR does not target main. No branch restriction needed."
+            exit 0
+          fi
+
+          if [ "${{ github.event.action }}" = "closed" ]; then
+            echo "PR is closed. Clearing stale branch restriction check."
+            exit 0
+          fi
 
           if [ "${{ github.head_ref }}" != "development" ]; then
             echo "❌ Only 'development' branch can be merged into 'main'"
