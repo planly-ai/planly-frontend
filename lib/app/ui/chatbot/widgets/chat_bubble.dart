@@ -5,6 +5,7 @@ import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'dart:convert';
+import 'package:planly_ai/app/ui/chatbot/widgets/agent_block_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/alert_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/event_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/event_list_card.dart';
@@ -54,13 +55,13 @@ class ChatBubble extends StatelessWidget {
         return _buildAgentBlockWithAvatar(
           context,
           colorScheme,
-          _ReasoningBlock(message: message, isStreaming: isStreamingBlock),
+          _buildReasoningBlock(context),
         );
       case MessageType.toolCall:
         return _buildAgentBlockWithAvatar(
           context,
           colorScheme,
-          _ToolCallBlock(message: message),
+          _buildToolCallBlock(context),
         );
       default:
         return _buildTextBubble(context, isUser, colorScheme, theme);
@@ -105,6 +106,61 @@ class ChatBubble extends StatelessWidget {
       data,
       onSubmit: (formData) => _handleFormSubmit(formData, controller),
     );
+  }
+
+  Widget _buildReasoningBlock(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return AgentBlockCard(
+      title: 'Thinking',
+      content: message.text,
+      isStreaming: isStreamingBlock,
+      style: AgentBlockCardStyle.thinking(colorScheme),
+      contentTextStyle: theme.textTheme.bodySmall?.copyWith(
+        color: colorScheme.onSurface.withValues(alpha: 0.92),
+        height: 1.35,
+      ),
+    );
+  }
+
+  Widget _buildToolCallBlock(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final metadata = _decodeToolCallMetadata();
+    final name = metadata['name']?.toString();
+    final title = name == null || name.isEmpty
+        ? 'Tool call'
+        : 'Tool call: $name';
+
+    return AgentBlockCard(
+      title: title,
+      content: _formatToolArguments(message.text),
+      isStreaming: isStreamingBlock,
+      style: AgentBlockCardStyle.toolCall(colorScheme),
+      contentTextStyle: theme.textTheme.bodySmall?.copyWith(
+        color: colorScheme.onSurface.withValues(alpha: 0.86),
+        fontFamily: 'monospace',
+        height: 1.35,
+      ),
+    );
+  }
+
+  Map<String, dynamic> _decodeToolCallMetadata() {
+    try {
+      final decoded = jsonDecode(message.cardContent ?? '{}');
+      if (decoded is Map<String, dynamic>) return decoded;
+    } catch (_) {}
+    return const {};
+  }
+
+  String _formatToolArguments(String value) {
+    try {
+      final decoded = jsonDecode(value);
+      return const JsonEncoder.withIndent('  ').convert(decoded);
+    } catch (_) {
+      return value;
+    }
   }
 
   void _handleFormSubmit(
@@ -152,24 +208,7 @@ class ChatBubble extends StatelessWidget {
     ColorScheme colorScheme,
     Widget card,
   ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.spacingM,
-        vertical: AppConstants.spacingS,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            backgroundColor: colorScheme.primaryContainer,
-            child: Icon(Icons.smart_toy, color: colorScheme.onPrimaryContainer),
-          ),
-          const SizedBox(width: AppConstants.spacingS),
-          Expanded(child: card),
-        ],
-      ),
-    );
+    return _buildBotMessageShell(colorScheme: colorScheme, child: card);
   }
 
   Widget _buildAgentBlockWithAvatar(
@@ -177,6 +216,13 @@ class ChatBubble extends StatelessWidget {
     ColorScheme colorScheme,
     Widget child,
   ) {
+    return _buildBotMessageShell(colorScheme: colorScheme, child: child);
+  }
+
+  Widget _buildBotMessageShell({
+    required ColorScheme colorScheme,
+    required Widget child,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingM,
@@ -185,13 +231,27 @@ class ChatBubble extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundColor: colorScheme.primaryContainer,
-            child: Icon(Icons.smart_toy, color: colorScheme.onPrimaryContainer),
-          ),
+          _buildAvatar(colorScheme: colorScheme, isUser: false),
           const SizedBox(width: AppConstants.spacingS),
           Expanded(child: child),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar({
+    required ColorScheme colorScheme,
+    required bool isUser,
+  }) {
+    return CircleAvatar(
+      backgroundColor: isUser
+          ? colorScheme.secondaryContainer
+          : colorScheme.primaryContainer,
+      child: Icon(
+        isUser ? Icons.person : Icons.smart_toy,
+        color: isUser
+            ? colorScheme.onSecondaryContainer
+            : colorScheme.onPrimaryContainer,
       ),
     );
   }
@@ -211,16 +271,10 @@ class ChatBubble extends StatelessWidget {
         mainAxisAlignment: isUser
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            CircleAvatar(
-              backgroundColor: colorScheme.primaryContainer,
-              child: Icon(
-                Icons.smart_toy,
-                color: colorScheme.onPrimaryContainer,
-              ),
-            ),
+            _buildAvatar(colorScheme: colorScheme, isUser: false),
             const SizedBox(width: AppConstants.spacingS),
           ],
           Flexible(
@@ -231,18 +285,18 @@ class ChatBubble extends StatelessWidget {
                     ? colorScheme.primary
                     : colorScheme.outlineVariant.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(
+                  topLeft: Radius.circular(
+                    isUser ? AppConstants.borderRadiusLarge : 4,
+                  ),
+                  topRight: Radius.circular(
+                    isUser ? 4 : AppConstants.borderRadiusLarge,
+                  ),
+                  bottomLeft: const Radius.circular(
                     AppConstants.borderRadiusLarge,
                   ),
-                  topRight: const Radius.circular(
+                  bottomRight: const Radius.circular(
                     AppConstants.borderRadiusLarge,
                   ),
-                  bottomLeft: isUser
-                      ? const Radius.circular(AppConstants.borderRadiusLarge)
-                      : const Radius.circular(4),
-                  bottomRight: isUser
-                      ? const Radius.circular(4)
-                      : const Radius.circular(AppConstants.borderRadiusLarge),
                 ),
               ),
               child: Column(
@@ -309,13 +363,7 @@ class ChatBubble extends StatelessWidget {
           ),
           if (isUser) ...[
             const SizedBox(width: AppConstants.spacingS),
-            CircleAvatar(
-              backgroundColor: colorScheme.secondaryContainer,
-              child: Icon(
-                Icons.person,
-                color: colorScheme.onSecondaryContainer,
-              ),
-            ),
+            _buildAvatar(colorScheme: colorScheme, isUser: true),
           ],
         ],
       ),
@@ -425,245 +473,6 @@ class ChatBubble extends StatelessWidget {
                 ],
               ),
             ),
-    );
-  }
-}
-
-class _ReasoningBlock extends StatelessWidget {
-  final ChatMessage message;
-  final bool isStreaming;
-
-  const _ReasoningBlock({required this.message, required this.isStreaming});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withValues(alpha: 0.32),
-        border: Border.all(color: colorScheme.primary.withValues(alpha: 0.22)),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-      ),
-      child: _ReasoningPanel(
-        title: 'Thinking',
-        content: message.text,
-        isReasoningActive: isStreaming,
-        titleStyle: theme.textTheme.labelMedium?.copyWith(
-          color: colorScheme.onPrimaryContainer,
-          fontWeight: FontWeight.w600,
-        ),
-        contentStyle: theme.textTheme.bodySmall?.copyWith(
-          color: colorScheme.onSurface.withValues(alpha: 0.92),
-          height: 1.35,
-        ),
-        iconColor: colorScheme.onPrimaryContainer.withValues(alpha: 0.82),
-      ),
-    );
-  }
-}
-
-class _ToolCallBlock extends StatelessWidget {
-  final ChatMessage message;
-
-  const _ToolCallBlock({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final metadata = _decodeMetadata();
-    final name = metadata['name']?.toString();
-    final body = _formatToolArguments(message.text);
-
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: colorScheme.tertiaryContainer.withValues(alpha: 0.28),
-        border: Border.all(color: colorScheme.tertiary.withValues(alpha: 0.2)),
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.construction_outlined,
-                size: 16,
-                color: colorScheme.onTertiaryContainer,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  name == null || name.isEmpty
-                      ? 'Tool call'
-                      : 'Tool call: $name',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onTertiaryContainer,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (body.trim().isNotEmpty) ...[
-            const SizedBox(height: AppConstants.spacingS),
-            SelectableText(
-              body,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurface.withValues(alpha: 0.86),
-                fontFamily: 'monospace',
-                height: 1.35,
-              ),
-            ),
-          ],
-          const SizedBox(height: 4),
-          Text(
-            DateFormat('HH:mm').format(message.createdAt),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.62),
-              fontSize: 10,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Map<String, dynamic> _decodeMetadata() {
-    try {
-      final decoded = jsonDecode(message.cardContent ?? '{}');
-      if (decoded is Map<String, dynamic>) return decoded;
-    } catch (_) {}
-    return const {};
-  }
-
-  String _formatToolArguments(String value) {
-    try {
-      final decoded = jsonDecode(value);
-      return const JsonEncoder.withIndent('  ').convert(decoded);
-    } catch (_) {
-      return value;
-    }
-  }
-}
-
-class _ReasoningPanel extends StatefulWidget {
-  final String title;
-  final String content;
-  final bool isReasoningActive;
-  final TextStyle? titleStyle;
-  final TextStyle? contentStyle;
-  final Color iconColor;
-
-  const _ReasoningPanel({
-    required this.title,
-    required this.content,
-    required this.isReasoningActive,
-    required this.titleStyle,
-    required this.contentStyle,
-    required this.iconColor,
-  });
-
-  @override
-  State<_ReasoningPanel> createState() => _ReasoningPanelState();
-}
-
-class _ReasoningPanelState extends State<_ReasoningPanel> {
-  late bool _expanded;
-
-  @override
-  void initState() {
-    super.initState();
-    _expanded = widget.isReasoningActive;
-  }
-
-  @override
-  void didUpdateWidget(covariant _ReasoningPanel oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!oldWidget.isReasoningActive && widget.isReasoningActive) {
-      setState(() {
-        _expanded = true;
-      });
-    } else if (oldWidget.isReasoningActive && !widget.isReasoningActive) {
-      // Auto collapse once reasoning has finished.
-      setState(() {
-        _expanded = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final normalizedContent = widget.content.trimRight();
-    final hasContent = normalizedContent.trim().isNotEmpty;
-    final preview = hasContent
-        ? normalizedContent.trim().replaceAll('\n', ' ')
-        : '';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusMedium),
-          onTap: hasContent
-              ? () {
-                  setState(() {
-                    _expanded = !_expanded;
-                  });
-                }
-              : null,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.psychology_alt_outlined,
-                  size: 16,
-                  color: widget.iconColor,
-                ),
-                const SizedBox(width: 6),
-                Expanded(child: Text(widget.title, style: widget.titleStyle)),
-                AnimatedRotation(
-                  turns: _expanded ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 180),
-                  curve: Curves.easeOut,
-                  child: Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 18,
-                    color: widget.iconColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutCubic,
-          child: _expanded && hasContent
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                  child: Text(normalizedContent, style: widget.contentStyle),
-                )
-              : (!widget.isReasoningActive && hasContent)
-              ? Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
-                  child: Text(
-                    preview,
-                    style: widget.contentStyle?.copyWith(
-                      color: widget.contentStyle?.color?.withValues(
-                        alpha: 0.65,
-                      ),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ),
-      ],
     );
   }
 }
