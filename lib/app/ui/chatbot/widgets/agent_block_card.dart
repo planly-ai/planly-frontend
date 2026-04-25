@@ -7,6 +7,7 @@ class AgentBlockCard extends StatefulWidget {
   final bool isStreaming;
   final AgentBlockCardStyle style;
   final TextStyle? contentTextStyle;
+  final double maxContentHeight;
 
   const AgentBlockCard({
     super.key,
@@ -15,6 +16,7 @@ class AgentBlockCard extends StatefulWidget {
     required this.isStreaming,
     required this.style,
     this.contentTextStyle,
+    this.maxContentHeight = 180,
   });
 
   @override
@@ -38,20 +40,20 @@ class AgentBlockCardStyle {
 
   factory AgentBlockCardStyle.thinking(ColorScheme colorScheme) {
     return AgentBlockCardStyle(
-      backgroundColor: colorScheme.outlineVariant.withValues(alpha: 0.3),
+      backgroundColor: colorScheme.outlineVariant.withValues(alpha: 0.16),
       borderColor: Colors.transparent,
-      titleColor: colorScheme.primary,
-      iconColor: colorScheme.primary,
+      titleColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.68),
+      iconColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.62),
       icon: Icons.psychology_alt_outlined,
     );
   }
 
   factory AgentBlockCardStyle.toolCall(ColorScheme colorScheme) {
     return AgentBlockCardStyle(
-      backgroundColor: colorScheme.tertiaryContainer.withValues(alpha: 0.26),
+      backgroundColor: colorScheme.outlineVariant.withValues(alpha: 0.2),
       borderColor: Colors.transparent,
-      titleColor: colorScheme.onTertiaryContainer,
-      iconColor: colorScheme.onTertiaryContainer.withValues(alpha: 0.82),
+      titleColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+      iconColor: colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
       icon: Icons.construction_outlined,
     );
   }
@@ -59,11 +61,13 @@ class AgentBlockCardStyle {
 
 class _AgentBlockCardState extends State<AgentBlockCard> {
   late bool _expanded;
+  final ScrollController _contentScrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _expanded = widget.isStreaming;
+    _scrollContentToBottom();
   }
 
   @override
@@ -78,6 +82,27 @@ class _AgentBlockCardState extends State<AgentBlockCard> {
         _expanded = false;
       });
     }
+    if (oldWidget.content != widget.content ||
+        oldWidget.isStreaming != widget.isStreaming) {
+      _scrollContentToBottom();
+    }
+  }
+
+  @override
+  void dispose() {
+    _contentScrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollContentToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_expanded || !_contentScrollController.hasClients) {
+        return;
+      }
+      _contentScrollController.jumpTo(
+        _contentScrollController.position.maxScrollExtent,
+      );
+    });
   }
 
   @override
@@ -135,9 +160,10 @@ class _AgentBlockCardState extends State<AgentBlockCard> {
                   Expanded(
                     child: Text(
                       widget.title,
-                      style: theme.textTheme.labelMedium?.copyWith(
+                      style: theme.textTheme.labelSmall?.copyWith(
                         color: widget.style.titleColor,
                         fontWeight: FontWeight.w600,
+                        fontSize: 11,
                       ),
                     ),
                   ),
@@ -161,7 +187,18 @@ class _AgentBlockCardState extends State<AgentBlockCard> {
             child: _expanded && hasContent
                 ? Padding(
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                    child: Text(normalizedContent, style: contentStyle),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: widget.maxContentHeight,
+                      ),
+                      child: Scrollbar(
+                        controller: _contentScrollController,
+                        child: SingleChildScrollView(
+                          controller: _contentScrollController,
+                          child: Text(normalizedContent, style: contentStyle),
+                        ),
+                      ),
+                    ),
                   )
                 : (!widget.isStreaming && hasContent)
                 ? Padding(

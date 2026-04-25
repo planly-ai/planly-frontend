@@ -45,6 +45,7 @@ class ScheduleCard extends StatelessWidget {
 
     return Card(
       elevation: AppConstants.elevationLow,
+      color: colorScheme.primaryContainer.withValues(alpha: 0.26),
       margin: EdgeInsets.all(ResponsiveUtils.getResponsiveCardMargin(context)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),

@@ -8,11 +8,7 @@ class GraphCard extends StatelessWidget {
   final String title;
   final GraphData graph;
 
-  const GraphCard({
-    super.key,
-    required this.title,
-    required this.graph,
-  });
+  const GraphCard({super.key, required this.title, required this.graph});
 
   factory GraphCard.fromJson(Map<String, dynamic> json) {
     return GraphCard(
@@ -28,6 +24,7 @@ class GraphCard extends StatelessWidget {
 
     return Card(
       elevation: AppConstants.elevationLow,
+      color: colorScheme.primaryContainer.withValues(alpha: 0.26),
       margin: EdgeInsets.all(ResponsiveUtils.getResponsiveCardMargin(context)),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
@@ -146,7 +143,9 @@ class GraphCard extends StatelessWidget {
                 toY: entry.value.toDouble(),
                 color: colorScheme.primary.withValues(alpha: 0.8),
                 width: 16,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(4),
+                ),
               ),
             ],
           );
@@ -247,9 +246,9 @@ class GraphCard extends StatelessWidget {
             return Text(
               value.toInt().toString(),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontSize: 10,
-                  ),
+                color: colorScheme.onSurfaceVariant,
+                fontSize: 10,
+              ),
             );
           },
           reservedSize: 20,
@@ -266,9 +265,9 @@ class GraphCard extends StatelessWidget {
                 child: Text(
                   graph.xAxis[index],
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontSize: 10,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
                 ),
               );
             }

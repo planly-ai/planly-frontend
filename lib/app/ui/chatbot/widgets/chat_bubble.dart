@@ -118,7 +118,8 @@ class ChatBubble extends StatelessWidget {
       isStreaming: isStreamingBlock,
       style: AgentBlockCardStyle.thinking(colorScheme),
       contentTextStyle: theme.textTheme.bodySmall?.copyWith(
-        color: colorScheme.onSurface.withValues(alpha: 0.92),
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.66),
+        fontSize: 11,
         height: 1.35,
       ),
     );
@@ -139,7 +140,8 @@ class ChatBubble extends StatelessWidget {
       isStreaming: isStreamingBlock,
       style: AgentBlockCardStyle.toolCall(colorScheme),
       contentTextStyle: theme.textTheme.bodySmall?.copyWith(
-        color: colorScheme.onSurface.withValues(alpha: 0.86),
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
+        fontSize: 11,
         fontFamily: 'monospace',
         height: 1.35,
       ),
@@ -283,7 +285,7 @@ class ChatBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isUser
                     ? colorScheme.primary
-                    : colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    : colorScheme.primaryContainer.withValues(alpha: 0.32),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(
                     isUser ? AppConstants.borderRadiusLarge : 4,
@@ -317,33 +319,33 @@ class ChatBubble extends StatelessWidget {
                         p: theme.textTheme.bodyMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         strong: theme.textTheme.bodyMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                         listBullet: theme.textTheme.bodyMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         h1: theme.textTheme.headlineMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         h2: theme.textTheme.headlineSmall?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         h3: theme.textTheme.titleLarge?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                       ),
                     ),
@@ -353,7 +355,9 @@ class ChatBubble extends StatelessWidget {
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: isUser
                           ? colorScheme.onPrimary.withValues(alpha: 0.7)
-                          : colorScheme.onSurface.withValues(alpha: 0.7),
+                          : colorScheme.onPrimaryContainer.withValues(
+                              alpha: 0.68,
+                            ),
                       fontSize: 10,
                     ),
                   ),
