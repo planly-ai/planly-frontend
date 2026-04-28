@@ -5,6 +5,7 @@ import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'dart:convert';
+import 'package:planly_ai/app/ui/chatbot/utils/form_submission_formatter.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/agent_block_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/alert_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/event_card.dart';
@@ -171,26 +172,16 @@ class ChatBubble extends StatelessWidget {
   ) async {
     // 流程：FORM -> 用户提交 -> AI 继续 -> GOAL/TASK
     debugPrint('[FormCard] Form submitted: $formData');
-    final formCardData = _decodeFormCardData();
+    final formCardData = FormSubmissionFormatter.decodeCardData(
+      message.cardContent,
+    );
 
     // 1. 持久化表单状态到当前消息
     try {
-      final decoded = jsonDecode(message.cardContent ?? '{}');
-      final cardData = decoded is Map<String, dynamic>
-          ? Map<String, dynamic>.from(decoded)
-          : <String, dynamic>{};
-      final nestedData = cardData['data'];
-      final dataMap = nestedData is Map<String, dynamic>
-          ? Map<String, dynamic>.from(nestedData)
-          : cardData;
-
-      dataMap['isSubmitted'] = true;
-      dataMap['values'] = formData;
-      if (nestedData is Map<String, dynamic>) {
-        cardData['data'] = dataMap;
-      }
-
-      message.cardContent = jsonEncode(cardData);
+      message.cardContent = FormSubmissionFormatter.markSubmitted(
+        cardContent: message.cardContent,
+        values: formData,
+      );
 
       // 保存到数据库
       await isar.writeTxn(() async {
@@ -204,99 +195,12 @@ class ChatBubble extends StatelessWidget {
     }
 
     // 2. 发送消息给 AI
-    final submissionMessage = _formatFormSubmissionMessage(
-      formCardData,
-      formData,
+    final submissionMessage = FormSubmissionFormatter.formatSubmissionMessage(
+      cardData: formCardData,
+      values: formData,
     );
     controller.textController.text = submissionMessage;
     controller.sendMessage();
-  }
-
-  Map<String, dynamic> _decodeFormCardData() {
-    try {
-      final decoded = jsonDecode(message.cardContent ?? '{}');
-      if (decoded is! Map<String, dynamic>) return const {};
-
-      final nestedData = decoded['data'];
-      if (nestedData is Map<String, dynamic>) {
-        return Map<String, dynamic>.from(nestedData);
-      }
-
-      return Map<String, dynamic>.from(decoded);
-    } catch (_) {
-      return const {};
-    }
-  }
-
-  String _formatFormSubmissionMessage(
-    Map<String, dynamic> cardData,
-    Map<String, dynamic> formValues,
-  ) {
-    final title = (cardData['title'] ?? '').toString().trim();
-    final buffer = StringBuffer();
-    buffer.writeln(
-      '**${title.isEmpty ? 'Form submitted' : '$title submitted'}**',
-    );
-    buffer.writeln();
-
-    final fields = cardData['fields'] is List
-        ? cardData['fields'] as List
-        : const [];
-    final writtenKeys = <String>{};
-
-    for (final field in fields) {
-      if (field is! Map) continue;
-
-      final key = (field['key'] ?? '').toString();
-      if (key.isEmpty || !formValues.containsKey(key)) continue;
-
-      final label = (field['label'] ?? key).toString();
-      final type = (field['type'] ?? '').toString();
-      final required = field['required'] == true;
-      final value = formValues[key];
-
-      if (!required && _isEmptyFormValue(value)) continue;
-
-      buffer.writeln(
-        '- **$label:** ${_formatFormValue(value, fieldType: type)}',
-      );
-      writtenKeys.add(key);
-    }
-
-    for (final entry in formValues.entries) {
-      if (writtenKeys.contains(entry.key) || _isEmptyFormValue(entry.value)) {
-        continue;
-      }
-
-      buffer.writeln('- **${entry.key}:** ${_formatFormValue(entry.value)}');
-    }
-
-    return buffer.toString().trimRight();
-  }
-
-  bool _isEmptyFormValue(dynamic value) {
-    if (value == null) return true;
-    if (value is String) return value.trim().isEmpty;
-    if (value is Iterable) return value.isEmpty;
-    return false;
-  }
-
-  String _formatFormValue(dynamic value, {String fieldType = ''}) {
-    if (value is Iterable) {
-      return value.map((item) => item.toString()).join(', ');
-    }
-
-    final text = value?.toString().trim() ?? '';
-    if (text.isEmpty) return '-';
-
-    if (fieldType.toUpperCase() == 'DATE_TIME_PICKER') {
-      final date = DateTime.tryParse(text);
-      if (date != null) {
-        return DateFormat('yyyy-MM-dd HH:mm').format(date.toLocal());
-      }
-    }
-
-    return text.replaceAll(RegExp(r'\s+'), ' ');
   }
 
   Widget _buildCardWithAvatar(
