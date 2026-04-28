@@ -175,12 +175,20 @@ class ChatBubble extends StatelessWidget {
 
     // 1. 持久化表单状态到当前消息
     try {
-      final cardData = jsonDecode(message.cardContent ?? '{}');
-      final dataMap = cardData['data'] as Map<String, dynamic>? ?? {};
+      final decoded = jsonDecode(message.cardContent ?? '{}');
+      final cardData = decoded is Map<String, dynamic>
+          ? Map<String, dynamic>.from(decoded)
+          : <String, dynamic>{};
+      final nestedData = cardData['data'];
+      final dataMap = nestedData is Map<String, dynamic>
+          ? Map<String, dynamic>.from(nestedData)
+          : cardData;
 
       dataMap['isSubmitted'] = true;
       dataMap['values'] = formData;
-      cardData['data'] = dataMap;
+      if (nestedData is Map<String, dynamic>) {
+        cardData['data'] = dataMap;
+      }
 
       message.cardContent = jsonEncode(cardData);
 
