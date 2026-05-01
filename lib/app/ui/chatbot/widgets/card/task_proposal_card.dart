@@ -72,22 +72,11 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
 
       var nextIndex = (await _todoRepository.getAll()).length;
       for (final phase in widget.data.subTasks) {
-        final phaseTodo = await _todoRepository.create(
-          name: phase.title,
-          description: phase.description,
-          startTime: null,
-          completedTime: phase.deadline,
-          fix: false,
-          priority: phase.priority,
-          tags: const [],
-          index: nextIndex++,
-          task: rootTask,
-        );
-
         for (final event in phase.events) {
           final eventTodo = await _todoRepository.create(
             name: event.title,
             description: event.description,
+            subtask: phase.title,
             startTime: event.startTime,
             completedTime: event.endTime,
             fix: false,
@@ -96,13 +85,6 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
             index: nextIndex++,
             task: rootTask,
           );
-
-          await isar.writeTxn(() async {
-            eventTodo.parent.value = phaseTodo;
-            await isar.todos.put(eventTodo);
-            await eventTodo.parent.save();
-            await eventTodo.task.save();
-          });
 
           if (eventTodo.todoStartTime != null) {
             await _notificationService.scheduleForTodo(eventTodo);
