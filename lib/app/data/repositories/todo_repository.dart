@@ -1,8 +1,11 @@
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/main.dart';
+import 'package:uuid/uuid.dart';
 
 class TodoRepository {
+  static final Uuid _uuid = Uuid();
+
   final Isar _isar = isar;
 
   // ==================== CREATE ====================
@@ -20,6 +23,7 @@ class TodoRepository {
     required Tasks task,
   }) async {
     final todo = Todos(
+      uuidv7: _uuid.v7(),
       name: name,
       description: description,
       subtask: subtask,

@@ -5,6 +5,9 @@ import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/main.dart';
 import 'package:planly_ai/app/constants/debug_config.dart';
+import 'package:uuid/uuid.dart';
+
+final Uuid _uuid = Uuid();
 
 /// Generates sample todo data for a college student's daily life.
 /// 
@@ -49,6 +52,7 @@ Future<void> createSampleTodoData() async {
             : TodoStatus.active;
 
         final todo = Todos(
+          uuidv7: _uuid.v7(),
           name: activity['name'] as String,
           description: activity['description'] as String,
           createdTime: day.subtract(const Duration(days: 1)),
@@ -89,6 +93,7 @@ Future<Map<String, Tasks>> _ensureCategoriesExist() async {
       var task = await isar.tasks.filter().titleEqualTo(name).findFirst();
       if (task == null) {
         task = Tasks(
+          uuidv7: _uuid.v7(),
           title: name,
           taskColor: _getCategoryColor(name).value,
           description: '$name related tasks and schedules',

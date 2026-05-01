@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/main.dart';
+import 'package:uuid/uuid.dart';
 
 class TaskRepository {
+  static final Uuid _uuid = Uuid();
+
   final Isar _isar = isar;
 
   // ==================== CREATE ====================
@@ -18,6 +21,7 @@ class TaskRepository {
     required int index,
   }) async {
     final task = Tasks(
+      uuidv7: _uuid.v7(),
       title: title,
       description: description,
       taskEndTime: taskEndTime,

@@ -13,6 +13,7 @@ import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
 import 'package:planly_ai/main.dart';
+import 'package:uuid/uuid.dart';
 
 class IsarController {
   static const _platform = MethodChannel('directory_picker');
@@ -44,6 +45,7 @@ class IsarController {
       isar = isarInstance;
 
       await _migrateToStatusField(isarInstance);
+      await _migrateUuidV7Fields(isarInstance);
 
       return isarInstance;
     }
@@ -81,6 +83,48 @@ class IsarController {
       );
     } catch (e) {
       debugPrint('Migration error: $e');
+    }
+  }
+
+  static Future<void> _migrateUuidV7Fields(Isar isar) async {
+    try {
+      final uuid = Uuid();
+      final tasks = await isar.tasks.where().findAll();
+      final todos = await isar.todos.where().findAll();
+
+      final tasksToUpdate = tasks
+          .where((task) => task.uuidv7.trim().isEmpty)
+          .toList();
+      final todosToUpdate = todos
+          .where((todo) => todo.uuidv7.trim().isEmpty)
+          .toList();
+
+      if (tasksToUpdate.isEmpty && todosToUpdate.isEmpty) {
+        debugPrint('Migration: UUIDv7 fields already populated');
+        return;
+      }
+
+      await isar.writeTxn(() async {
+        for (final task in tasksToUpdate) {
+          task.uuidv7 = uuid.v7();
+        }
+        for (final todo in todosToUpdate) {
+          todo.uuidv7 = uuid.v7();
+        }
+
+        if (tasksToUpdate.isNotEmpty) {
+          await isar.tasks.putAll(tasksToUpdate);
+        }
+        if (todosToUpdate.isNotEmpty) {
+          await isar.todos.putAll(todosToUpdate);
+        }
+      });
+
+      debugPrint(
+        'Migration completed: Added UUIDv7 to ${tasksToUpdate.length} tasks and ${todosToUpdate.length} todos',
+      );
+    } catch (e) {
+      debugPrint('UUIDv7 migration error: $e');
     }
   }
 

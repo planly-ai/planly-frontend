@@ -74,6 +74,8 @@ enum TaskCategory {
 @collection
 class Tasks {
   Id id;
+  @Index()
+  String uuidv7;
   String title;
   String description;
   DateTime? taskEndTime;
@@ -90,6 +92,7 @@ class Tasks {
 
   Tasks({
     this.id = Isar.autoIncrement,
+    this.uuidv7 = '',
     required this.title,
     this.description = '',
     this.taskEndTime,
@@ -104,6 +107,8 @@ class Tasks {
 @collection
 class Todos {
   Id id;
+  @Index()
+  String uuidv7;
   String name;
   String description;
   String? subtask;
@@ -132,6 +137,7 @@ class Todos {
 
   Todos({
     this.id = Isar.autoIncrement,
+    this.uuidv7 = '',
     required this.name,
     this.description = '',
     this.subtask,

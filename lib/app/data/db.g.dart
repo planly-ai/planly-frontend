@@ -3930,6 +3930,7 @@ const TasksSchema = CollectionSchema(
       type: IsarType.dateTime,
     ),
     r'title': PropertySchema(id: 7, name: r'title', type: IsarType.string),
+    r'uuidv7': PropertySchema(id: 8, name: r'uuidv7', type: IsarType.string),
   },
 
   estimateSize: _tasksEstimateSize,
@@ -3937,7 +3938,21 @@ const TasksSchema = CollectionSchema(
   deserialize: _tasksDeserialize,
   deserializeProp: _tasksDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'uuidv7': IndexSchema(
+      id: -5681201954958710893,
+      name: r'uuidv7',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'uuidv7',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+      ],
+    ),
+  },
   links: {
     r'todos': LinkSchema(
       id: -2841613509957218706,
@@ -3963,6 +3978,7 @@ int _tasksEstimateSize(
   var bytesCount = offsets.last;
   bytesCount += 3 + object.description.length * 3;
   bytesCount += 3 + object.title.length * 3;
+  bytesCount += 3 + object.uuidv7.length * 3;
   return bytesCount;
 }
 
@@ -3980,6 +3996,7 @@ void _tasksSerialize(
   writer.writeLong(offsets[5], object.taskColor);
   writer.writeDateTime(offsets[6], object.taskEndTime);
   writer.writeString(offsets[7], object.title);
+  writer.writeString(offsets[8], object.uuidv7);
 }
 
 Tasks _tasksDeserialize(
@@ -4002,6 +4019,7 @@ Tasks _tasksDeserialize(
     taskColor: reader.readLong(offsets[5]),
     taskEndTime: reader.readDateTimeOrNull(offsets[6]),
     title: reader.readString(offsets[7]),
+    uuidv7: reader.readStringOrNull(offsets[8]) ?? '',
   );
   return object;
 }
@@ -4033,6 +4051,8 @@ P _tasksDeserializeProp<P>(
       return (reader.readDateTimeOrNull(offset)) as P;
     case 7:
       return (reader.readString(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -4176,6 +4196,58 @@ extension TasksQueryWhere on QueryBuilder<Tasks, Tasks, QWhereClause> {
           includeUpper: includeUpper,
         ),
       );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterWhereClause> uuidv7EqualTo(String uuidv7) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'uuidv7', value: [uuidv7]),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterWhereClause> uuidv7NotEqualTo(
+    String uuidv7,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [],
+                upper: [uuidv7],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [uuidv7],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [uuidv7],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [],
+                upper: [uuidv7],
+                includeUpper: false,
+              ),
+            );
+      }
     });
   }
 }
@@ -4862,6 +4934,152 @@ extension TasksQueryFilter on QueryBuilder<Tasks, Tasks, QFilterCondition> {
       );
     });
   }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7EqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7GreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7LessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7Between(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'uuidv7',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7StartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7EndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7Contains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7Matches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'uuidv7',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7IsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'uuidv7', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> uuidv7IsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'uuidv7', value: ''),
+      );
+    });
+  }
 }
 
 extension TasksQueryObject on QueryBuilder<Tasks, Tasks, QFilterCondition> {}
@@ -5027,6 +5245,18 @@ extension TasksQuerySortBy on QueryBuilder<Tasks, Tasks, QSortBy> {
       return query.addSortBy(r'title', Sort.desc);
     });
   }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByUuidv7() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByUuidv7Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.desc);
+    });
+  }
 }
 
 extension TasksQuerySortThenBy on QueryBuilder<Tasks, Tasks, QSortThenBy> {
@@ -5137,6 +5367,18 @@ extension TasksQuerySortThenBy on QueryBuilder<Tasks, Tasks, QSortThenBy> {
       return query.addSortBy(r'title', Sort.desc);
     });
   }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByUuidv7() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByUuidv7Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.desc);
+    });
+  }
 }
 
 extension TasksQueryWhereDistinct on QueryBuilder<Tasks, Tasks, QDistinct> {
@@ -5189,6 +5431,14 @@ extension TasksQueryWhereDistinct on QueryBuilder<Tasks, Tasks, QDistinct> {
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'title', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QDistinct> distinctByUuidv7({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'uuidv7', caseSensitive: caseSensitive);
     });
   }
 }
@@ -5245,6 +5495,12 @@ extension TasksQueryProperty on QueryBuilder<Tasks, Tasks, QQueryProperty> {
   QueryBuilder<Tasks, String, QQueryOperations> titleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'title');
+    });
+  }
+
+  QueryBuilder<Tasks, String, QQueryOperations> uuidv7Property() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'uuidv7');
     });
   }
 }
@@ -5309,6 +5565,7 @@ const TodosSchema = CollectionSchema(
       name: r'todoStartTime',
       type: IsarType.dateTime,
     ),
+    r'uuidv7': PropertySchema(id: 14, name: r'uuidv7', type: IsarType.string),
   },
 
   estimateSize: _todosEstimateSize,
@@ -5316,7 +5573,21 @@ const TodosSchema = CollectionSchema(
   deserialize: _todosDeserialize,
   deserializeProp: _todosDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'uuidv7': IndexSchema(
+      id: -5681201954958710893,
+      name: r'uuidv7',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'uuidv7',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+      ],
+    ),
+  },
   links: {
     r'parent': LinkSchema(
       id: 6308854949126399580,
@@ -5367,6 +5638,7 @@ int _todosEstimateSize(
       bytesCount += value.length * 3;
     }
   }
+  bytesCount += 3 + object.uuidv7.length * 3;
   return bytesCount;
 }
 
@@ -5390,6 +5662,7 @@ void _todosSerialize(
   writer.writeDateTime(offsets[11], object.todoCompletedTime);
   writer.writeDateTime(offsets[12], object.todoCompletionTime);
   writer.writeDateTime(offsets[13], object.todoStartTime);
+  writer.writeString(offsets[14], object.uuidv7);
 }
 
 Todos _todosDeserialize(
@@ -5417,6 +5690,7 @@ Todos _todosDeserialize(
     todoCompletedTime: reader.readDateTimeOrNull(offsets[11]),
     todoCompletionTime: reader.readDateTimeOrNull(offsets[12]),
     todoStartTime: reader.readDateTimeOrNull(offsets[13]),
+    uuidv7: reader.readStringOrNull(offsets[14]) ?? '',
   );
   object.childrenSortOption =
       _TodoschildrenSortOptionValueEnumMap[reader.readByteOrNull(offsets[0])] ??
@@ -5467,6 +5741,8 @@ P _todosDeserializeProp<P>(
       return (reader.readDateTimeOrNull(offset)) as P;
     case 13:
       return (reader.readDateTimeOrNull(offset)) as P;
+    case 14:
+      return (reader.readStringOrNull(offset) ?? '') as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -5604,6 +5880,58 @@ extension TodosQueryWhere on QueryBuilder<Todos, Todos, QWhereClause> {
           includeUpper: includeUpper,
         ),
       );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterWhereClause> uuidv7EqualTo(String uuidv7) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(indexName: r'uuidv7', value: [uuidv7]),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterWhereClause> uuidv7NotEqualTo(
+    String uuidv7,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [],
+                upper: [uuidv7],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [uuidv7],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [uuidv7],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'uuidv7',
+                lower: [],
+                upper: [uuidv7],
+                includeUpper: false,
+              ),
+            );
+      }
     });
   }
 }
@@ -6866,6 +7194,152 @@ extension TodosQueryFilter on QueryBuilder<Todos, Todos, QFilterCondition> {
       );
     });
   }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7EqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7GreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7LessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7Between(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'uuidv7',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7StartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7EndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7Contains(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'uuidv7',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7Matches(
+    String pattern, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'uuidv7',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7IsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'uuidv7', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterFilterCondition> uuidv7IsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'uuidv7', value: ''),
+      );
+    });
+  }
 }
 
 extension TodosQueryObject on QueryBuilder<Todos, Todos, QFilterCondition> {}
@@ -7117,6 +7591,18 @@ extension TodosQuerySortBy on QueryBuilder<Todos, Todos, QSortBy> {
       return query.addSortBy(r'todoStartTime', Sort.desc);
     });
   }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> sortByUuidv7() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> sortByUuidv7Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.desc);
+    });
+  }
 }
 
 extension TodosQuerySortThenBy on QueryBuilder<Todos, Todos, QSortThenBy> {
@@ -7287,6 +7773,18 @@ extension TodosQuerySortThenBy on QueryBuilder<Todos, Todos, QSortThenBy> {
       return query.addSortBy(r'todoStartTime', Sort.desc);
     });
   }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> thenByUuidv7() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QAfterSortBy> thenByUuidv7Desc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'uuidv7', Sort.desc);
+    });
+  }
 }
 
 extension TodosQueryWhereDistinct on QueryBuilder<Todos, Todos, QDistinct> {
@@ -7377,6 +7875,14 @@ extension TodosQueryWhereDistinct on QueryBuilder<Todos, Todos, QDistinct> {
   QueryBuilder<Todos, Todos, QDistinct> distinctByTodoStartTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'todoStartTime');
+    });
+  }
+
+  QueryBuilder<Todos, Todos, QDistinct> distinctByUuidv7({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'uuidv7', caseSensitive: caseSensitive);
     });
   }
 }
@@ -7471,6 +7977,12 @@ extension TodosQueryProperty on QueryBuilder<Todos, Todos, QQueryProperty> {
   QueryBuilder<Todos, DateTime?, QQueryOperations> todoStartTimeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'todoStartTime');
+    });
+  }
+
+  QueryBuilder<Todos, String, QQueryOperations> uuidv7Property() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'uuidv7');
     });
   }
 }
