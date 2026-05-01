@@ -174,12 +174,14 @@ class TodoController extends GetxController {
     String title,
     String description,
     TaskCategory category,
-    Color color,
-  ) async {
+    Color color, {
+    DateTime? taskEndTime,
+  }) async {
     await _taskService.updateTask(
       task: task,
       title: title,
       description: description,
+      taskEndTime: taskEndTime,
       category: category,
       color: color,
     );

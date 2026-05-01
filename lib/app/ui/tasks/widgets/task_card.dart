@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
+import 'package:intl/intl.dart';
 import 'package:planly_ai/app/controller/todo_controller.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/ui/tasks/widgets/circular_progress_widget.dart';
@@ -211,6 +212,35 @@ class _TaskCardState extends State<TaskCard>
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+          ),
+        ],
+        if (widget.task.taskEndTime != null) ...[
+          const SizedBox(height: 3),
+          Row(
+            children: [
+              Icon(
+                IconsaxPlusLinear.calendar,
+                size: 13,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  DateFormat(
+                    'yyyy-MM-dd HH:mm',
+                  ).format(widget.task.taskEndTime!),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      12,
+                    ),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ],

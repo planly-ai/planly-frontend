@@ -53,6 +53,7 @@ class TaskService {
     required Tasks task,
     required String title,
     required String description,
+    DateTime? taskEndTime,
     required TaskCategory category,
     required Color color,
   }) async {
@@ -60,7 +61,7 @@ class TaskService {
       task: task,
       title: title,
       description: description,
-      taskEndTime: task.taskEndTime,
+      taskEndTime: taskEndTime,
       category: category,
       color: color,
     );
