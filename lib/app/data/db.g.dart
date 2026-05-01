@@ -3924,7 +3924,12 @@ const TasksSchema = CollectionSchema(
       name: r'taskColor',
       type: IsarType.long,
     ),
-    r'title': PropertySchema(id: 6, name: r'title', type: IsarType.string),
+    r'taskEndTime': PropertySchema(
+      id: 6,
+      name: r'taskEndTime',
+      type: IsarType.dateTime,
+    ),
+    r'title': PropertySchema(id: 7, name: r'title', type: IsarType.string),
   },
 
   estimateSize: _tasksEstimateSize,
@@ -3973,7 +3978,8 @@ void _tasksSerialize(
   writer.writeLong(offsets[3], object.index);
   writer.writeByte(offsets[4], object.sortOption.index);
   writer.writeLong(offsets[5], object.taskColor);
-  writer.writeString(offsets[6], object.title);
+  writer.writeDateTime(offsets[6], object.taskEndTime);
+  writer.writeString(offsets[7], object.title);
 }
 
 Tasks _tasksDeserialize(
@@ -3994,7 +4000,8 @@ Tasks _tasksDeserialize(
         _TaskssortOptionValueEnumMap[reader.readByteOrNull(offsets[4])] ??
         SortOption.none,
     taskColor: reader.readLong(offsets[5]),
-    title: reader.readString(offsets[6]),
+    taskEndTime: reader.readDateTimeOrNull(offsets[6]),
+    title: reader.readString(offsets[7]),
   );
   return object;
 }
@@ -4023,6 +4030,8 @@ P _tasksDeserializeProp<P>(
     case 5:
       return (reader.readLong(offset)) as P;
     case 6:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -4633,6 +4642,81 @@ extension TasksQueryFilter on QueryBuilder<Tasks, Tasks, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> taskEndTimeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'taskEndTime'),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> taskEndTimeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'taskEndTime'),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> taskEndTimeEqualTo(
+    DateTime? value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'taskEndTime', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> taskEndTimeGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'taskEndTime',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> taskEndTimeLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'taskEndTime',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterFilterCondition> taskEndTimeBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'taskEndTime',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
   QueryBuilder<Tasks, Tasks, QAfterFilterCondition> titleEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -4920,6 +5004,18 @@ extension TasksQuerySortBy on QueryBuilder<Tasks, Tasks, QSortBy> {
     });
   }
 
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByTaskEndTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskEndTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByTaskEndTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskEndTime', Sort.desc);
+    });
+  }
+
   QueryBuilder<Tasks, Tasks, QAfterSortBy> sortByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -5018,6 +5114,18 @@ extension TasksQuerySortThenBy on QueryBuilder<Tasks, Tasks, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByTaskEndTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskEndTime', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByTaskEndTimeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'taskEndTime', Sort.desc);
+    });
+  }
+
   QueryBuilder<Tasks, Tasks, QAfterSortBy> thenByTitle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'title', Sort.asc);
@@ -5070,6 +5178,12 @@ extension TasksQueryWhereDistinct on QueryBuilder<Tasks, Tasks, QDistinct> {
     });
   }
 
+  QueryBuilder<Tasks, Tasks, QDistinct> distinctByTaskEndTime() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'taskEndTime');
+    });
+  }
+
   QueryBuilder<Tasks, Tasks, QDistinct> distinctByTitle({
     bool caseSensitive = true,
   }) {
@@ -5119,6 +5233,12 @@ extension TasksQueryProperty on QueryBuilder<Tasks, Tasks, QQueryProperty> {
   QueryBuilder<Tasks, int, QQueryOperations> taskColorProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'taskColor');
+    });
+  }
+
+  QueryBuilder<Tasks, DateTime?, QQueryOperations> taskEndTimeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'taskEndTime');
     });
   }
 

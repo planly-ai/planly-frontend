@@ -24,6 +24,7 @@ class TaskService {
   Future<Tasks?> createTask({
     required String title,
     required String description,
+    DateTime? taskEndTime,
     required TaskCategory category,
     required Color color,
     required int currentTaskCount,
@@ -36,6 +37,7 @@ class TaskService {
     final task = await _taskRepo.create(
       title: title,
       description: description,
+      taskEndTime: taskEndTime,
       category: category,
       color: color,
       index: currentTaskCount,
@@ -58,6 +60,7 @@ class TaskService {
       task: task,
       title: title,
       description: description,
+      taskEndTime: task.taskEndTime,
       category: category,
       color: color,
     );

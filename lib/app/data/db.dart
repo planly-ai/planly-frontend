@@ -76,6 +76,7 @@ class Tasks {
   Id id;
   String title;
   String description;
+  DateTime? taskEndTime;
   int taskColor;
   @enumerated
   TaskCategory category;
@@ -91,6 +92,7 @@ class Tasks {
     this.id = Isar.autoIncrement,
     required this.title,
     this.description = '',
+    this.taskEndTime,
     this.category = TaskCategory.uncategorized,
     this.archive = false,
     required this.taskColor,

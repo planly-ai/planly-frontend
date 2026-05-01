@@ -65,6 +65,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
       final rootTask = await _taskRepository.create(
         title: widget.data.title,
         description: widget.data.description,
+        taskEndTime: widget.data.deadline,
         category: widget.data.category,
         color: taskColor,
         index: allTasks.length,
