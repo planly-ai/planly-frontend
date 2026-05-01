@@ -345,6 +345,7 @@ class EnUs {
     'form_please_select_datetime': 'Select date and time',
     'form_submitted': 'Submitted',
     'taskProposalSubtitle': 'Task plan proposal',
+    'taskProposalTodoList': 'Todo list',
     'taskProposalPhaseCount': '@count phases',
     'taskProposalEventCount': '@count events',
     'taskProposalMoreEvents': '+ @count more events',

@@ -71,7 +71,44 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
       );
 
       var nextIndex = (await _todoRepository.getAll()).length;
+      for (final event in widget.data.events) {
+        final eventTodo = await _todoRepository.create(
+          name: event.title,
+          description: event.description,
+          startTime: event.startTime,
+          completedTime: event.endTime,
+          fix: false,
+          priority: event.priority,
+          tags: const [],
+          index: nextIndex++,
+          task: rootTask,
+        );
+
+        if (eventTodo.todoStartTime != null) {
+          await _notificationService.scheduleForTodo(eventTodo);
+        }
+      }
+
       for (final phase in widget.data.subTasks) {
+        if (phase.events.isEmpty) {
+          final eventTodo = await _todoRepository.create(
+            name: phase.title,
+            description: phase.description,
+            startTime: phase.effectiveStartTime,
+            completedTime: phase.effectiveEndTime,
+            fix: false,
+            priority: phase.priority,
+            tags: const [],
+            index: nextIndex++,
+            task: rootTask,
+          );
+
+          if (eventTodo.todoStartTime != null) {
+            await _notificationService.scheduleForTodo(eventTodo);
+          }
+          continue;
+        }
+
         for (final event in phase.events) {
           final eventTodo = await _todoRepository.create(
             name: event.title,
@@ -130,6 +167,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final data = widget.data;
+    final groups = _displayGroups();
 
     return Card(
       elevation: AppConstants.elevationLow,
@@ -155,10 +193,10 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
               ),
             ],
             const SizedBox(height: AppConstants.spacingM),
-            _buildSummaryRow(context),
+            _buildSummaryRow(context, groups.length),
             const SizedBox(height: AppConstants.spacingS),
-            ...data.subTasks.asMap().entries.map(
-              (entry) => _buildPhaseItem(context, entry.key, entry.value),
+            ...groups.asMap().entries.map(
+              (entry) => _buildEventGroup(context, entry.key, entry.value),
             ),
             const SizedBox(height: AppConstants.spacingM),
             _buildConfirmButton(context),
@@ -166,6 +204,39 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
         ),
       ),
     );
+  }
+
+  List<TaskProposalEventGroup> _displayGroups() {
+    final groups = <TaskProposalEventGroup>[];
+    final standaloneEvents = <TaskProposalEvent>[
+      ...widget.data.events,
+      ...widget.data.subTasks
+          .where((phase) => phase.events.isEmpty)
+          .map(TaskProposalEvent.fromPhase),
+    ];
+
+    if (standaloneEvents.isNotEmpty) {
+      groups.add(
+        TaskProposalEventGroup(
+          title: 'taskProposalTodoList'.tr,
+          description: '',
+          events: standaloneEvents,
+        ),
+      );
+    }
+
+    for (final phase in widget.data.subTasks) {
+      if (phase.events.isEmpty) continue;
+      groups.add(
+        TaskProposalEventGroup(
+          title: phase.title,
+          description: phase.description,
+          events: phase.events,
+        ),
+      );
+    }
+
+    return groups;
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -216,7 +287,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
     );
   }
 
-  Widget _buildSummaryRow(BuildContext context) {
+  Widget _buildSummaryRow(BuildContext context, int groupCount) {
     final data = widget.data;
 
     return Column(
@@ -238,7 +309,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
                 context,
                 Icons.layers_outlined,
                 'taskProposalPhaseCount'.trParams({
-                  'count': data.subTasks.length.toString(),
+                  'count': groupCount.toString(),
                 }),
               ),
             ),
@@ -307,18 +378,18 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
     );
   }
 
-  Widget _buildPhaseItem(
+  Widget _buildEventGroup(
     BuildContext context,
-    int phaseIndex,
-    TaskProposalPhase phase,
+    int groupIndex,
+    TaskProposalEventGroup group,
   ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isExpanded = _expandedPhaseIndexes.contains(phaseIndex);
+    final isExpanded = _expandedPhaseIndexes.contains(groupIndex);
     final previewEvents = isExpanded
-        ? phase.events
-        : phase.events.take(2).toList();
-    final hiddenCount = phase.events.length - previewEvents.length;
+        ? group.events
+        : group.events.take(2).toList();
+    final hiddenCount = group.events.length - previewEvents.length;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppConstants.spacingS),
@@ -337,7 +408,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
             children: [
               Expanded(
                 child: Text(
-                  phase.title,
+                  group.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -352,7 +423,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
               ),
               Text(
                 'taskProposalEventCount'.trParams({
-                  'count': phase.events.length.toString(),
+                  'count': group.events.length.toString(),
                 }),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
@@ -361,10 +432,10 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
               ),
             ],
           ),
-          if (phase.description.isNotEmpty) ...[
+          if (group.description.isNotEmpty) ...[
             const SizedBox(height: AppConstants.spacingXS),
             Text(
-              phase.description,
+              group.description,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodySmall?.copyWith(
@@ -381,7 +452,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
               InkWell(
                 onTap: () {
                   setState(() {
-                    _expandedPhaseIndexes.add(phaseIndex);
+                    _expandedPhaseIndexes.add(groupIndex);
                   });
                 },
                 borderRadius: BorderRadius.circular(
@@ -404,11 +475,11 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
                   ),
                 ),
               )
-            else if (isExpanded && phase.events.length > 2)
+            else if (isExpanded && group.events.length > 2)
               InkWell(
                 onTap: () {
                   setState(() {
-                    _expandedPhaseIndexes.remove(phaseIndex);
+                    _expandedPhaseIndexes.remove(groupIndex);
                   });
                 },
                 borderRadius: BorderRadius.circular(
@@ -511,6 +582,7 @@ class TaskProposalData {
   final TaskCategory category;
   final Priority priority;
   final List<TaskProposalPhase> subTasks;
+  final List<TaskProposalEvent> events;
   final bool isActionDone;
 
   const TaskProposalData({
@@ -520,11 +592,17 @@ class TaskProposalData {
     required this.category,
     required this.priority,
     required this.subTasks,
+    required this.events,
     required this.isActionDone,
   });
 
   int get totalEventCount {
-    return subTasks.fold<int>(0, (sum, phase) => sum + phase.events.length);
+    return events.length +
+        subTasks.fold<int>(
+          0,
+          (sum, phase) =>
+              sum + (phase.events.isEmpty ? 1 : phase.events.length),
+        );
   }
 
   factory TaskProposalData.fromJson(Map<String, dynamic> json) {
@@ -532,6 +610,12 @@ class TaskProposalData {
         .whereType<Map>()
         .map(
           (item) => TaskProposalPhase.fromJson(Map<String, dynamic>.from(item)),
+        )
+        .toList();
+    final events = (json['events'] as List? ?? const [])
+        .whereType<Map>()
+        .map(
+          (item) => TaskProposalEvent.fromJson(Map<String, dynamic>.from(item)),
         )
         .toList();
 
@@ -542,6 +626,7 @@ class TaskProposalData {
       category: _parseTaskCategory(json['category']),
       priority: _parsePriority(json['priority']),
       subTasks: subTasks,
+      events: events,
       isActionDone: json['isActionDone'] == true,
     );
   }
@@ -550,17 +635,41 @@ class TaskProposalData {
 class TaskProposalPhase {
   final String title;
   final String description;
+  final DateTime? startTime;
+  final DateTime? endTime;
   final DateTime? deadline;
+  final int estimatedDuration;
   final Priority priority;
   final List<TaskProposalEvent> events;
 
   const TaskProposalPhase({
     required this.title,
     required this.description,
+    required this.startTime,
+    required this.endTime,
     required this.deadline,
+    required this.estimatedDuration,
     required this.priority,
     required this.events,
   });
+
+  DateTime? get effectiveEndTime {
+    return endTime ?? deadline;
+  }
+
+  DateTime? get effectiveStartTime {
+    if (startTime != null) return startTime;
+    final end = effectiveEndTime;
+    if (end == null) return null;
+    if (estimatedDuration <= 0) return end;
+    return end.subtract(Duration(minutes: estimatedDuration));
+  }
+
+  String get formattedDate {
+    final start = effectiveStartTime;
+    if (start == null) return '';
+    return DateFormat('MM-dd HH:mm').format(start);
+  }
 
   factory TaskProposalPhase.fromJson(Map<String, dynamic> json) {
     final events = (json['events'] as List? ?? const [])
@@ -573,11 +682,26 @@ class TaskProposalPhase {
     return TaskProposalPhase(
       title: (json['title'] ?? '').toString(),
       description: (json['description'] ?? '').toString(),
+      startTime: _parseDateTime(json['startTime']),
+      endTime: _parseDateTime(json['endTime']),
       deadline: _parseDateTime(json['deadline']),
+      estimatedDuration: _parseInt(json['estimatedDuration']),
       priority: _parsePriority(json['priority']),
       events: events,
     );
   }
+}
+
+class TaskProposalEventGroup {
+  final String title;
+  final String description;
+  final List<TaskProposalEvent> events;
+
+  const TaskProposalEventGroup({
+    required this.title,
+    required this.description,
+    required this.events,
+  });
 }
 
 class TaskProposalEvent {
@@ -594,6 +718,16 @@ class TaskProposalEvent {
     required this.endTime,
     required this.priority,
   });
+
+  factory TaskProposalEvent.fromPhase(TaskProposalPhase phase) {
+    return TaskProposalEvent(
+      title: phase.title,
+      description: phase.description,
+      startTime: phase.effectiveStartTime,
+      endTime: phase.effectiveEndTime,
+      priority: phase.priority,
+    );
+  }
 
   String get formattedDate {
     final start = startTime;
@@ -616,6 +750,12 @@ DateTime? _parseDateTime(dynamic value) {
   if (value == null) return null;
   if (value is DateTime) return value.toLocal();
   return DateTime.tryParse(value.toString())?.toLocal();
+}
+
+int _parseInt(dynamic value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse((value ?? '').toString()) ?? 0;
 }
 
 TaskCategory _parseTaskCategory(dynamic value) {
