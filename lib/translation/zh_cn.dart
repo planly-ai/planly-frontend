@@ -335,5 +335,16 @@ class ZhCN {
     'form_please_select': '请选择',
     'form_please_select_datetime': '请选择日期时间',
     'form_submitted': '已提交',
+    'taskProposalSubtitle': '任务计划草案',
+    'taskProposalTodoList': '待办列表',
+    'taskProposalPhaseCount': '@count 个阶段',
+    'taskProposalEventCount': '@count 个日程',
+    'taskProposalMoreEvents': '还有 @count 个日程',
+    'taskProposalCollapseEvents': '收起',
+    'taskProposalAddButton': '添加整套计划',
+    'taskProposalAddedButton': '已添加',
+    'taskProposalAdded': '任务计划已添加',
+    'taskProposalAddFailed': '任务计划添加失败',
+    'noDeadline': '无截止日期',
   };
 }

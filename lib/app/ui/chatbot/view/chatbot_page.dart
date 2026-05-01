@@ -153,7 +153,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
         children: [
           Expanded(
             child: Obx(() {
-              if (controller.messages.isEmpty) {
+              final currentMessages = controller.messages;
+              final isRecognizing = controller.isRecognizing.value;
+              final isTyping = controller.isTyping.value;
+              final hasActiveAgentBlock =
+                  controller.activeAgentBlockCount.value > 0;
+              final activeAgentMessageIds = controller.activeAgentMessageIds;
+
+              if (currentMessages.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -179,19 +186,21 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 controller: controller.scrollController,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 itemCount:
-                    controller.messages.length +
-                    (controller.isRecognizing.value ? 1 : 0) +
-                    (controller.isTyping.value ? 1 : 0),
+                    currentMessages.length +
+                    (isRecognizing ? 1 : 0) +
+                    (isTyping && !hasActiveAgentBlock ? 1 : 0),
                 itemBuilder: (context, index) {
                   // Message bubbles
-                  if (index < controller.messages.length) {
-                    final msg = controller.messages[index];
-                    return ChatBubble(message: msg);
+                  if (index < currentMessages.length) {
+                    final msg = currentMessages[index];
+                    return ChatBubble(
+                      message: msg,
+                      isStreamingBlock: activeAgentMessageIds.contains(msg.id),
+                    );
                   }
 
                   // ASR Recognition state (User side)
-                  if (controller.isRecognizing.value &&
-                      index == controller.messages.length) {
+                  if (isRecognizing && index == currentMessages.length) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -227,6 +236,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       vertical: 8,
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CircleAvatar(
                           backgroundColor: colorScheme.primaryContainer,
@@ -236,11 +246,27 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'Generating...'.tr,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontStyle: FontStyle.italic,
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: colorScheme.outlineVariant.withValues(
+                                alpha: 0.3,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Generating...',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.onSurface,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],

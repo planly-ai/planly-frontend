@@ -19,6 +19,9 @@ extension FirstWhereOrNull<E> on Iterable<E> {
 }
 
 class TodoController extends GetxController {
+  static const String _generalTaskTitle = 'General';
+  static const Color _generalTaskColor = Color(0xFF9E9E9E);
+
   // ==================== Stream Subscriptions ====================
   StreamSubscription<void>? _taskWatcherSubscription;
   StreamSubscription<void>? _todoWatcherSubscription;
@@ -241,7 +244,7 @@ class TodoController extends GetxController {
   // ==================== Todos CRUD ====================
 
   Future<Todos> addTodo({
-    required Tasks task,
+    required Tasks? task,
     required String title,
     required String description,
     String? subtask,
@@ -251,8 +254,10 @@ class TodoController extends GetxController {
     required Priority priority,
     required List<String> tags,
   }) async {
+    final targetTask = await _resolveTaskOrGeneral(task);
+
     final todo = await _todoService.createTodo(
-      task: task,
+      task: targetTask,
       title: title,
       description: description,
       subtask: subtask,
@@ -264,6 +269,30 @@ class TodoController extends GetxController {
       currentTodoCount: todos.length,
     );
     return todo;
+  }
+
+  Future<Tasks> _resolveTaskOrGeneral(Tasks? task) async {
+    if (task != null) return task;
+
+    final allTasks = await _taskRepo.getAll();
+    final generalTask = allTasks.firstWhereOrNull((task) {
+      return !task.archive &&
+          task.category == TaskCategory.uncategorized &&
+          task.title.trim().toLowerCase() == _generalTaskTitle.toLowerCase();
+    });
+
+    if (generalTask != null) return generalTask;
+
+    final created = await _taskRepo.create(
+      title: _generalTaskTitle,
+      description: '',
+      category: TaskCategory.uncategorized,
+      color: _generalTaskColor,
+      index: allTasks.length,
+    );
+
+    await _loadTasksAndTodos();
+    return created;
   }
 
   Future<void> updateTodo({

@@ -204,7 +204,7 @@ class ChatMessage {
   String? attachmentName;
   String? ossId;
 
-  // Optional: raw JSON data for cards
+  // Optional: raw JSON data for cards and structured agent blocks
   String? cardContent;
 
   final session = IsarLink<ChatSession>();
@@ -240,6 +240,8 @@ enum MessageType {
   cardGraph,
   cardEventList,
   cardForm,
+  reasoning,
+  toolCall,
 }
 
 @collection

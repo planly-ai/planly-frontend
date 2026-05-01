@@ -5,20 +5,28 @@ import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'dart:convert';
+import 'package:planly_ai/app/ui/chatbot/utils/form_submission_formatter.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/agent_block_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/alert_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/event_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/event_list_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/graph_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/schedule_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/task_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/task_proposal_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/form_card.dart';
 import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
 import 'package:planly_ai/main.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
+  final bool isStreamingBlock;
 
-  const ChatBubble({super.key, required this.message});
+  const ChatBubble({
+    super.key,
+    required this.message,
+    this.isStreamingBlock = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +46,25 @@ class ChatBubble extends StatelessWidget {
       case MessageType.cardSchedule:
         return _buildCardWithAvatar(context, colorScheme, _buildScheduleCard());
       case MessageType.cardEventList:
-        return _buildCardWithAvatar(context, colorScheme, _buildEventListCard());
+        return _buildCardWithAvatar(
+          context,
+          colorScheme,
+          _buildEventListCard(),
+        );
       case MessageType.cardForm:
         return _buildCardWithAvatar(context, colorScheme, _buildFormCard());
+      case MessageType.reasoning:
+        return _buildAgentBlockWithAvatar(
+          context,
+          colorScheme,
+          _buildReasoningBlock(context),
+        );
+      case MessageType.toolCall:
+        return _buildAgentBlockWithAvatar(
+          context,
+          colorScheme,
+          _buildToolCallBlock(context),
+        );
       default:
         return _buildTextBubble(context, isUser, colorScheme, theme);
     }
@@ -53,6 +77,10 @@ class ChatBubble extends StatelessWidget {
 
   Widget _buildTaskCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
+    if (data is Map<String, dynamic> &&
+        (data['subTasks'] is List || data['events'] is List)) {
+      return TaskProposalCard.fromJson(data, message: message);
+    }
     return TaskCard.fromJson(data);
   }
 
@@ -80,24 +108,85 @@ class ChatBubble extends StatelessWidget {
     final data = jsonDecode(message.cardContent ?? '{}');
     // 获取控制器实例用于提交表单
     final controller = Get.find<ChatbotController>();
-    return FormCard.fromJson(data, onSubmit: (formData) => _handleFormSubmit(formData, controller));
+    return FormCard.fromJson(
+      data,
+      onSubmit: (formData) => _handleFormSubmit(formData, controller),
+    );
   }
 
-  void _handleFormSubmit(Map<String, dynamic> formData, ChatbotController controller) async {
-    // 将表单数据格式化为消息发送给后端
+  Widget _buildReasoningBlock(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return AgentBlockCard(
+      title: 'Thinking',
+      content: message.text,
+      isStreaming: isStreamingBlock,
+      style: AgentBlockCardStyle.thinking(colorScheme),
+      contentTextStyle: theme.textTheme.bodySmall?.copyWith(
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.66),
+        fontSize: 11,
+        height: 1.35,
+      ),
+    );
+  }
+
+  Widget _buildToolCallBlock(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final metadata = _decodeToolCallMetadata();
+    final name = metadata['name']?.toString();
+    final title = name == null || name.isEmpty
+        ? 'Tool call'
+        : 'Tool call: $name';
+
+    return AgentBlockCard(
+      title: title,
+      content: _formatToolArguments(message.text),
+      isStreaming: isStreamingBlock,
+      style: AgentBlockCardStyle.toolCall(colorScheme),
+      contentTextStyle: theme.textTheme.bodySmall?.copyWith(
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.76),
+        fontSize: 11,
+        fontFamily: 'monospace',
+        height: 1.35,
+      ),
+    );
+  }
+
+  Map<String, dynamic> _decodeToolCallMetadata() {
+    try {
+      final decoded = jsonDecode(message.cardContent ?? '{}');
+      if (decoded is Map<String, dynamic>) return decoded;
+    } catch (_) {}
+    return const {};
+  }
+
+  String _formatToolArguments(String value) {
+    try {
+      final decoded = jsonDecode(value);
+      return const JsonEncoder.withIndent('  ').convert(decoded);
+    } catch (_) {
+      return value;
+    }
+  }
+
+  void _handleFormSubmit(
+    Map<String, dynamic> formData,
+    ChatbotController controller,
+  ) async {
     // 流程：FORM -> 用户提交 -> AI 继续 -> GOAL/TASK
     debugPrint('[FormCard] Form submitted: $formData');
+    final formCardData = FormSubmissionFormatter.decodeCardData(
+      message.cardContent,
+    );
 
     // 1. 持久化表单状态到当前消息
     try {
-      final cardData = jsonDecode(message.cardContent ?? '{}');
-      final dataMap = cardData['data'] as Map<String, dynamic>? ?? {};
-
-      dataMap['isSubmitted'] = true;
-      dataMap['values'] = formData;
-      cardData['data'] = dataMap;
-
-      message.cardContent = jsonEncode(cardData);
+      message.cardContent = FormSubmissionFormatter.markSubmitted(
+        cardContent: message.cardContent,
+        values: formData,
+      );
 
       // 保存到数据库
       await isar.writeTxn(() async {
@@ -111,12 +200,11 @@ class ChatBubble extends StatelessWidget {
     }
 
     // 2. 发送消息给 AI
-    // 将表单数据转换为 JSON 字符串作为消息发送
-    final formDataJson = const JsonEncoder.withIndent('  ').convert(formData);
-
-    // 调用控制器的 sendMessage 方法
-    // 注意：这里需要临时设置 textController 的值然后发送
-    controller.textController.text = '表单已提交：$formDataJson';
+    final submissionMessage = FormSubmissionFormatter.formatSubmissionMessage(
+      cardData: formCardData,
+      values: formData,
+    );
+    controller.textController.text = submissionMessage;
     controller.sendMessage();
   }
 
@@ -125,22 +213,50 @@ class ChatBubble extends StatelessWidget {
     ColorScheme colorScheme,
     Widget card,
   ) {
+    return _buildBotMessageShell(colorScheme: colorScheme, child: card);
+  }
+
+  Widget _buildAgentBlockWithAvatar(
+    BuildContext context,
+    ColorScheme colorScheme,
+    Widget child,
+  ) {
+    return _buildBotMessageShell(colorScheme: colorScheme, child: child);
+  }
+
+  Widget _buildBotMessageShell({
+    required ColorScheme colorScheme,
+    required Widget child,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppConstants.spacingM,
         vertical: AppConstants.spacingS,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundColor: colorScheme.primaryContainer,
-            child: Icon(Icons.smart_toy, color: colorScheme.onPrimaryContainer),
-          ),
+          _buildAvatar(colorScheme: colorScheme, isUser: false),
           const SizedBox(width: AppConstants.spacingS),
-          Expanded(child: card),
+          Expanded(child: child),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAvatar({
+    required ColorScheme colorScheme,
+    required bool isUser,
+  }) {
+    return CircleAvatar(
+      backgroundColor: isUser
+          ? colorScheme.secondaryContainer
+          : colorScheme.primaryContainer,
+      child: Icon(
+        isUser ? Icons.person : Icons.smart_toy,
+        color: isUser
+            ? colorScheme.onSecondaryContainer
+            : colorScheme.onPrimaryContainer,
       ),
     );
   }
@@ -160,16 +276,10 @@ class ChatBubble extends StatelessWidget {
         mainAxisAlignment: isUser
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isUser) ...[
-            CircleAvatar(
-              backgroundColor: colorScheme.primaryContainer,
-              child: Icon(
-                Icons.smart_toy,
-                color: colorScheme.onPrimaryContainer,
-              ),
-            ),
+            _buildAvatar(colorScheme: colorScheme, isUser: false),
             const SizedBox(width: AppConstants.spacingS),
           ],
           Flexible(
@@ -178,20 +288,20 @@ class ChatBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isUser
                     ? colorScheme.primary
-                    : colorScheme.outlineVariant.withValues(alpha: 0.3),
+                    : colorScheme.primaryContainer.withValues(alpha: 0.32),
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(
+                  topLeft: Radius.circular(
+                    isUser ? AppConstants.borderRadiusLarge : 4,
+                  ),
+                  topRight: Radius.circular(
+                    isUser ? 4 : AppConstants.borderRadiusLarge,
+                  ),
+                  bottomLeft: const Radius.circular(
                     AppConstants.borderRadiusLarge,
                   ),
-                  topRight: const Radius.circular(
+                  bottomRight: const Radius.circular(
                     AppConstants.borderRadiusLarge,
                   ),
-                  bottomLeft: isUser
-                      ? const Radius.circular(AppConstants.borderRadiusLarge)
-                      : const Radius.circular(4),
-                  bottomRight: isUser
-                      ? const Radius.circular(4)
-                      : const Radius.circular(AppConstants.borderRadiusLarge),
                 ),
               ),
               child: Column(
@@ -212,33 +322,33 @@ class ChatBubble extends StatelessWidget {
                         p: theme.textTheme.bodyMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         strong: theme.textTheme.bodyMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                         listBullet: theme.textTheme.bodyMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         h1: theme.textTheme.headlineMedium?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         h2: theme.textTheme.headlineSmall?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                         h3: theme.textTheme.titleLarge?.copyWith(
                           color: isUser
                               ? colorScheme.onPrimary
-                              : colorScheme.onSurface,
+                              : colorScheme.onPrimaryContainer,
                         ),
                       ),
                     ),
@@ -248,7 +358,9 @@ class ChatBubble extends StatelessWidget {
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: isUser
                           ? colorScheme.onPrimary.withValues(alpha: 0.7)
-                          : colorScheme.onSurface.withValues(alpha: 0.7),
+                          : colorScheme.onPrimaryContainer.withValues(
+                              alpha: 0.68,
+                            ),
                       fontSize: 10,
                     ),
                   ),
@@ -258,13 +370,7 @@ class ChatBubble extends StatelessWidget {
           ),
           if (isUser) ...[
             const SizedBox(width: AppConstants.spacingS),
-            CircleAvatar(
-              backgroundColor: colorScheme.secondaryContainer,
-              child: Icon(
-                Icons.person,
-                color: colorScheme.onSecondaryContainer,
-              ),
-            ),
+            _buildAvatar(colorScheme: colorScheme, isUser: true),
           ],
         ],
       ),

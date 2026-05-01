@@ -344,5 +344,16 @@ class EnUs {
     'form_please_select': 'Please select',
     'form_please_select_datetime': 'Select date and time',
     'form_submitted': 'Submitted',
+    'taskProposalSubtitle': 'Task plan proposal',
+    'taskProposalTodoList': 'Todo list',
+    'taskProposalPhaseCount': '@count phases',
+    'taskProposalEventCount': '@count events',
+    'taskProposalMoreEvents': '+ @count more events',
+    'taskProposalCollapseEvents': 'Show less',
+    'taskProposalAddButton': 'Add plan',
+    'taskProposalAddedButton': 'Added',
+    'taskProposalAdded': 'Task plan added',
+    'taskProposalAddFailed': 'Failed to add task plan',
+    'noDeadline': 'No deadline',
   };
 }
