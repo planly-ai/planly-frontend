@@ -13,6 +13,7 @@ import 'package:planly_ai/app/ui/chatbot/widgets/card/event_list_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/graph_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/schedule_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/task_card.dart';
+import 'package:planly_ai/app/ui/chatbot/widgets/card/task_proposal_card.dart';
 import 'package:planly_ai/app/ui/chatbot/widgets/card/form_card.dart';
 import 'package:planly_ai/app/ui/chatbot/controller/chatbot_controller.dart';
 import 'package:planly_ai/main.dart';
@@ -76,6 +77,10 @@ class ChatBubble extends StatelessWidget {
 
   Widget _buildTaskCard() {
     final data = jsonDecode(message.cardContent ?? '{}');
+    if (data is Map<String, dynamic> &&
+        (data['subTasks'] is List || data['events'] is List)) {
+      return TaskProposalCard.fromJson(data, message: message);
+    }
     return TaskCard.fromJson(data);
   }
 
