@@ -9,6 +9,7 @@ import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/data/repositories/task_repository.dart';
 import 'package:planly_ai/app/data/repositories/todo_repository.dart';
 import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/services/sync_service.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
 import 'package:planly_ai/main.dart';
@@ -41,6 +42,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
   final _taskRepository = TaskRepository();
   final _todoRepository = TodoRepository();
   final _notificationService = NotificationService();
+  final _syncService = SyncService();
 
   late bool _isAdded;
   bool _isAdding = false;
@@ -70,6 +72,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
         color: taskColor,
         index: allTasks.length,
       );
+      await _syncService.enqueueTask(rootTask, SyncAction.create);
 
       var nextIndex = (await _todoRepository.getAll()).length;
       for (final event in widget.data.events) {
@@ -88,6 +91,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
         if (eventTodo.todoStartTime != null) {
           await _notificationService.scheduleForTodo(eventTodo);
         }
+        await _syncService.enqueueEvent(eventTodo, SyncAction.create);
       }
 
       for (final phase in widget.data.subTasks) {
@@ -107,6 +111,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
           if (eventTodo.todoStartTime != null) {
             await _notificationService.scheduleForTodo(eventTodo);
           }
+          await _syncService.enqueueEvent(eventTodo, SyncAction.create);
           continue;
         }
 
@@ -127,6 +132,7 @@ class _TaskProposalCardState extends State<TaskProposalCard> {
           if (eventTodo.todoStartTime != null) {
             await _notificationService.scheduleForTodo(eventTodo);
           }
+          await _syncService.enqueueEvent(eventTodo, SyncAction.create);
         }
       }
 

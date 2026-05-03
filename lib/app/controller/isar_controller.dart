@@ -33,6 +33,7 @@ class IsarController {
         [
           TasksSchema,
           TodosSchema,
+          SyncQueueItemSchema,
           SettingsSchema,
           ChatSessionSchema,
           ChatMessageSchema,

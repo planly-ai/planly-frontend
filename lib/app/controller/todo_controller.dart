@@ -7,6 +7,7 @@ import 'package:planly_ai/app/data/repositories/todo_repository.dart';
 import 'package:planly_ai/app/services/task_service.dart';
 import 'package:planly_ai/app/services/todo_service.dart';
 import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/services/sync_service.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 
 extension FirstWhereOrNull<E> on Iterable<E> {
@@ -33,6 +34,7 @@ class TodoController extends GetxController {
   // ==================== Services ====================
   late final TaskService _taskService;
   late final TodoService _todoService;
+  late final SyncService _syncService;
 
   // ==================== Observable State ====================
   final tasks = <Tasks>[].obs;
@@ -94,6 +96,7 @@ class TodoController extends GetxController {
       todoRepo: _todoRepo,
       notificationService: notificationService,
     );
+    _syncService = SyncService();
   }
 
   void _setupWatchers() {
@@ -296,6 +299,7 @@ class TodoController extends GetxController {
     );
 
     await _loadTasksAndTodos();
+    await _syncService.enqueueTask(created, SyncAction.create);
     return created;
   }
 

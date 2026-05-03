@@ -3892,6 +3892,1595 @@ extension SettingsQueryProperty
 // coverage:ignore-file
 // ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
 
+extension GetSyncQueueItemCollection on Isar {
+  IsarCollection<SyncQueueItem> get syncQueueItems => this.collection();
+}
+
+const SyncQueueItemSchema = CollectionSchema(
+  name: r'SyncQueueItem',
+  id: 599395208720970483,
+  properties: {
+    r'action': PropertySchema(
+      id: 0,
+      name: r'action',
+      type: IsarType.byte,
+      enumMap: _SyncQueueItemactionEnumValueMap,
+    ),
+    r'attemptCount': PropertySchema(
+      id: 1,
+      name: r'attemptCount',
+      type: IsarType.long,
+    ),
+    r'createdAt': PropertySchema(
+      id: 2,
+      name: r'createdAt',
+      type: IsarType.dateTime,
+    ),
+    r'entityType': PropertySchema(
+      id: 3,
+      name: r'entityType',
+      type: IsarType.byte,
+      enumMap: _SyncQueueItementityTypeEnumValueMap,
+    ),
+    r'entityUuid': PropertySchema(
+      id: 4,
+      name: r'entityUuid',
+      type: IsarType.string,
+    ),
+    r'lastError': PropertySchema(
+      id: 5,
+      name: r'lastError',
+      type: IsarType.string,
+    ),
+    r'payloadJson': PropertySchema(
+      id: 6,
+      name: r'payloadJson',
+      type: IsarType.string,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 7,
+      name: r'updatedAt',
+      type: IsarType.dateTime,
+    ),
+  },
+
+  estimateSize: _syncQueueItemEstimateSize,
+  serialize: _syncQueueItemSerialize,
+  deserialize: _syncQueueItemDeserialize,
+  deserializeProp: _syncQueueItemDeserializeProp,
+  idName: r'id',
+  indexes: {
+    r'entityType_entityUuid': IndexSchema(
+      id: -9033069752587194766,
+      name: r'entityType_entityUuid',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'entityType',
+          type: IndexType.value,
+          caseSensitive: false,
+        ),
+        IndexPropertySchema(
+          name: r'entityUuid',
+          type: IndexType.hash,
+          caseSensitive: true,
+        ),
+      ],
+    ),
+  },
+  links: {},
+  embeddedSchemas: {},
+
+  getId: _syncQueueItemGetId,
+  getLinks: _syncQueueItemGetLinks,
+  attach: _syncQueueItemAttach,
+  version: '3.3.0',
+);
+
+int _syncQueueItemEstimateSize(
+  SyncQueueItem object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  bytesCount += 3 + object.entityUuid.length * 3;
+  {
+    final value = object.lastError;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.payloadJson.length * 3;
+  return bytesCount;
+}
+
+void _syncQueueItemSerialize(
+  SyncQueueItem object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeByte(offsets[0], object.action.index);
+  writer.writeLong(offsets[1], object.attemptCount);
+  writer.writeDateTime(offsets[2], object.createdAt);
+  writer.writeByte(offsets[3], object.entityType.index);
+  writer.writeString(offsets[4], object.entityUuid);
+  writer.writeString(offsets[5], object.lastError);
+  writer.writeString(offsets[6], object.payloadJson);
+  writer.writeDateTime(offsets[7], object.updatedAt);
+}
+
+SyncQueueItem _syncQueueItemDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = SyncQueueItem(
+    action:
+        _SyncQueueItemactionValueEnumMap[reader.readByteOrNull(offsets[0])] ??
+        SyncAction.create,
+    attemptCount: reader.readLongOrNull(offsets[1]) ?? 0,
+    createdAt: reader.readDateTime(offsets[2]),
+    entityType:
+        _SyncQueueItementityTypeValueEnumMap[reader.readByteOrNull(
+          offsets[3],
+        )] ??
+        SyncEntityType.task,
+    entityUuid: reader.readString(offsets[4]),
+    id: id,
+    lastError: reader.readStringOrNull(offsets[5]),
+    payloadJson: reader.readString(offsets[6]),
+    updatedAt: reader.readDateTime(offsets[7]),
+  );
+  return object;
+}
+
+P _syncQueueItemDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (_SyncQueueItemactionValueEnumMap[reader.readByteOrNull(offset)] ??
+              SyncAction.create)
+          as P;
+    case 1:
+      return (reader.readLongOrNull(offset) ?? 0) as P;
+    case 2:
+      return (reader.readDateTime(offset)) as P;
+    case 3:
+      return (_SyncQueueItementityTypeValueEnumMap[reader.readByteOrNull(
+                offset,
+              )] ??
+              SyncEntityType.task)
+          as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
+      return (reader.readDateTime(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+const _SyncQueueItemactionEnumValueMap = {
+  'create': 0,
+  'update': 1,
+  'delete': 2,
+};
+const _SyncQueueItemactionValueEnumMap = {
+  0: SyncAction.create,
+  1: SyncAction.update,
+  2: SyncAction.delete,
+};
+const _SyncQueueItementityTypeEnumValueMap = {'task': 0, 'event': 1};
+const _SyncQueueItementityTypeValueEnumMap = {
+  0: SyncEntityType.task,
+  1: SyncEntityType.event,
+};
+
+Id _syncQueueItemGetId(SyncQueueItem object) {
+  return object.id;
+}
+
+List<IsarLinkBase<dynamic>> _syncQueueItemGetLinks(SyncQueueItem object) {
+  return [];
+}
+
+void _syncQueueItemAttach(
+  IsarCollection<dynamic> col,
+  Id id,
+  SyncQueueItem object,
+) {
+  object.id = id;
+}
+
+extension SyncQueueItemQueryWhereSort
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QWhere> {
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhere> anyId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(const IdWhereClause.any());
+    });
+  }
+}
+
+extension SyncQueueItemQueryWhere
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QWhereClause> {
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause> idEqualTo(
+    Id id,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IdWhereClause.between(lower: id, upper: id));
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause> idNotEqualTo(
+    Id id,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            )
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IdWhereClause.greaterThan(lower: id, includeLower: false),
+            )
+            .addWhereClause(
+              IdWhereClause.lessThan(upper: id, includeUpper: false),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause> idGreaterThan(
+    Id id, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.greaterThan(lower: id, includeLower: include),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause> idLessThan(
+    Id id, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.lessThan(upper: id, includeUpper: include),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause> idBetween(
+    Id lowerId,
+    Id upperId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IdWhereClause.between(
+          lower: lowerId,
+          includeLower: includeLower,
+          upper: upperId,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause>
+  entityTypeEqualToAnyEntityUuid(SyncEntityType entityType) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'entityType_entityUuid',
+          value: [entityType],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause>
+  entityTypeNotEqualToAnyEntityUuid(SyncEntityType entityType) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [],
+                upper: [entityType],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [entityType],
+                includeLower: false,
+                upper: [],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [entityType],
+                includeLower: false,
+                upper: [],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [],
+                upper: [entityType],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause>
+  entityTypeGreaterThanAnyEntityUuid(
+    SyncEntityType entityType, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'entityType_entityUuid',
+          lower: [entityType],
+          includeLower: include,
+          upper: [],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause>
+  entityTypeLessThanAnyEntityUuid(
+    SyncEntityType entityType, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'entityType_entityUuid',
+          lower: [],
+          upper: [entityType],
+          includeUpper: include,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause>
+  entityTypeBetweenAnyEntityUuid(
+    SyncEntityType lowerEntityType,
+    SyncEntityType upperEntityType, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.between(
+          indexName: r'entityType_entityUuid',
+          lower: [lowerEntityType],
+          includeLower: includeLower,
+          upper: [upperEntityType],
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause>
+  entityTypeEntityUuidEqualTo(SyncEntityType entityType, String entityUuid) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        IndexWhereClause.equalTo(
+          indexName: r'entityType_entityUuid',
+          value: [entityType, entityUuid],
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterWhereClause>
+  entityTypeEqualToEntityUuidNotEqualTo(
+    SyncEntityType entityType,
+    String entityUuid,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [entityType],
+                upper: [entityType, entityUuid],
+                includeUpper: false,
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [entityType, entityUuid],
+                includeLower: false,
+                upper: [entityType],
+              ),
+            );
+      } else {
+        return query
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [entityType, entityUuid],
+                includeLower: false,
+                upper: [entityType],
+              ),
+            )
+            .addWhereClause(
+              IndexWhereClause.between(
+                indexName: r'entityType_entityUuid',
+                lower: [entityType],
+                upper: [entityType, entityUuid],
+                includeUpper: false,
+              ),
+            );
+      }
+    });
+  }
+}
+
+extension SyncQueueItemQueryFilter
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QFilterCondition> {
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  actionEqualTo(SyncAction value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'action', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  actionGreaterThan(SyncAction value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'action',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  actionLessThan(SyncAction value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'action',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  actionBetween(
+    SyncAction lower,
+    SyncAction upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'action',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  attemptCountEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'attemptCount', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  attemptCountGreaterThan(int value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'attemptCount',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  attemptCountLessThan(int value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'attemptCount',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  attemptCountBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'attemptCount',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  createdAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'createdAt', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  createdAtGreaterThan(DateTime value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'createdAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  createdAtLessThan(DateTime value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'createdAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  createdAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'createdAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityTypeEqualTo(SyncEntityType value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'entityType', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityTypeGreaterThan(SyncEntityType value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'entityType',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityTypeLessThan(SyncEntityType value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'entityType',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityTypeBetween(
+    SyncEntityType lower,
+    SyncEntityType upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'entityType',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'entityUuid',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'entityUuid',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'entityUuid',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'entityUuid',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'entityUuid',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'entityUuid',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'entityUuid',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'entityUuid',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'entityUuid', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  entityUuidIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'entityUuid', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition> idEqualTo(
+    Id value,
+  ) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'id', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  idGreaterThan(Id value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition> idLessThan(
+    Id value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'id',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition> idBetween(
+    Id lower,
+    Id upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'id',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNull(property: r'lastError'),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        const FilterCondition.isNotNull(property: r'lastError'),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorEqualTo(String? value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'lastError',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'lastError',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'lastError',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'lastError',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'lastError',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'lastError',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'lastError',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'lastError',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'lastError', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  lastErrorIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'lastError', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonEqualTo(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(
+          property: r'payloadJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'payloadJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'payloadJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'payloadJson',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonStartsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.startsWith(
+          property: r'payloadJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonEndsWith(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.endsWith(
+          property: r'payloadJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.contains(
+          property: r'payloadJson',
+          value: value,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.matches(
+          property: r'payloadJson',
+          wildcard: pattern,
+          caseSensitive: caseSensitive,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'payloadJson', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  payloadJsonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(property: r'payloadJson', value: ''),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  updatedAtEqualTo(DateTime value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.equalTo(property: r'updatedAt', value: value),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  updatedAtGreaterThan(DateTime value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.greaterThan(
+          include: include,
+          property: r'updatedAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  updatedAtLessThan(DateTime value, {bool include = false}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.lessThan(
+          include: include,
+          property: r'updatedAt',
+          value: value,
+        ),
+      );
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterFilterCondition>
+  updatedAtBetween(
+    DateTime lower,
+    DateTime upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(
+        FilterCondition.between(
+          property: r'updatedAt',
+          lower: lower,
+          includeLower: includeLower,
+          upper: upper,
+          includeUpper: includeUpper,
+        ),
+      );
+    });
+  }
+}
+
+extension SyncQueueItemQueryObject
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QFilterCondition> {}
+
+extension SyncQueueItemQueryLinks
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QFilterCondition> {}
+
+extension SyncQueueItemQuerySortBy
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QSortBy> {
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByAction() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'action', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByActionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'action', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByAttemptCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attemptCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByAttemptCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attemptCount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByEntityType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByEntityTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityType', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByEntityUuid() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityUuid', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByEntityUuidDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityUuid', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByLastError() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastError', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByLastErrorDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastError', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByPayloadJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByPayloadJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadJson', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
+}
+
+extension SyncQueueItemQuerySortThenBy
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QSortThenBy> {
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByAction() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'action', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByActionDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'action', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByAttemptCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attemptCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByAttemptCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'attemptCount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByEntityType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByEntityTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityType', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByEntityUuid() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityUuid', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByEntityUuidDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'entityUuid', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenById() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'id', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByLastError() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastError', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByLastErrorDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lastError', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByPayloadJson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadJson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByPayloadJsonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payloadJson', Sort.desc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QAfterSortBy>
+  thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
+}
+
+extension SyncQueueItemQueryWhereDistinct
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> {
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> distinctByAction() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'action');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct>
+  distinctByAttemptCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'attemptCount');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> distinctByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'createdAt');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> distinctByEntityType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'entityType');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> distinctByEntityUuid({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'entityUuid', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> distinctByLastError({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lastError', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> distinctByPayloadJson({
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'payloadJson', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncQueueItem, QDistinct> distinctByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt');
+    });
+  }
+}
+
+extension SyncQueueItemQueryProperty
+    on QueryBuilder<SyncQueueItem, SyncQueueItem, QQueryProperty> {
+  QueryBuilder<SyncQueueItem, int, QQueryOperations> idProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncAction, QQueryOperations> actionProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'action');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, int, QQueryOperations> attemptCountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'attemptCount');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, DateTime, QQueryOperations> createdAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, SyncEntityType, QQueryOperations>
+  entityTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'entityType');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, String, QQueryOperations> entityUuidProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'entityUuid');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, String?, QQueryOperations> lastErrorProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lastError');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, String, QQueryOperations> payloadJsonProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'payloadJson');
+    });
+  }
+
+  QueryBuilder<SyncQueueItem, DateTime, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
+    });
+  }
+}
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
 extension GetTasksCollection on Isar {
   IsarCollection<Tasks> get tasks => this.collection();
 }

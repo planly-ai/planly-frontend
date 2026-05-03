@@ -71,6 +71,38 @@ enum TaskCategory {
   final String labelKey;
 }
 
+enum SyncEntityType { task, event }
+
+enum SyncAction { create, update, delete }
+
+@collection
+class SyncQueueItem {
+  Id id = Isar.autoIncrement;
+  @Index(composite: [CompositeIndex('entityUuid')])
+  @enumerated
+  SyncEntityType entityType;
+  String entityUuid;
+  @enumerated
+  SyncAction action;
+  String payloadJson;
+  DateTime createdAt;
+  DateTime updatedAt;
+  int attemptCount;
+  String? lastError;
+
+  SyncQueueItem({
+    this.id = Isar.autoIncrement,
+    required this.entityType,
+    required this.entityUuid,
+    required this.action,
+    required this.payloadJson,
+    required this.createdAt,
+    required this.updatedAt,
+    this.attemptCount = 0,
+    this.lastError,
+  });
+}
+
 @collection
 class Tasks {
   Id id;

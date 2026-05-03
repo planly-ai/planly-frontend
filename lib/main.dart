@@ -255,6 +255,7 @@ Future<Isar?> _getIsarInstance() async {
       [
         TasksSchema,
         TodosSchema,
+        SyncQueueItemSchema,
         SettingsSchema,
         ChatSessionSchema,
         ChatMessageSchema,

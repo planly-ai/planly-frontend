@@ -4,12 +4,14 @@ import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/data/repositories/task_repository.dart';
 import 'package:planly_ai/app/data/repositories/todo_repository.dart';
 import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/services/sync_service.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
 
 class TaskService {
   final TaskRepository _taskRepo;
   final TodoRepository _todoRepo;
   final NotificationService _notificationService;
+  final SyncService _syncService = SyncService();
 
   TaskService({
     required TaskRepository taskRepo,
@@ -44,6 +46,7 @@ class TaskService {
     );
 
     showSnackBar('createCategory'.tr);
+    await _syncService.enqueueTask(task, SyncAction.create);
     return task;
   }
 
@@ -67,6 +70,7 @@ class TaskService {
     );
 
     showSnackBar('editCategory'.tr);
+    await _syncService.enqueueTask(task, SyncAction.update);
   }
 
   Future<void> archiveTasks(List<Tasks> tasks) async {
@@ -82,6 +86,9 @@ class TaskService {
 
     await _notificationService.cancelForTask(allTodos);
     await _taskRepo.updateArchiveStatusBatch(tasksCopy, true);
+    for (final task in tasksCopy) {
+      await _syncService.enqueueTask(task, SyncAction.update);
+    }
 
     showSnackBar('categoryArchive'.tr);
   }
@@ -98,6 +105,9 @@ class TaskService {
     }
     await _notificationService.scheduleForTask(allTodos);
     await _taskRepo.updateArchiveStatusBatch(tasksCopy, false);
+    for (final task in tasksCopy) {
+      await _syncService.enqueueTask(task, SyncAction.update);
+    }
 
     showSnackBar('noCategoryArchive'.tr);
   }
@@ -112,6 +122,7 @@ class TaskService {
     for (final task in tasksCopy) {
       final todos = await _todoRepo.getByTaskId(task.id);
       await _notificationService.cancelForTask(todos);
+      await _syncService.enqueueTask(task, SyncAction.delete);
       await _deleteAllTodosForTask(todos);
       await _taskRepo.delete(task);
     }
@@ -131,6 +142,12 @@ class TaskService {
     }
 
     if (allIds.isNotEmpty) {
+      for (final id in allIds) {
+        final todo = await _todoRepo.getById(id);
+        if (todo != null) {
+          await _syncService.enqueueEvent(todo, SyncAction.delete);
+        }
+      }
       await _todoRepo.deleteBatch(allIds);
     }
   }
