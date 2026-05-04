@@ -346,5 +346,8 @@ class ZhCN {
     'taskProposalAdded': '任务计划已添加',
     'taskProposalAddFailed': '任务计划添加失败',
     'noDeadline': '无截止日期',
+    'syncNoPending': '没有待同步数据',
+    'syncSuccess': '同步完成',
+    'syncFailed': '同步失败，待同步数据稍后会重试',
   };
 }

@@ -355,5 +355,8 @@ class EnUs {
     'taskProposalAdded': 'Task plan added',
     'taskProposalAddFailed': 'Failed to add task plan',
     'noDeadline': 'No deadline',
+    'syncNoPending': 'No pending data to sync',
+    'syncSuccess': 'Sync completed',
+    'syncFailed': 'Sync failed. Pending data will retry later',
   };
 }

@@ -71,11 +71,46 @@ enum TaskCategory {
   final String labelKey;
 }
 
+enum SyncEntityType { task, event }
+
+enum SyncAction { create, update, delete }
+
+@collection
+class SyncQueueItem {
+  Id id = Isar.autoIncrement;
+  @Index(composite: [CompositeIndex('entityUuid')])
+  @enumerated
+  SyncEntityType entityType;
+  String entityUuid;
+  @enumerated
+  SyncAction action;
+  String payloadJson;
+  DateTime createdAt;
+  DateTime updatedAt;
+  int attemptCount;
+  String? lastError;
+
+  SyncQueueItem({
+    this.id = Isar.autoIncrement,
+    required this.entityType,
+    required this.entityUuid,
+    required this.action,
+    required this.payloadJson,
+    required this.createdAt,
+    required this.updatedAt,
+    this.attemptCount = 0,
+    this.lastError,
+  });
+}
+
 @collection
 class Tasks {
   Id id;
+  @Index()
+  String uuidv7;
   String title;
   String description;
+  DateTime? taskEndTime;
   int taskColor;
   @enumerated
   TaskCategory category;
@@ -89,8 +124,10 @@ class Tasks {
 
   Tasks({
     this.id = Isar.autoIncrement,
+    this.uuidv7 = '',
     required this.title,
     this.description = '',
+    this.taskEndTime,
     this.category = TaskCategory.uncategorized,
     this.archive = false,
     required this.taskColor,
@@ -102,6 +139,8 @@ class Tasks {
 @collection
 class Todos {
   Id id;
+  @Index()
+  String uuidv7;
   String name;
   String description;
   String? subtask;
@@ -130,6 +169,7 @@ class Todos {
 
   Todos({
     this.id = Isar.autoIncrement,
+    this.uuidv7 = '',
     required this.name,
     this.description = '',
     this.subtask,
