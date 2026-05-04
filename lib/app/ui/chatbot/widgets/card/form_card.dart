@@ -242,6 +242,25 @@ class _FormCardState extends State<FormCard> {
     }).toList();
   }
 
+  String? _fieldStringValue(String key) {
+    final value = _fieldValues[key];
+    if (value == null) return null;
+    return value.toString();
+  }
+
+  List<String> _fieldStringListValue(String key) {
+    final value = _fieldValues[key];
+    if (value == null) return <String>[];
+    if (value is List<String>) return List<String>.from(value);
+    if (value is List) {
+      return value
+          .where((item) => item != null)
+          .map((item) => item.toString())
+          .toList();
+    }
+    return <String>[value.toString()];
+  }
+
   Widget _buildField(BuildContext context, FormField field) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -457,7 +476,7 @@ class _FormCardState extends State<FormCard> {
 
   Widget _buildCheckboxField(BuildContext context, FormField field) {
     final colorScheme = Theme.of(context).colorScheme;
-    final currentValue = _fieldValues[field.key] as List<String>? ?? [];
+    final currentValue = _fieldStringListValue(field.key);
 
     return Wrap(
       spacing: AppConstants.spacingM,
@@ -541,7 +560,7 @@ class _FormCardState extends State<FormCard> {
 
   Widget _buildRadioField(BuildContext context, FormField field) {
     final colorScheme = Theme.of(context).colorScheme;
-    final currentValue = _fieldValues[field.key] as String?;
+    final currentValue = _fieldStringValue(field.key);
 
     return Wrap(
       spacing: AppConstants.spacingM,
@@ -622,7 +641,11 @@ class _FormCardState extends State<FormCard> {
 
   Widget _buildDropdownField(BuildContext context, FormField field) {
     final colorScheme = Theme.of(context).colorScheme;
-    final currentValue = _fieldValues[field.key] as String?;
+    final rawValue = _fieldStringValue(field.key);
+    final currentValue =
+        (field.options ?? []).any((option) => option.value == rawValue)
+        ? rawValue
+        : null;
 
     return DropdownButtonFormField<String>(
       isExpanded: true,
@@ -711,7 +734,7 @@ class _FormCardState extends State<FormCard> {
 
   Widget _buildDateTimePickerField(BuildContext context, FormField field) {
     final colorScheme = Theme.of(context).colorScheme;
-    final currentValue = _fieldValues[field.key] as String?;
+    final currentValue = _fieldStringValue(field.key);
 
     return InkWell(
       onTap: _isSubmitted
