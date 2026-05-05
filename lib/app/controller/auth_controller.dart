@@ -5,6 +5,7 @@ import 'package:planly_ai/app/data/models/user.dart';
 import 'package:planly_ai/app/services/auth_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:planly_ai/app/controller/home_controller.dart';
+import 'package:planly_ai/app/controller/sync_controller.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
 import 'package:planly_ai/main.dart';
 
@@ -49,20 +50,26 @@ class AuthController extends GetxController {
       );
 
       final responseData = response.data;
-      final bool isSuccess = response.statusCode == 200 &&
+      final bool isSuccess =
+          response.statusCode == 200 &&
           (responseData['code'] == null || responseData['code'] == 200);
 
       if (isSuccess) {
         // Token 可能在根字段或 data 字段中
-        final token = responseData['token'] 
-            ?? responseData['access_token'] 
-            ?? responseData['data']?['token'] 
-            ?? responseData['data']?['access_token'];
-        
-        debugPrint('[Login] Response token: ${token != null ? "exists" : "null"}');
+        final token =
+            responseData['token'] ??
+            responseData['access_token'] ??
+            responseData['data']?['token'] ??
+            responseData['data']?['access_token'];
+
+        debugPrint(
+          '[Login] Response token: ${token != null ? "exists" : "null"}',
+        );
         debugPrint('[Login] Response data keys: ${responseData.keys.toList()}');
         if (responseData['data'] != null) {
-          debugPrint('[Login] Response data keys: ${responseData['data'].keys.toList()}');
+          debugPrint(
+            '[Login] Response data keys: ${responseData['data'].keys.toList()}',
+          );
         }
 
         if (token != null) {
@@ -72,9 +79,12 @@ class AuthController extends GetxController {
           // Fetch detailed profile
           try {
             final profileResponse = await _authService.getProfile();
-            if (profileResponse.statusCode == 200 && profileResponse.data['code'] == 200) {
+            if (profileResponse.statusCode == 200 &&
+                profileResponse.data['code'] == 200) {
               final userData = profileResponse.data['data']['user'];
-              debugPrint('[Login] Profile fetched successfully, userId: ${userData['userId']}');
+              debugPrint(
+                '[Login] Profile fetched successfully, userId: ${userData['userId']}',
+              );
               await _updateUser(
                 username: userData['userName'] ?? username,
                 isLoggedIn: true,
@@ -85,12 +95,22 @@ class AuthController extends GetxController {
                 authToken: token,
               );
             } else {
-              debugPrint('[Login] Profile fetch failed, status: ${profileResponse.statusCode}');
-              await _updateUser(username: username, isLoggedIn: true, authToken: token);
+              debugPrint(
+                '[Login] Profile fetch failed, status: ${profileResponse.statusCode}',
+              );
+              await _updateUser(
+                username: username,
+                isLoggedIn: true,
+                authToken: token,
+              );
             }
           } catch (e) {
             debugPrint('[Login] Profile fetch exception: $e');
-            await _updateUser(username: username, isLoggedIn: true, authToken: token);
+            await _updateUser(
+              username: username,
+              isLoggedIn: true,
+              authToken: token,
+            );
           }
         } else {
           debugPrint('[Login] No token in response');
@@ -98,6 +118,9 @@ class AuthController extends GetxController {
         }
 
         showSnackBar('loginSuccess'.tr);
+        if (Get.isRegistered<SyncController>()) {
+          Get.find<SyncController>().scheduleSync(delay: Duration.zero);
+        }
 
         Get.find<HomeController>().changeTabIndex(4);
         Get.back();
@@ -175,14 +198,24 @@ class AuthController extends GetxController {
     if (isLoggedIn) {
       await _storage.write(key: 'is_logged_in', value: 'true');
       await _storage.write(key: 'username', value: username);
-      if (userId != null) await _storage.write(key: 'user_id', value: userId);
-      if (userType != null) await _storage.write(key: 'user_type', value: userType);
-      if (tenantId != null) await _storage.write(key: 'tenant_id', value: tenantId);
-      if (loginDate != null) await _storage.write(key: 'login_date', value: loginDate);
+      if (userId != null) {
+        await _storage.write(key: 'user_id', value: userId);
+      }
+      if (userType != null) {
+        await _storage.write(key: 'user_type', value: userType);
+      }
+      if (tenantId != null) {
+        await _storage.write(key: 'tenant_id', value: tenantId);
+      }
+      if (loginDate != null) {
+        await _storage.write(key: 'login_date', value: loginDate);
+      }
       // Save auth token if provided
       if (authToken != null) {
         await _storage.write(key: 'auth_token', value: authToken);
-        debugPrint('[Auth] Token saved in _updateUser: ${authToken.substring(0, 20)}...');
+        debugPrint(
+          '[Auth] Token saved in _updateUser: ${authToken.substring(0, 20)}...',
+        );
       }
     } else {
       await _storage.delete(key: 'is_logged_in');

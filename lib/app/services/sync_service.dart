@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -10,8 +11,12 @@ import 'package:planly_ai/main.dart';
 import 'package:uuid/uuid.dart';
 
 class SyncService {
+  static final StreamController<void> _queueChangeController =
+      StreamController<void>.broadcast();
   static const String _timeZone = 'Asia/Shanghai';
   static final Uuid _uuid = Uuid();
+
+  static Stream<void> get queueChanges => _queueChangeController.stream;
 
   Future<void> enqueueTask(Tasks task, SyncAction action) async {
     await _enqueue(
@@ -20,6 +25,7 @@ class SyncService {
       action: action,
       payload: _taskPayload(task),
     );
+    _notifyQueueChanged();
   }
 
   Future<void> enqueueEvent(Todos todo, SyncAction action) async {
@@ -30,19 +36,24 @@ class SyncService {
       action: action,
       payload: _eventPayload(todo),
     );
+    _notifyQueueChanged();
   }
 
   Future<int> pendingCount() async {
     return await isar.syncQueueItems.count();
   }
 
-  Future<bool> syncPending() async {
+  Future<bool> syncPending({bool force = false}) async {
     if (!settings.isLoggedIn) {
       debugPrint('[Sync] Skipped because user is not logged in');
       return false;
     }
 
-    final items = await isar.syncQueueItems.where().sortByCreatedAt().findAll();
+    final allItems = await isar.syncQueueItems
+        .where()
+        .sortByCreatedAt()
+        .findAll();
+    final items = force ? allItems : allItems.where(_isReadyForRetry).toList();
     if (items.isEmpty) return true;
 
     final body = {
@@ -85,6 +96,25 @@ class SyncService {
       await _markFailed(items, message);
       return false;
     }
+  }
+
+  void _notifyQueueChanged() {
+    if (!_queueChangeController.isClosed) {
+      _queueChangeController.add(null);
+    }
+  }
+
+  bool _isReadyForRetry(SyncQueueItem item) {
+    if (item.lastError == null || item.lastError!.isEmpty) return true;
+
+    final cooldown = _retryCooldown(item.attemptCount);
+    return DateTime.now().difference(item.updatedAt) >= cooldown;
+  }
+
+  Duration _retryCooldown(int attemptCount) {
+    final effectiveAttempt = attemptCount.clamp(0, 10);
+    final seconds = 30 * (1 << effectiveAttempt);
+    return Duration(seconds: seconds > 1800 ? 1800 : seconds);
   }
 
   Future<void> _enqueue({

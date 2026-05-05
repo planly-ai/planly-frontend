@@ -3,6 +3,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:planly_ai/app/controller/isar_controller.dart';
+import 'package:planly_ai/app/controller/sync_controller.dart';
 import 'package:planly_ai/app/services/auto_backup_service.dart';
 import 'package:planly_ai/app/ui/home.dart';
 import 'package:planly_ai/app/ui/onboarding.dart';
@@ -310,6 +311,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final themeController = Get.put(ThemeController());
   final authController = Get.put(AuthController());
+  final syncController = Get.put(SyncController(), permanent: true);
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<HomePageState> _homeKey = GlobalKey<HomePageState>();
   String? _pendingShortcut;

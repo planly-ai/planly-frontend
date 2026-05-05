@@ -36,10 +36,7 @@ class HomePageState extends State<HomePage>
     permanent: true,
   );
 
-  late final SyncController _syncController = Get.put(
-    SyncController(),
-    permanent: true,
-  );
+  late final SyncController _syncController = Get.find<SyncController>();
 
   late final AnimationController _fabAnimationController;
   late final Animation<double> _fabScaleAnimation;
@@ -146,7 +143,8 @@ class HomePageState extends State<HomePage>
 
   Widget _buildRefreshableBody(Widget body) {
     return RefreshIndicator(
-      onRefresh: () => _syncController.syncPending(showResult: true),
+      onRefresh: () =>
+          _syncController.syncPending(showResult: true, force: true),
       child: body,
     );
   }
