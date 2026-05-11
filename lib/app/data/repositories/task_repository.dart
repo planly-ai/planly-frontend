@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/main.dart';
+import 'package:uuid/uuid.dart';
 
 class TaskRepository {
+  static final Uuid _uuid = Uuid();
+
   final Isar _isar = isar;
 
   // ==================== CREATE ====================
@@ -12,13 +15,16 @@ class TaskRepository {
   Future<Tasks> create({
     required String title,
     required String description,
+    DateTime? taskEndTime,
     required TaskCategory category,
     required Color color,
     required int index,
   }) async {
     final task = Tasks(
+      uuidv7: _uuid.v7(),
       title: title,
       description: description,
+      taskEndTime: taskEndTime,
       category: category,
       taskColor: color.value32bit,
       index: index,
@@ -53,12 +59,14 @@ class TaskRepository {
     required Tasks task,
     required String title,
     required String description,
+    DateTime? taskEndTime,
     required TaskCategory category,
     required Color color,
   }) async {
     await _isar.writeTxn(() async {
       task.title = title;
       task.description = description;
+      task.taskEndTime = taskEndTime;
       task.category = category;
       task.taskColor = color.value32bit;
       await _isar.tasks.put(task);

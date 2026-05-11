@@ -7,6 +7,7 @@ import 'package:planly_ai/app/data/repositories/todo_repository.dart';
 import 'package:planly_ai/app/services/task_service.dart';
 import 'package:planly_ai/app/services/todo_service.dart';
 import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/services/sync_service.dart';
 import 'package:planly_ai/app/constants/app_constants.dart';
 
 extension FirstWhereOrNull<E> on Iterable<E> {
@@ -19,6 +20,9 @@ extension FirstWhereOrNull<E> on Iterable<E> {
 }
 
 class TodoController extends GetxController {
+  static const String _generalTaskTitle = 'General';
+  static const Color _generalTaskColor = Color(0xFF9E9E9E);
+
   // ==================== Stream Subscriptions ====================
   StreamSubscription<void>? _taskWatcherSubscription;
   StreamSubscription<void>? _todoWatcherSubscription;
@@ -30,6 +34,7 @@ class TodoController extends GetxController {
   // ==================== Services ====================
   late final TaskService _taskService;
   late final TodoService _todoService;
+  late final SyncService _syncService;
 
   // ==================== Observable State ====================
   final tasks = <Tasks>[].obs;
@@ -91,6 +96,7 @@ class TodoController extends GetxController {
       todoRepo: _todoRepo,
       notificationService: notificationService,
     );
+    _syncService = SyncService();
   }
 
   void _setupWatchers() {
@@ -153,11 +159,13 @@ class TodoController extends GetxController {
     String title,
     String description,
     TaskCategory category,
-    Color color,
-  ) async {
+    Color color, {
+    DateTime? taskEndTime,
+  }) async {
     await _taskService.createTask(
       title: title,
       description: description,
+      taskEndTime: taskEndTime,
       category: category,
       color: color,
       currentTaskCount: tasks.length,
@@ -169,12 +177,14 @@ class TodoController extends GetxController {
     String title,
     String description,
     TaskCategory category,
-    Color color,
-  ) async {
+    Color color, {
+    DateTime? taskEndTime,
+  }) async {
     await _taskService.updateTask(
       task: task,
       title: title,
       description: description,
+      taskEndTime: taskEndTime,
       category: category,
       color: color,
     );
@@ -241,7 +251,7 @@ class TodoController extends GetxController {
   // ==================== Todos CRUD ====================
 
   Future<Todos> addTodo({
-    required Tasks task,
+    required Tasks? task,
     required String title,
     required String description,
     String? subtask,
@@ -251,8 +261,10 @@ class TodoController extends GetxController {
     required Priority priority,
     required List<String> tags,
   }) async {
+    final targetTask = await _resolveTaskOrGeneral(task);
+
     final todo = await _todoService.createTodo(
-      task: task,
+      task: targetTask,
       title: title,
       description: description,
       subtask: subtask,
@@ -264,6 +276,31 @@ class TodoController extends GetxController {
       currentTodoCount: todos.length,
     );
     return todo;
+  }
+
+  Future<Tasks> _resolveTaskOrGeneral(Tasks? task) async {
+    if (task != null) return task;
+
+    final allTasks = await _taskRepo.getAll();
+    final generalTask = allTasks.firstWhereOrNull((task) {
+      return !task.archive &&
+          task.category == TaskCategory.uncategorized &&
+          task.title.trim().toLowerCase() == _generalTaskTitle.toLowerCase();
+    });
+
+    if (generalTask != null) return generalTask;
+
+    final created = await _taskRepo.create(
+      title: _generalTaskTitle,
+      description: '',
+      category: TaskCategory.uncategorized,
+      color: _generalTaskColor,
+      index: allTasks.length,
+    );
+
+    await _loadTasksAndTodos();
+    await _syncService.enqueueTask(created, SyncAction.create);
+    return created;
   }
 
   Future<void> updateTodo({

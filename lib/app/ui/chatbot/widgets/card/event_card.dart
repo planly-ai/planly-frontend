@@ -71,20 +71,9 @@ class _EventCardState extends State<EventCard> {
 
     final todoController = Get.find<TodoController>();
 
-    final targetTask =
-        todoController.tasks.firstWhereOrNull(
-          (t) =>
-              !t.archive &&
-              (t.title.toLowerCase() == 'uncategorized' ||
-                  t.title == 'unclassified'.tr ||
-                  t.title == '未分类'),
-        ) ??
-        todoController.tasks.firstWhereOrNull((t) => !t.archive) ??
-        todoController.tasks.first;
-
     try {
       await todoController.addTodo(
-        task: targetTask,
+        task: null,
         title: widget.title,
         description: widget.description ?? '',
         startTime: widget.startTime,
@@ -119,6 +108,7 @@ class _EventCardState extends State<EventCard> {
 
     return Card(
       elevation: AppConstants.elevationLow,
+      color: colorScheme.primaryContainer.withValues(alpha: 0.26),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(

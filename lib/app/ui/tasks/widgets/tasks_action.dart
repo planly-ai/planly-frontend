@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:planly_ai/app/controller/todo_controller.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/ui/tasks/widgets/icon_container.dart';
@@ -14,6 +16,7 @@ import 'package:planly_ai/app/utils/color_extensions.dart';
 import 'package:planly_ai/app/utils/navigation_helper.dart';
 import 'package:planly_ai/app/utils/responsive_utils.dart';
 import 'package:planly_ai/app/utils/text_utils.dart';
+import 'package:planly_ai/main.dart';
 
 class TasksAction extends StatefulWidget {
   const TasksAction({
@@ -41,6 +44,7 @@ class _TasksActionState extends State<TasksAction>
   late final TextEditingController _titleController;
   late final TextEditingController _descController;
   late final TextEditingController _categoryController;
+  late final TextEditingController _endTimeController;
   late final FocusNode _categoryFocusNode;
   late TaskCategory _selectedCategory;
   late final _EditingController _editingController;
@@ -62,6 +66,7 @@ class _TasksActionState extends State<TasksAction>
   void _initializeControllers() {
     _titleController = TextEditingController();
     _descController = TextEditingController();
+    _endTimeController = TextEditingController();
     _colorNotifier = ValueNotifier(
       widget.edit ? Color(widget.task!.taskColor) : const Color(0xFF2196F3),
     );
@@ -80,11 +85,13 @@ class _TasksActionState extends State<TasksAction>
     if (widget.edit) {
       _titleController.text = widget.task!.title;
       _descController.text = widget.task!.description;
+      _endTimeController.text = _formatDateTime(widget.task!.taskEndTime);
     }
 
     _editingController = _EditingController(
       _titleController.text,
       _descController.text,
+      _endTimeController.text,
       _selectedCategory,
       _colorNotifier.value,
     );
@@ -120,6 +127,7 @@ class _TasksActionState extends State<TasksAction>
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
+    _endTimeController.dispose();
     _categoryController.dispose();
     _categoryFocusNode.dispose();
     _colorNotifier.dispose();
@@ -141,6 +149,7 @@ class _TasksActionState extends State<TasksAction>
       onConfirm: () {
         _titleController.clear();
         _descController.clear();
+        _endTimeController.clear();
         NavigationHelper.back(result: true);
       },
     );
@@ -172,6 +181,7 @@ class _TasksActionState extends State<TasksAction>
       _descController.text,
       _selectedCategory,
       _colorNotifier.value,
+      taskEndTime: _selectedEndTime,
     );
     widget.updateTaskName?.call();
   }
@@ -182,9 +192,37 @@ class _TasksActionState extends State<TasksAction>
       _descController.text,
       _selectedCategory,
       _colorNotifier.value,
+      taskEndTime: _selectedEndTime,
     );
     _titleController.clear();
     _descController.clear();
+    _endTimeController.clear();
+  }
+
+  DateTime? get _selectedEndTime {
+    return widget.edit
+        ? _parseFormattedDateTime(_endTimeController.text)
+        : _parseFormattedDateTime(_endTimeController.text);
+  }
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return '';
+    return timeformat.value == '12'
+        ? DateFormat.yMMMEd(locale.languageCode).add_jm().format(dateTime)
+        : DateFormat.yMMMEd(locale.languageCode).add_Hm().format(dateTime);
+  }
+
+  DateTime? _parseFormattedDateTime(String value) {
+    if (value.trim().isEmpty) return null;
+    final parsed = DateTime.tryParse(value);
+    if (parsed != null) return parsed.toLocal();
+    try {
+      return timeformat.value == '12'
+          ? DateFormat.yMMMEd(locale.languageCode).add_jm().parse(value)
+          : DateFormat.yMMMEd(locale.languageCode).add_Hm().parse(value);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
@@ -382,6 +420,8 @@ class _TasksActionState extends State<TasksAction>
                     SizedBox(height: padding * 1.2),
                     _buildCategorySelect(),
                     SizedBox(height: padding * 1.2),
+                    _buildEndTimeButton(context),
+                    SizedBox(height: padding * 1.2),
                     _buildDescriptionInput(),
                     SizedBox(height: padding * 1.5),
                     _buildColorPicker(),
@@ -430,6 +470,90 @@ class _TasksActionState extends State<TasksAction>
       maxLine: null,
       onChanged: (value) => _editingController.description.value = value,
     );
+  }
+
+  Widget _buildEndTimeButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasEndTime = _endTimeController.text.isNotEmpty;
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: FilledButton.tonal(
+        onPressed: _showEndTimePicker,
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.spacingL,
+            vertical: AppConstants.spacingS,
+          ),
+          minimumSize: const Size(0, 40),
+          backgroundColor: hasEndTime
+              ? colorScheme.primaryContainer
+              : colorScheme.secondaryContainer,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              IconsaxPlusLinear.calendar,
+              size: AppConstants.iconSizeSmall,
+              color: hasEndTime
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onSecondaryContainer,
+            ),
+            SizedBox(width: AppConstants.spacingS),
+            Text(
+              hasEndTime ? _endTimeController.text : 'endTime'.tr,
+              style: TextStyle(
+                fontSize: ResponsiveUtils.getResponsiveFontSize(context, 13),
+                fontWeight: FontWeight.w600,
+                color: hasEndTime
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSecondaryContainer,
+              ),
+            ),
+            if (hasEndTime) ...[
+              SizedBox(width: AppConstants.spacingS),
+              InkWell(
+                onTap: () {
+                  _endTimeController.clear();
+                  setState(() {
+                    _editingController.endTime.value = _endTimeController.text;
+                  });
+                },
+                child: Icon(
+                  IconsaxPlusLinear.close_circle,
+                  size: AppConstants.iconSizeSmall - 2,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showEndTimePicker() async {
+    final now = DateTime.now();
+    final currentEndTime = _selectedEndTime;
+    final initialDate = currentEndTime ?? now;
+    final DateTime? dateTime = await showOmniDateTimePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: initialDate.isBefore(now)
+          ? initialDate.subtract(const Duration(hours: 1))
+          : now.subtract(const Duration(hours: 1)),
+      lastDate: now.add(const Duration(days: 3650)),
+      is24HourMode: timeformat.value != '12',
+      borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+    );
+
+    if (dateTime == null) return;
+
+    setState(() {
+      _endTimeController.text = _formatDateTime(dateTime);
+      _editingController.endTime.value = _endTimeController.text;
+    });
   }
 
   Widget _buildCategorySelect() {
@@ -948,6 +1072,7 @@ class _EditingController extends ChangeNotifier {
   _EditingController(
     this.initialTitle,
     this.initialDescription,
+    this.initialEndTime,
     this.initialCategory,
     this.initialColor,
   ) {
@@ -956,11 +1081,13 @@ class _EditingController extends ChangeNotifier {
 
   final String? initialTitle;
   final String? initialDescription;
+  final String? initialEndTime;
   final TaskCategory initialCategory;
   final Color? initialColor;
 
   final title = ValueNotifier<String?>(null);
   final description = ValueNotifier<String?>(null);
+  final endTime = ValueNotifier<String?>(null);
   final category = ValueNotifier<TaskCategory>(TaskCategory.uncategorized);
   final color = ValueNotifier<Color?>(null);
   final _canCompose = ValueNotifier<bool>(false);
@@ -970,11 +1097,13 @@ class _EditingController extends ChangeNotifier {
   void _initializeListeners() {
     title.value = initialTitle;
     description.value = initialDescription;
+    endTime.value = initialEndTime;
     category.value = initialCategory;
     color.value = initialColor;
 
     title.addListener(_updateCanCompose);
     description.addListener(_updateCanCompose);
+    endTime.addListener(_updateCanCompose);
     category.addListener(_updateCanCompose);
     color.addListener(_updateCanCompose);
   }
@@ -983,6 +1112,7 @@ class _EditingController extends ChangeNotifier {
     _canCompose.value =
         title.value != initialTitle ||
         description.value != initialDescription ||
+        endTime.value != initialEndTime ||
         category.value != initialCategory ||
         color.value != initialColor;
   }
@@ -991,10 +1121,12 @@ class _EditingController extends ChangeNotifier {
   void dispose() {
     title.removeListener(_updateCanCompose);
     description.removeListener(_updateCanCompose);
+    endTime.removeListener(_updateCanCompose);
     category.removeListener(_updateCanCompose);
     color.removeListener(_updateCanCompose);
     title.dispose();
     description.dispose();
+    endTime.dispose();
     category.dispose();
     color.dispose();
     _canCompose.dispose();

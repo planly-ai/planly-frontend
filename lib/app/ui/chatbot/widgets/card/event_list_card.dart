@@ -29,6 +29,7 @@ class EventListCard extends StatelessWidget {
 
     return Card(
       elevation: AppConstants.elevationLow,
+      color: colorScheme.primaryContainer.withValues(alpha: 0.26),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(
@@ -41,8 +42,9 @@ class EventListCard extends StatelessWidget {
                   padding: const EdgeInsets.all(AppConstants.spacingXS),
                   decoration: BoxDecoration(
                     color: colorScheme.primary.withValues(alpha: 0.15),
-                    borderRadius:
-                        BorderRadius.circular(AppConstants.borderRadiusSmall),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.borderRadiusSmall,
+                    ),
                   ),
                   child: Icon(
                     Icons.event_note,
@@ -55,8 +57,10 @@ class EventListCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontSize:
-                          ResponsiveUtils.getResponsiveFontSize(context, 16),
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(
+                        context,
+                        16,
+                      ),
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onSurface,
                       letterSpacing: -0.3,
@@ -81,7 +85,8 @@ class EventListCard extends StatelessWidget {
     try {
       final start = DateTime.parse(e.startTime).toLocal();
       final end = DateTime.parse(e.endTime).toLocal();
-      timeRange = '${DateFormat('HH:mm').format(start)} - ${DateFormat('HH:mm').format(end)}';
+      timeRange =
+          '${DateFormat('HH:mm').format(start)} - ${DateFormat('HH:mm').format(end)}';
     } catch (_) {
       timeRange = '${e.startTime} - ${e.endTime}';
     }
@@ -100,7 +105,9 @@ class EventListCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppConstants.spacingS),
             decoration: BoxDecoration(
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusSmall),
+              borderRadius: BorderRadius.circular(
+                AppConstants.borderRadiusSmall,
+              ),
             ),
             child: Icon(
               Icons.event,
@@ -118,8 +125,10 @@ class EventListCard extends StatelessWidget {
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
-                    fontSize:
-                        ResponsiveUtils.getResponsiveFontSize(context, 14),
+                    fontSize: ResponsiveUtils.getResponsiveFontSize(
+                      context,
+                      14,
+                    ),
                     letterSpacing: -0.2,
                   ),
                 ),
@@ -128,8 +137,10 @@ class EventListCard extends StatelessWidget {
                     timeRange,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurfaceVariant,
-                      fontSize:
-                          ResponsiveUtils.getResponsiveFontSize(context, 13),
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(
+                        context,
+                        13,
+                      ),
                     ),
                   ),
                 if (e.description != null && e.description!.isNotEmpty)
@@ -137,8 +148,10 @@ class EventListCard extends StatelessWidget {
                     e.description!,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.onSurfaceVariant,
-                      fontSize:
-                          ResponsiveUtils.getResponsiveFontSize(context, 12),
+                      fontSize: ResponsiveUtils.getResponsiveFontSize(
+                        context,
+                        12,
+                      ),
                     ),
                   ),
               ],
@@ -191,7 +204,10 @@ class EventListCardTestApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       home: Scaffold(
-        appBar: AppBar(title: Text('event_list_card_preview'.tr), centerTitle: true),
+        appBar: AppBar(
+          title: Text('event_list_card_preview'.tr),
+          centerTitle: true,
+        ),
         backgroundColor: Colors.grey[100],
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),

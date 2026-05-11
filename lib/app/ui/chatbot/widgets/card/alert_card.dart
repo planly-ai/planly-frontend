@@ -42,6 +42,7 @@ class AlertCard extends StatelessWidget {
 
     return Card(
       elevation: AppConstants.elevationLow,
+      color: colorScheme.primaryContainer.withValues(alpha: 0.26),
       child: Padding(
         padding: const EdgeInsets.all(AppConstants.spacingM),
         child: Column(

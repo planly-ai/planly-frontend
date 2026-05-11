@@ -1,13 +1,15 @@
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:isar_community/isar.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/main.dart';
 import 'package:planly_ai/app/constants/debug_config.dart';
+import 'package:uuid/uuid.dart';
+
+final Uuid _uuid = Uuid();
 
 /// Generates sample todo data for a college student's daily life.
-/// 
+///
 /// The data is generated for a period of 14 days before and after today.
 /// Each day contains 2-5 schedule items.
 Future<void> createSampleTodoData() async {
@@ -49,6 +51,7 @@ Future<void> createSampleTodoData() async {
             : TodoStatus.active;
 
         final todo = Todos(
+          uuidv7: _uuid.v7(),
           name: activity['name'] as String,
           description: activity['description'] as String,
           createdTime: day.subtract(const Duration(days: 1)),
@@ -70,12 +73,12 @@ Future<void> createSampleTodoData() async {
 
 Future<void> removeSampleTodoData() async {
   await isar.writeTxn(() async {
-    // We only remove todos that match our sample naming or categories if needed, 
+    // We only remove todos that match our sample naming or categories if needed,
     // but for debug purposes, we might just clear everything or use a tag.
     // For now, let's just clear all todos and non-archived tasks to start fresh if autoRemove is true.
     await isar.todos.clear();
     // Keep categories but we could also clear them if we want a completely fresh state.
-    // await isar.tasks.clear(); 
+    // await isar.tasks.clear();
   });
   debugPrint('[Sample Todo] Old todo data removed!');
 }
@@ -89,8 +92,9 @@ Future<Map<String, Tasks>> _ensureCategoriesExist() async {
       var task = await isar.tasks.filter().titleEqualTo(name).findFirst();
       if (task == null) {
         task = Tasks(
+          uuidv7: _uuid.v7(),
           title: name,
-          taskColor: _getCategoryColor(name).value,
+          taskColor: _getCategoryColor(name).toARGB32(),
           description: '$name related tasks and schedules',
         );
         await isar.tasks.put(task);

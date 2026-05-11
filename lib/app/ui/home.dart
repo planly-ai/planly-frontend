@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 import 'package:planly_ai/app/controller/fab_controller.dart';
+import 'package:planly_ai/app/controller/sync_controller.dart';
 import 'package:planly_ai/app/ui/settings/view/settings.dart';
 import 'package:planly_ai/app/ui/statistics/view/statistics.dart';
 import 'package:planly_ai/app/ui/tasks/view/all_tasks.dart';
@@ -34,6 +35,8 @@ class HomePageState extends State<HomePage>
     HomeController(),
     permanent: true,
   );
+
+  late final SyncController _syncController = Get.find<SyncController>();
 
   late final AnimationController _fabAnimationController;
   late final Animation<double> _fabScaleAnimation;
@@ -130,12 +133,20 @@ class HomePageState extends State<HomePage>
             );
 
       return Scaffold(
-        body: body,
+        body: _buildRefreshableBody(body),
         bottomNavigationBar: isMobile ? _buildBottomNavigationBar() : null,
         floatingActionButton: _buildFloatingActionButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
+  }
+
+  Widget _buildRefreshableBody(Widget body) {
+    return RefreshIndicator(
+      onRefresh: () =>
+          _syncController.syncPending(showResult: true, force: true),
+      child: body,
+    );
   }
 
   Widget _buildNavigationRail(BuildContext context, bool isExtended) {

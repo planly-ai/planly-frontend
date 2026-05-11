@@ -4,12 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:planly_ai/app/data/db.dart';
 import 'package:planly_ai/app/data/repositories/todo_repository.dart';
 import 'package:planly_ai/app/services/notification_service.dart';
+import 'package:planly_ai/app/services/sync_service.dart';
 import 'package:planly_ai/app/utils/show_snack_bar.dart';
 import 'package:planly_ai/main.dart';
 
 class TodoService {
   final TodoRepository _todoRepo;
   final NotificationService _notificationService;
+  final SyncService _syncService = SyncService();
 
   TodoService({
     required TodoRepository todoRepo,
@@ -65,6 +67,7 @@ class TodoService {
     await _notificationService.scheduleForTodo(todo);
 
     showSnackBar('todoCreate'.tr);
+    await _syncService.enqueueEvent(todo, SyncAction.create);
     return todo;
   }
 
@@ -109,6 +112,7 @@ class TodoService {
     }
 
     showSnackBar('updateTodo'.tr);
+    await _syncService.enqueueEvent(todo, SyncAction.update);
   }
 
   Future<void> updateTodoStatus(Todos todo) async {
@@ -123,12 +127,19 @@ class TodoService {
     } else {
       await _notificationService.cancel(todo.id);
     }
+    await _syncService.enqueueEvent(todo, SyncAction.update);
   }
 
   Future<void> updateStatusWithSubtasks(Todos todo, TodoStatus status) async {
     await _todoRepo.updateStatusWithSubtasks(parentTodo: todo, status: status);
 
     final allIds = await _collectSubtreeIds(todo);
+    for (final id in allIds) {
+      final todoItem = await _todoRepo.getById(id);
+      if (todoItem != null) {
+        await _syncService.enqueueEvent(todoItem, SyncAction.update);
+      }
+    }
 
     if (status.isCompleted) {
       await _notificationService.cancelBatch(allIds.toList());
@@ -161,6 +172,12 @@ class TodoService {
     if (allIds.isEmpty) return;
 
     await _todoRepo.moveToTask(todoIds: allIds, task: task);
+    for (final id in allIds) {
+      final todo = await _todoRepo.getById(id);
+      if (todo != null) {
+        await _syncService.enqueueEvent(todo, SyncAction.update);
+      }
+    }
     showSnackBar('updateTodo'.tr);
   }
 
@@ -210,6 +227,12 @@ class TodoService {
     if (allIds.isEmpty) return;
 
     await _notificationService.cancelBatch(allIds.toList());
+    for (final id in allIds) {
+      final todo = await _todoRepo.getById(id);
+      if (todo != null) {
+        await _syncService.enqueueEvent(todo, SyncAction.delete);
+      }
+    }
     await _todoRepo.deleteBatch(allIds);
 
     showSnackBar('todoDelete'.tr);
