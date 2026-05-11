@@ -45,7 +45,7 @@
 
 ## 📸 Screenshots
 
-<img src='/readme/1.png' width='200'/> <img src='/readme/2.png' width='200'/> <img src='/readme/3.png' width='200'/> <img src='/readme/4.png' width='200'/> <img src='/readme/5.png' width='200'/> <img src='/readme/6.png' width='200'/> <img src='/readme/7.png' width='200'/> <img src='/readme/8.png' width='200'/>
+![screenshot](./readme/screenshot.png)
 
 ---
 
